@@ -4,6 +4,7 @@
 
     <string name="nav_home">Beranda</string>
     <string name="nav_history">Riwayat</string>
+    <string name="nav_reports">Laporan</string>
     <string name="nav_accounts">Akun</string>
     <string name="nav_settings">Pengaturan</string>
 
@@ -53,6 +54,15 @@
     <string name="account_mutations">Mutasi</string>
     <string name="account_no_mutations">Belum ada mutasi pada akun ini</string>
     <string name="account_not_found">Akun tidak ditemukan</string>
+
+    <!-- Tema -->
+    <string name="settings_theme">Tema</string>
+    <string name="theme_system">Ikuti sistem</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_dark">Gelap</string>
+
+    <!-- Laporan -->
+    <string name="reports_empty">Belum ada pengeluaran bulan ini</string>
 
     <!-- Pengaturan AI -->
     <string name="settings_ai_title">Pengaturan AI</string>

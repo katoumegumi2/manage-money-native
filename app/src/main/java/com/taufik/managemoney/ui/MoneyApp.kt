@@ -1,10 +1,14 @@
 package com.taufik.managemoney.ui
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -15,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -39,13 +44,16 @@ import com.taufik.managemoney.ui.navigation.CONFIRM_ROUTE
 import com.taufik.managemoney.ui.navigation.EDIT_TX_ROUTE
 import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
 import com.taufik.managemoney.ui.navigation.PARSE_INPUT_ROUTE
+import com.taufik.managemoney.ui.navigation.SETTINGS_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.VOICE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
 import com.taufik.managemoney.ui.navigation.confirmRoute
 import com.taufik.managemoney.ui.navigation.editTxRoute
 import com.taufik.managemoney.ui.parse.ParseInputScreen
+import com.taufik.managemoney.ui.reports.ReportsScreen
 import com.taufik.managemoney.ui.settings.AiSettingsScreen
+import com.taufik.managemoney.ui.theme.Gold
 import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
 @Composable
@@ -55,25 +63,31 @@ fun MoneyApp() {
     val currentDestination = backStackEntry?.destination
     val context = LocalContext.current
 
-    // Layar input penuh (catat/manual/konfirmasi) menyembunyikan bottom nav + FAB.
-    val fullScreenRoutes = setOf(VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE)
+    // Layar input/penuh menyembunyikan bottom nav + FAB.
+    val fullScreenRoutes = setOf(
+        VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE, SETTINGS_ROUTE,
+    )
     val showChrome = currentDestination?.route !in fullScreenRoutes
+
+    fun openTab(route: String) {
+        navController.navigate(route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     Scaffold(
         bottomBar = {
             if (showChrome) {
                 NavigationBar {
-                    TopDestination.entries.forEach { dest ->
+                    TopDestination.entries.forEachIndexed { index, dest ->
+                        // Sisipkan celah di tengah (slot FAB mic) antara Riwayat & Laporan.
+                        if (index == 2) Spacer(Modifier.weight(1f))
                         val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
                         NavigationBarItem(
                             selected = selected,
-                            onClick = {
-                                navController.navigate(dest.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            onClick = { openTab(dest.route) },
                             icon = { Icon(dest.icon, contentDescription = null) },
                             label = { Text(stringResource(dest.labelRes)) },
                         )
@@ -83,13 +97,18 @@ fun MoneyApp() {
         },
         floatingActionButton = {
             if (showChrome) {
-                ExtendedFloatingActionButton(
+                FloatingActionButton(
                     onClick = { navController.navigate(VOICE_INPUT_ROUTE) },
-                    icon = { Icon(Icons.Filled.Mic, contentDescription = null) },
-                    text = { Text(stringResource(R.string.action_voice)) },
-                )
+                    shape = CircleShape,
+                    containerColor = Gold,
+                    contentColor = androidx.compose.ui.graphics.Color(0xFF1B1306),
+                    modifier = Modifier.size(64.dp),
+                ) {
+                    Icon(Icons.Filled.Mic, contentDescription = stringResource(R.string.action_voice), modifier = Modifier.size(28.dp))
+                }
             }
         },
+        floatingActionButtonPosition = FabPosition.Center,
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -99,13 +118,17 @@ fun MoneyApp() {
             composable(TopDestination.HOME.route) {
                 HomeScreen(
                     onAccountClick = { id -> navController.navigate(accountDetailRoute(id)) },
+                    onSettings = { navController.navigate(SETTINGS_ROUTE) },
                 )
             }
             composable(TopDestination.HISTORY.route) {
                 HistoryScreen(onEdit = { id -> navController.navigate(editTxRoute(id)) })
             }
+            composable(TopDestination.REPORTS.route) { ReportsScreen() }
             composable(TopDestination.ACCOUNTS.route) { AccountsScreen() }
-            composable(TopDestination.SETTINGS.route) { AiSettingsScreen() }
+            composable(SETTINGS_ROUTE) {
+                AiSettingsScreen(onBack = { navController.popBackStack() })
+            }
             composable(
                 route = ACCOUNT_DETAIL_ROUTE,
                 arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.LongType }),

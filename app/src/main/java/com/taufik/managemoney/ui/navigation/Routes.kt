@@ -22,6 +22,9 @@ const val PARSE_INPUT_ROUTE = "parse"
 /** Form input manual transaksi. */
 const val MANUAL_ENTRY_ROUTE = "manual"
 
+/** Pengaturan (AI + tema + data) — dibuka dari ikon gear di Beranda, bukan tab. */
+const val SETTINGS_ROUTE = "settings"
+
 /** Layar konfirmasi; argumen = payload Base64 `List<ParsedTransaction>` (lihat [ConfirmPayload]). */
 const val ARG_CONFIRM_PAYLOAD = "payload"
 const val CONFIRM_ROUTE = "confirm/{$ARG_CONFIRM_PAYLOAD}"

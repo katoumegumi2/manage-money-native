@@ -12,18 +12,26 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,28 +48,49 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taufik.managemoney.R
+import com.taufik.managemoney.data.settings.ThemeMode
 import com.taufik.managemoney.ui.theme.Expense
 import com.taufik.managemoney.ui.theme.Income
+import com.taufik.managemoney.ui.theme.ThemeViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiSettingsScreen(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AiSettingsViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val themeMode by themeViewModel.mode.collectAsStateWithLifecycle()
     var keyVisible by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 18.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.settings_ai_title),
-            style = MaterialTheme.typography.titleLarge,
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.nav_settings)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            ThemeSection(themeMode, themeViewModel::set)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 6.dp))
+            Text(
+                text = stringResource(R.string.settings_ai_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
         Text(
             text = stringResource(R.string.settings_ai_subtitle),
             style = MaterialTheme.typography.bodyMedium,
@@ -169,6 +198,31 @@ fun AiSettingsScreen(
             }
         }
 
-        DataActions()
+            DataActions()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ThemeSection(mode: ThemeMode, onSelect: (ThemeMode) -> Unit) {
+    Text(
+        text = stringResource(R.string.settings_theme),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+    )
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        val options = listOf(
+            ThemeMode.SYSTEM to R.string.theme_system,
+            ThemeMode.LIGHT to R.string.theme_light,
+            ThemeMode.DARK to R.string.theme_dark,
+        )
+        options.forEachIndexed { index, (value, labelRes) ->
+            SegmentedButton(
+                selected = mode == value,
+                onClick = { onSelect(value) },
+                shape = SegmentedButtonDefaults.itemShape(index, options.size),
+            ) { Text(stringResource(labelRes)) }
+        }
     }
 }

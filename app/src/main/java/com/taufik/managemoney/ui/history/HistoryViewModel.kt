@@ -3,11 +3,9 @@ package com.taufik.managemoney.ui.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taufik.managemoney.domain.model.Account
-import com.taufik.managemoney.domain.model.CategorySum
 import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.domain.usecase.ObserveAccounts
 import com.taufik.managemoney.domain.usecase.ObserveAllTransactions
-import com.taufik.managemoney.domain.usecase.ObserveExpenseByCategory
 import com.taufik.managemoney.ui.model.TxRowUi
 import com.taufik.managemoney.ui.model.toRowUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,9 +30,6 @@ data class HistoryFilter(
     val query: String = "",
 )
 
-/** Satu kategori pada rekap: label + total + porsi (0..1) untuk bar. */
-data class CategoryBar(val label: String, val total: Long, val fraction: Float)
-
 /** Kelompok transaksi per tanggal. */
 data class DateGroup(val label: String, val rows: List<TxRowUi>)
 
@@ -42,8 +37,6 @@ data class HistoryUiState(
     val loading: Boolean = true,
     val filter: HistoryFilter = HistoryFilter(),
     val accounts: List<Account> = emptyList(),
-    val recap: List<CategoryBar> = emptyList(),
-    val recapTotal: Long = 0,
     val groups: List<DateGroup> = emptyList(),
 ) {
     val isEmpty: Boolean get() = groups.isEmpty()
@@ -53,7 +46,6 @@ data class HistoryUiState(
 class HistoryViewModel @Inject constructor(
     observeAll: ObserveAllTransactions,
     observeAccounts: ObserveAccounts,
-    observeExpenseByCategory: ObserveExpenseByCategory,
 ) : ViewModel() {
 
     private val today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))
@@ -62,9 +54,8 @@ class HistoryViewModel @Inject constructor(
     val state: StateFlow<HistoryUiState> = combine(
         observeAll(),
         observeAccounts(),
-        observeExpenseByCategory(today),
         filter,
-    ) { transactions, accounts, recapRows, f ->
+    ) { transactions, accounts, f ->
         val namesById = accounts.associate { it.id to it.nama }
 
         val filtered = transactions.filter { tx ->
@@ -87,8 +78,6 @@ class HistoryViewModel @Inject constructor(
             loading = false,
             filter = f,
             accounts = accounts,
-            recap = toBars(recapRows),
-            recapTotal = recapRows.sumOf { it.total },
             groups = groups,
         )
     }.stateIn(
@@ -105,16 +94,5 @@ class HistoryViewModel @Inject constructor(
         val needle = q.trim().lowercase(localeId)
         return catatan.lowercase(localeId).contains(needle) ||
             kategori.lowercase(localeId).contains(needle)
-    }
-
-    private fun toBars(rows: List<CategorySum>): List<CategoryBar> {
-        val max = rows.maxOfOrNull { it.total }?.takeIf { it > 0 } ?: return emptyList()
-        return rows.map {
-            CategoryBar(
-                label = it.kategori.replaceFirstChar { c -> c.titlecase(localeId) },
-                total = it.total,
-                fraction = (it.total.toFloat() / max).coerceIn(0f, 1f),
-            )
-        }
     }
 }

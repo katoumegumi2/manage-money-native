@@ -14,7 +14,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +44,7 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 @Composable
 fun HomeScreen(
     onAccountClick: (Long) -> Unit,
+    onSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -50,7 +55,7 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(horizontal = 18.dp),
     ) {
-        item { HeaderSection() }
+        item { HeaderSection(onSettings) }
         item { HeroSection(state) }
         item { Spacer(Modifier.height(8.dp)) }
 
@@ -95,18 +100,30 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HeaderSection() {
-    Column(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) {
-        Text(
-            text = stringResource(R.string.app_name).uppercase(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = stringResource(R.string.nav_home),
-            style = MaterialTheme.typography.titleLarge,
-        )
+private fun HeaderSection(onSettings: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.app_name).uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = stringResource(R.string.nav_home),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
+        IconButton(onClick = onSettings) {
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = stringResource(R.string.nav_settings),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

@@ -73,10 +73,7 @@ fun HistoryScreen(
 
         item { TipeFilterRow(state.filter.tipe, viewModel::setTipe) }
         item { AccountFilterRow(state, viewModel::setAccount) }
-
-        if (state.recap.isNotEmpty()) {
-            item { RecapSection(state) }
-        }
+        item { Spacer(Modifier.height(8.dp)) }
 
         if (state.isEmpty && !state.loading) {
             item { EmptyHistory() }
@@ -136,64 +133,6 @@ private fun AccountFilterRow(state: HistoryUiState, onSelect: (Long?) -> Unit) {
                 onClick = { onSelect(if (state.filter.accountId == acc.id) null else acc.id) },
                 label = { Text(acc.nama) },
             )
-        }
-    }
-}
-
-@Composable
-private fun RecapSection(state: HistoryUiState) {
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 18.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = stringResource(R.string.history_recap_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = formatRupiah(state.recapTotal),
-                fontFamily = MonoFamily,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-                color = Expense,
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-        state.recap.forEach { bar ->
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = bar.label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(0.3f),
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .height(10.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(bar.fraction)
-                            .height(10.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .background(Expense),
-                    )
-                }
-                Text(
-                    text = formatGrouped(bar.total),
-                    fontFamily = MonoFamily,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(0.25f).padding(start = 8.dp),
-                )
-            }
         }
     }
 }
