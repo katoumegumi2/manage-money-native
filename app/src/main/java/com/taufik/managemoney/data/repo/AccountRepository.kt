@@ -7,6 +7,7 @@ import com.taufik.managemoney.domain.model.Account
 import com.taufik.managemoney.domain.model.AccountBalance
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,7 +35,12 @@ class AccountRepository @Inject constructor(
 
     suspend fun getByKode(kode: String): Account? = accountDao.getByKode(kode)?.toDomain()
 
-    suspend fun add(account: Account): Long = accountDao.insert(account.toEntity())
+    /** Tambah akun baru; generate UUID bila id belum diisi. Mengembalikan id final. */
+    suspend fun add(account: Account): String {
+        val id = account.id.ifBlank { UUID.randomUUID().toString() }
+        accountDao.insert(account.toEntity().copy(id = id))
+        return id
+    }
 
     suspend fun update(account: Account) = accountDao.update(account.toEntity())
 }

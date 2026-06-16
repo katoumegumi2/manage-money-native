@@ -45,7 +45,7 @@ import com.taufik.managemoney.ui.util.txTypeLabel
 
 @Composable
 fun HistoryScreen(
-    onEdit: (Long) -> Unit,
+    onEdit: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
@@ -117,7 +117,7 @@ private fun TipeFilterRow(selected: TxType?, onSelect: (TxType?) -> Unit) {
 }
 
 @Composable
-private fun AccountFilterRow(state: HistoryUiState, onSelect: (Long?) -> Unit) {
+private fun AccountFilterRow(state: HistoryUiState, onSelect: (String?) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

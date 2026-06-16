@@ -29,6 +29,8 @@ fun Account.toEntity(): AccountEntity = AccountEntity(
     saldoAwal = saldoAwal,
     urutan = urutan,
     aktif = aktif,
+    updatedAt = System.currentTimeMillis(),
+    deletedAt = null,
 )
 
 fun AccountBalanceRow.toDomain(): AccountBalance = AccountBalance(
@@ -65,4 +67,6 @@ fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
     batchId = batchId,
     sumberInput = sumberInput.wire,
     createdAt = createdAt,
+    updatedAt = System.currentTimeMillis(),
+    deletedAt = null,
 )

@@ -9,12 +9,12 @@ import java.time.LocalDate
  * - transfer    → keduanya terisi & berbeda
  */
 data class Transaction(
-    val id: Long = 0,
+    val id: String = "",
     val tipe: TxType,
     val nominal: Long,
     val kategori: String,
-    val akunDariId: Long?,
-    val akunKeId: Long?,
+    val akunDariId: String?,
+    val akunKeId: String?,
     val tanggal: LocalDate,
     val catatan: String = "",
     val batchId: String? = null,

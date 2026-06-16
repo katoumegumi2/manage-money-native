@@ -15,8 +15,8 @@ data class EditableTx(
     val tipe: TxType,
     val nominal: Long,
     val kategori: String,
-    val akunDariId: Long?,
-    val akunKeId: Long?,
+    val akunDariId: String?,
+    val akunKeId: String?,
     val tanggal: LocalDate,
     val catatan: String = "",
     val perluDicek: Boolean = false,
@@ -29,7 +29,7 @@ data class EditableTx(
 }
 
 /** Resolusi hasil parser (kode akun) → editable (id akun). Tanggal invalid → fallback [today]. */
-fun ParsedTransaction.toEditable(idByKode: Map<String, Long>, today: LocalDate): EditableTx {
+fun ParsedTransaction.toEditable(idByKode: Map<String, String>, today: LocalDate): EditableTx {
     val tgl = runCatching { LocalDate.parse(tanggal) }.getOrDefault(today)
     return EditableTx(
         tipe = tipe,
@@ -44,7 +44,7 @@ fun ParsedTransaction.toEditable(idByKode: Map<String, Long>, today: LocalDate):
 }
 
 /** Editable (id akun) → kontrak parser (kode akun) untuk dioper ke layar Konfirmasi. */
-fun EditableTx.toParsed(kodeById: Map<Long, String>): ParsedTransaction = ParsedTransaction(
+fun EditableTx.toParsed(kodeById: Map<String, String>): ParsedTransaction = ParsedTransaction(
     tipe = tipe,
     nominal = nominal,
     kategori = kategori,

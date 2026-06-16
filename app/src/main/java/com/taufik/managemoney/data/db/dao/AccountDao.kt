@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 /** Baris hasil hitung saldo per akun (saldoAwal + masuk − keluar). */
 data class AccountBalanceRow(
-    val accountId: Long,
+    val accountId: String,
     val kode: String,
     val nama: String,
     val jenis: String,
@@ -30,7 +30,7 @@ interface AccountDao {
     suspend fun getByKode(kode: String): AccountEntity?
 
     @Query("SELECT * FROM accounts WHERE id = :id LIMIT 1")
-    suspend fun getById(id: Long): AccountEntity?
+    suspend fun getById(id: String): AccountEntity?
 
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun count(): Int
@@ -39,11 +39,12 @@ interface AccountDao {
     @Query("SELECT COUNT(*) FROM accounts WHERE aktif = 1")
     fun observeActiveCount(): kotlinx.coroutines.flow.Flow<Int>
 
+    // id = UUID di-generate di repo sebelum insert → return rowid tak dipakai.
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(account: AccountEntity): Long
+    suspend fun insert(account: AccountEntity)
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertAll(accounts: List<AccountEntity>): List<Long>
+    suspend fun insertAll(accounts: List<AccountEntity>)
 
     @Update
     suspend fun update(account: AccountEntity)

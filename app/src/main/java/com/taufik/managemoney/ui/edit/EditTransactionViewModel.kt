@@ -47,7 +47,7 @@ class EditTransactionViewModel @Inject constructor(
     private val deleteTransactionBatch: DeleteTransactionBatch,
 ) : ViewModel() {
 
-    private val txId: Long = savedStateHandle.get<Long>(ARG_TX_ID) ?: 0L
+    private val txId: String = savedStateHandle.get<String>(ARG_TX_ID) ?: ""
     private var original: Transaction? = null
 
     private val _state = MutableStateFlow(EditTxUiState())
@@ -92,8 +92,8 @@ class EditTransactionViewModel @Inject constructor(
 
     fun setNominal(value: Long) = edit { it.copy(nominal = value) }
     fun setKategori(value: String) = edit { it.copy(kategori = value) }
-    fun setAkunDari(id: Long) = edit { it.copy(akunDariId = id) }
-    fun setAkunKe(id: Long) = edit { it.copy(akunKeId = id) }
+    fun setAkunDari(id: String) = edit { it.copy(akunDariId = id) }
+    fun setAkunKe(id: String) = edit { it.copy(akunKeId = id) }
     fun setTanggal(date: LocalDate) = edit { it.copy(tanggal = date) }
     fun setCatatan(value: String) = edit { it.copy(catatan = value) }
 

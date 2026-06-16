@@ -9,7 +9,7 @@ import com.taufik.managemoney.domain.model.Transaction
 object CsvExporter {
     private val HEADER = listOf("tanggal", "tipe", "nominal", "kategori", "akun_dari", "akun_ke", "catatan")
 
-    fun export(transactions: List<Transaction>, kodeById: Map<Long, String>): String {
+    fun export(transactions: List<Transaction>, kodeById: Map<String, String>): String {
         val sb = StringBuilder()
         sb.append(HEADER.joinToString(",")).append("\r\n")
         transactions.forEach { t ->

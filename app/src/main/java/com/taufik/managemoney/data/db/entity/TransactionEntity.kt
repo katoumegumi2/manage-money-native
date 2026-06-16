@@ -29,15 +29,19 @@ import androidx.room.PrimaryKey
     ],
 )
 data class TransactionEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    // Primary key = UUID string (lihat AccountEntity) → FK akun juga string.
+    @PrimaryKey val id: String = "",
     val tipe: String, // TxType.wire
     val nominal: Long,
     val kategori: String,
-    val akunDariId: Long?,
-    val akunKeId: Long?,
+    val akunDariId: String?,
+    val akunKeId: String?,
     val tanggal: String, // ISO YYYY-MM-DD
     val catatan: String,
     val batchId: String?,
     val sumberInput: String, // SourceInput.wire
     val createdAt: Long,
+    // Metadata sync: updatedAt = epoch ms perubahan terakhir; deletedAt = tombstone (null = aktif).
+    val updatedAt: Long = 0,
+    val deletedAt: Long? = null,
 )

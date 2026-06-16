@@ -71,8 +71,8 @@ class ConfirmViewModel @Inject constructor(
 
     fun setNominal(index: Int, value: Long) = updateItem(index) { it.copy(nominal = value, perluDicek = false) }
     fun setKategori(index: Int, value: String) = updateItem(index) { it.copy(kategori = value) }
-    fun setAkunDari(index: Int, id: Long) = updateItem(index) { it.copy(akunDariId = id, perluDicek = false) }
-    fun setAkunKe(index: Int, id: Long) = updateItem(index) { it.copy(akunKeId = id, perluDicek = false) }
+    fun setAkunDari(index: Int, id: String) = updateItem(index) { it.copy(akunDariId = id, perluDicek = false) }
+    fun setAkunKe(index: Int, id: String) = updateItem(index) { it.copy(akunKeId = id, perluDicek = false) }
     fun setTanggal(index: Int, value: LocalDate) = updateItem(index) { it.copy(tanggal = value) }
     fun setCatatan(index: Int, value: String) = updateItem(index) { it.copy(catatan = value) }
 

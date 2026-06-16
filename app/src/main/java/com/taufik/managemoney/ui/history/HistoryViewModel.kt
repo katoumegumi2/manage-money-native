@@ -26,7 +26,7 @@ private val dateHeaderFormat = DateTimeFormatter.ofPattern("EEEE, d MMM yyyy", l
 
 data class HistoryFilter(
     val tipe: TxType? = null,
-    val accountId: Long? = null,
+    val accountId: String? = null,
     val query: String = "",
 )
 
@@ -87,7 +87,7 @@ class HistoryViewModel @Inject constructor(
     )
 
     fun setTipe(tipe: TxType?) = filter.update { it.copy(tipe = tipe) }
-    fun setAccount(accountId: Long?) = filter.update { it.copy(accountId = accountId) }
+    fun setAccount(accountId: String?) = filter.update { it.copy(accountId = accountId) }
     fun setQuery(query: String) = filter.update { it.copy(query = query) }
 
     private fun matchesQuery(catatan: String, kategori: String, q: String): Boolean {

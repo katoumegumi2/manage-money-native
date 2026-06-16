@@ -5,13 +5,13 @@ const val ARG_ACCOUNT_ID = "accountId"
 
 const val ACCOUNT_DETAIL_ROUTE = "account/{$ARG_ACCOUNT_ID}"
 
-fun accountDetailRoute(accountId: Long): String = "account/$accountId"
+fun accountDetailRoute(accountId: String): String = "account/$accountId"
 
 /** Edit/hapus satu transaksi tersimpan (dari Riwayat). */
 const val ARG_TX_ID = "txId"
 const val EDIT_TX_ROUTE = "edit/{$ARG_TX_ID}"
 
-fun editTxRoute(txId: Long): String = "edit/$txId"
+fun editTxRoute(txId: String): String = "edit/$txId"
 
 /** Input suara: mic → STT → parse AI → Konfirmasi (jalur utama). */
 const val VOICE_INPUT_ROUTE = "voice"

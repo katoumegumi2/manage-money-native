@@ -138,8 +138,8 @@ fun KategoriPicker(
 fun AccountPicker(
     label: String,
     accounts: List<Account>,
-    selectedId: Long?,
-    onSelect: (Long) -> Unit,
+    selectedId: String?,
+    onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
 ) {
@@ -186,10 +186,10 @@ fun AccountPicker(
 @Composable
 fun TransferAccounts(
     accounts: List<Account>,
-    fromId: Long?,
-    toId: Long?,
-    onFrom: (Long) -> Unit,
-    onTo: (Long) -> Unit,
+    fromId: String?,
+    toId: String?,
+    onFrom: (String) -> Unit,
+    onTo: (String) -> Unit,
     fromError: Boolean,
     toError: Boolean,
     modifier: Modifier = Modifier,

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class DeleteTransaction @Inject constructor(
     private val transactionRepository: TransactionRepository,
 ) {
-    suspend operator fun invoke(id: Long) = transactionRepository.deleteById(id)
+    suspend operator fun invoke(id: String) = transactionRepository.deleteById(id)
 }
 
 /** Hapus seluruh transaksi satu batch konfirmasi (mis. transfer + admin). */

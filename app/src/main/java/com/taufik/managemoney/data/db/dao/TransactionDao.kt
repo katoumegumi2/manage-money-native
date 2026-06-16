@@ -17,8 +17,9 @@ data class MonthlySumRow(val ym: String, val tipe: String, val total: Long)
 @Dao
 interface TransactionDao {
 
+    // id = UUID di-generate di repo sebelum insert → return rowid tak dipakai.
     @Insert
-    suspend fun insert(tx: TransactionEntity): Long
+    suspend fun insert(tx: TransactionEntity)
 
     @Update
     suspend fun update(tx: TransactionEntity)
@@ -27,7 +28,7 @@ interface TransactionDao {
     fun observeAll(): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
-    suspend fun getById(id: Long): TransactionEntity?
+    suspend fun getById(id: String): TransactionEntity?
 
     /** Rekap pengeluaran per kategori sejak tanggal (untuk laporan bulan ini). */
     @Query(
@@ -42,7 +43,7 @@ interface TransactionDao {
     /** Tulis satu batch konfirmasi (transfer + admin, atau belanja multi-item) sekaligus. */
     @Transaction
     @Insert
-    suspend fun insertAll(txs: List<TransactionEntity>): List<Long>
+    suspend fun insertAll(txs: List<TransactionEntity>)
 
     @Query("SELECT * FROM transactions ORDER BY tanggal DESC, createdAt DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<TransactionEntity>>
@@ -55,7 +56,7 @@ interface TransactionDao {
         ORDER BY tanggal DESC, createdAt DESC
         """,
     )
-    fun observeForAccount(accountId: Long): Flow<List<TransactionEntity>>
+    fun observeForAccount(accountId: String): Flow<List<TransactionEntity>>
 
     /**
      * Total nominal untuk satu tipe sejak tanggal tertentu (inklusif).
@@ -90,7 +91,7 @@ interface TransactionDao {
     suspend fun deleteByBatch(batchId: String)
 
     @Query("DELETE FROM transactions WHERE id = :id")
-    suspend fun deleteById(id: Long)
+    suspend fun deleteById(id: String)
 
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun count(): Int

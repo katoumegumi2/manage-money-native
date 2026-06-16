@@ -14,18 +14,18 @@ import java.time.LocalDate
 class TxRowUiTest {
 
     private val today = LocalDate.of(2026, 6, 15)
-    private val names = mapOf(1L to "BNI", 2L to "Tunai", 3L to "GoPay")
+    private val names = mapOf("1" to "BNI", "2" to "Tunai", "3" to "GoPay")
 
     private fun tx(
         tipe: TxType,
         nominal: Long,
-        akunDari: Long? = null,
-        akunKe: Long? = null,
+        akunDari: String? = null,
+        akunKe: String? = null,
         kategori: String = "lainnya",
         catatan: String = "",
         tanggal: LocalDate = today,
     ) = Transaction(
-        id = 7,
+        id = "7",
         tipe = tipe,
         nominal = nominal,
         kategori = kategori,
@@ -39,7 +39,7 @@ class TxRowUiTest {
 
     @Test
     fun `pengeluaran bertanda minus dan gaya expense`() {
-        val row = tx(TxType.PENGELUARAN, 25_000, akunDari = 2, kategori = "makanan", catatan = "Kopi")
+        val row = tx(TxType.PENGELUARAN, 25_000, akunDari = "2", kategori = "makanan", catatan = "Kopi")
             .toRowUi(names, today)
         assertEquals(AmountStyle.EXPENSE, row.style)
         assertEquals("−25.000", row.amountText)
@@ -49,7 +49,7 @@ class TxRowUiTest {
 
     @Test
     fun `pemasukan bertanda plus dan gaya income`() {
-        val row = tx(TxType.PEMASUKAN, 8_000_000, akunKe = 1, kategori = "gaji", catatan = "Gaji")
+        val row = tx(TxType.PEMASUKAN, 8_000_000, akunKe = "1", kategori = "gaji", catatan = "Gaji")
             .toRowUi(names, today.plusDays(1)) // kemarin relatif hari ini tx
         assertEquals(AmountStyle.INCOME, row.style)
         assertEquals("+8.000.000", row.amountText)
@@ -58,7 +58,7 @@ class TxRowUiTest {
 
     @Test
     fun `transfer netral di Beranda tanpa perspektif`() {
-        val row = tx(TxType.TRANSFER, 300_000, akunDari = 1, akunKe = 2, catatan = "Tarik tunai")
+        val row = tx(TxType.TRANSFER, 300_000, akunDari = "1", akunKe = "2", catatan = "Tarik tunai")
             .toRowUi(names, today)
         assertEquals(AmountStyle.TRANSFER, row.style)
         assertEquals("300.000", row.amountText) // tanpa tanda
@@ -67,23 +67,23 @@ class TxRowUiTest {
 
     @Test
     fun `transfer keluar dari sudut pandang akun sumber bertanda minus`() {
-        val row = tx(TxType.TRANSFER, 300_000, akunDari = 1, akunKe = 2)
-            .toRowUi(names, today, perspectiveId = 1)
+        val row = tx(TxType.TRANSFER, 300_000, akunDari = "1", akunKe = "2")
+            .toRowUi(names, today, perspectiveId = "1")
         assertEquals(AmountStyle.EXPENSE, row.style)
         assertEquals("−300.000", row.amountText)
     }
 
     @Test
     fun `transfer masuk dari sudut pandang akun tujuan bertanda plus`() {
-        val row = tx(TxType.TRANSFER, 300_000, akunDari = 1, akunKe = 2)
-            .toRowUi(names, today, perspectiveId = 2)
+        val row = tx(TxType.TRANSFER, 300_000, akunDari = "1", akunKe = "2")
+            .toRowUi(names, today, perspectiveId = "2")
         assertEquals(AmountStyle.INCOME, row.style)
         assertEquals("+300.000", row.amountText)
     }
 
     @Test
     fun `judul default memakai kategori bila catatan kosong`() {
-        val row = tx(TxType.PENGELUARAN, 5_000, akunDari = 2, kategori = "transport")
+        val row = tx(TxType.PENGELUARAN, 5_000, akunDari = "2", kategori = "transport")
             .toRowUi(names, today)
         assertEquals("Transport", row.title)
     }

@@ -19,13 +19,13 @@ class TransactionRepository @Inject constructor(
     fun observeRecent(limit: Int = 20): Flow<List<Transaction>> =
         transactionDao.observeRecent(limit).map { list -> list.map { it.toDomain() } }
 
-    fun observeForAccount(accountId: Long): Flow<List<Transaction>> =
+    fun observeForAccount(accountId: String): Flow<List<Transaction>> =
         transactionDao.observeForAccount(accountId).map { list -> list.map { it.toDomain() } }
 
     fun observeAll(): Flow<List<Transaction>> =
         transactionDao.observeAll().map { list -> list.map { it.toDomain() } }
 
-    suspend fun getById(id: Long): Transaction? = transactionDao.getById(id)?.toDomain()
+    suspend fun getById(id: String): Transaction? = transactionDao.getById(id)?.toDomain()
 
     suspend fun update(tx: Transaction) = transactionDao.update(tx.toEntity())
 
@@ -43,13 +43,25 @@ class TransactionRepository @Inject constructor(
         transactionDao.observeMonthlyTotals(sinceIso)
             .map { rows -> rows.map { MonthlyTotal(it.ym, TxType.fromWire(it.tipe), it.total) } }
 
-    suspend fun insert(tx: Transaction): Long = transactionDao.insert(tx.toEntity())
+    /** Simpan satu transaksi; generate UUID bila id belum diisi. Mengembalikan id final. */
+    suspend fun insert(tx: Transaction): String {
+        val entity = tx.toEntity().ensureId()
+        transactionDao.insert(entity)
+        return entity.id
+    }
 
     /** Simpan satu batch (semua transaksi dari 1 konfirmasi) dengan batchId yang sama. */
-    suspend fun insertBatch(txs: List<Transaction>): List<Long> =
-        transactionDao.insertAll(txs.map { it.toEntity() })
+    suspend fun insertBatch(txs: List<Transaction>): List<String> {
+        val entities = txs.map { it.toEntity().ensureId() }
+        transactionDao.insertAll(entities)
+        return entities.map { it.id }
+    }
 
     suspend fun deleteByBatch(batchId: String) = transactionDao.deleteByBatch(batchId)
 
-    suspend fun deleteById(id: Long) = transactionDao.deleteById(id)
+    suspend fun deleteById(id: String) = transactionDao.deleteById(id)
 }
+
+/** Pastikan entity punya id UUID (generate bila kosong). */
+private fun com.taufik.managemoney.data.db.entity.TransactionEntity.ensureId() =
+    if (id.isBlank()) copy(id = java.util.UUID.randomUUID().toString()) else this

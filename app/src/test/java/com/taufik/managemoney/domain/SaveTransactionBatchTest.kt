@@ -34,8 +34,8 @@ class SaveTransactionBatchTest {
     private lateinit var save: SaveTransactionBatch
 
     private val today = LocalDate.of(2026, 6, 16)
-    private var bni = 0L
-    private var gopay = 0L
+    private val bni = "id-bni"
+    private val gopay = "id-gopay"
 
     @Before
     fun setUp() = runTest {
@@ -47,11 +47,11 @@ class SaveTransactionBatchTest {
         accountRepo = AccountRepository(db.accountDao())
         save = SaveTransactionBatch(txRepo)
 
-        bni = db.accountDao().insert(
-            AccountEntity(kode = "bni", nama = "BNI", jenis = "bank", saldoAwal = 1_000_000, urutan = 1),
+        db.accountDao().insert(
+            AccountEntity(id = bni, kode = "bni", nama = "BNI", jenis = "bank", saldoAwal = 1_000_000, urutan = 1),
         )
-        gopay = db.accountDao().insert(
-            AccountEntity(kode = "gopay", nama = "GoPay", jenis = "ewallet", saldoAwal = 0, urutan = 2),
+        db.accountDao().insert(
+            AccountEntity(id = gopay, kode = "gopay", nama = "GoPay", jenis = "ewallet", saldoAwal = 0, urutan = 2),
         )
     }
 
@@ -61,13 +61,13 @@ class SaveTransactionBatchTest {
     private fun draft(
         tipe: TxType,
         nominal: Long,
-        akunDariId: Long? = null,
-        akunKeId: Long? = null,
+        akunDariId: String? = null,
+        akunKeId: String? = null,
         kategori: String = "lainnya",
     ) = TransactionDraft(tipe, nominal, kategori, akunDariId, akunKeId, today, "")
 
     private suspend fun total() = accountRepo.observeTotal().first()
-    private suspend fun saldo(id: Long) =
+    private suspend fun saldo(id: String) =
         accountRepo.observeBalances().first().first { it.accountId == id }.saldo
 
     @Test

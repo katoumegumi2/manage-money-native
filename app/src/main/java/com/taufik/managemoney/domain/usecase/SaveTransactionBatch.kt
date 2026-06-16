@@ -28,7 +28,7 @@ class SaveTransactionBatch @Inject constructor(
     suspend operator fun invoke(
         drafts: List<TransactionDraft>,
         sumber: SourceInput = SourceInput.MANUAL,
-    ): Result<List<Long>> {
+    ): Result<List<String>> {
         if (drafts.isEmpty()) return Result.failure(EmptyBatchException())
 
         val problems = drafts.mapIndexedNotNull { index, draft ->

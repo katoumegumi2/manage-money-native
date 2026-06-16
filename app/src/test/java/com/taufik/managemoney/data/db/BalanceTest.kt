@@ -27,10 +27,10 @@ class BalanceTest {
     private lateinit var accountDao: AccountDao
     private lateinit var txDao: TransactionDao
 
-    // id akun (di-set di setUp)
-    private var bni = 0L
-    private var tunai = 0L
-    private var gopay = 0L
+    // id akun (UUID-string; pakai kode sebagai id agar mudah dibaca di test)
+    private val bni = "id-bni"
+    private val tunai = "id-tunai"
+    private val gopay = "id-gopay"
 
     @Before
     fun setUp() = runTest {
@@ -41,9 +41,9 @@ class BalanceTest {
         accountDao = db.accountDao()
         txDao = db.transactionDao()
 
-        bni = accountDao.insert(account("bni", "BNI", AccountType.BANK, saldoAwal = 1_000_000, urutan = 1))
-        tunai = accountDao.insert(account("tunai", "Tunai", AccountType.TUNAI, saldoAwal = 50_000, urutan = 2))
-        gopay = accountDao.insert(account("gopay", "GoPay", AccountType.EWALLET, saldoAwal = 0, urutan = 3))
+        accountDao.insert(account(bni, "bni", "BNI", AccountType.BANK, saldoAwal = 1_000_000, urutan = 1))
+        accountDao.insert(account(tunai, "tunai", "Tunai", AccountType.TUNAI, saldoAwal = 50_000, urutan = 2))
+        accountDao.insert(account(gopay, "gopay", "GoPay", AccountType.EWALLET, saldoAwal = 0, urutan = 3))
     }
 
     @After
@@ -115,20 +115,21 @@ class BalanceTest {
 
     private suspend fun total(): Long = accountDao.observeTotal().first()
 
-    private suspend fun saldo(accountId: Long): Long =
+    private suspend fun saldo(accountId: String): Long =
         accountDao.observeBalances().first().first { it.accountId == accountId }.saldo
 
-    private fun account(kode: String, nama: String, jenis: AccountType, saldoAwal: Long, urutan: Int) =
-        AccountEntity(kode = kode, nama = nama, jenis = jenis.wire, saldoAwal = saldoAwal, urutan = urutan)
+    private fun account(id: String, kode: String, nama: String, jenis: AccountType, saldoAwal: Long, urutan: Int) =
+        AccountEntity(id = id, kode = kode, nama = nama, jenis = jenis.wire, saldoAwal = saldoAwal, urutan = urutan)
 
     private fun tx(
         tipe: TxType,
         nominal: Long,
-        akunDari: Long? = null,
-        akunKe: Long? = null,
+        akunDari: String? = null,
+        akunKe: String? = null,
         kategori: String = "lainnya",
         batchId: String? = null,
     ) = TransactionEntity(
+        id = java.util.UUID.randomUUID().toString(),
         tipe = tipe.wire,
         nominal = nominal,
         kategori = kategori,

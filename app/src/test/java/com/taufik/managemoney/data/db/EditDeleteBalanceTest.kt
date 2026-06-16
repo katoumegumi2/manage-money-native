@@ -27,8 +27,8 @@ class EditDeleteBalanceTest {
     private lateinit var db: AppDatabase
     private lateinit var accountDao: AccountDao
     private lateinit var txDao: TransactionDao
-    private var bni = 0L
-    private var gopay = 0L
+    private val bni = "id-bni"
+    private val gopay = "id-gopay"
 
     @Before
     fun setUp() = runTest {
@@ -38,32 +38,34 @@ class EditDeleteBalanceTest {
         ).allowMainThreadQueries().build()
         accountDao = db.accountDao()
         txDao = db.transactionDao()
-        bni = accountDao.insert(account("bni", "BNI", AccountType.BANK, 1_000_000, 1))
-        gopay = accountDao.insert(account("gopay", "GoPay", AccountType.EWALLET, 0, 2))
+        accountDao.insert(account(bni, "bni", "BNI", AccountType.BANK, 1_000_000, 1))
+        accountDao.insert(account(gopay, "gopay", "GoPay", AccountType.EWALLET, 0, 2))
     }
 
     @After
     fun tearDown() = db.close()
 
-    private suspend fun saldo(id: Long) =
+    private suspend fun saldo(id: String) =
         accountDao.observeBalances().first().first { it.accountId == id }.saldo
 
     private suspend fun total() = accountDao.observeTotal().first()
 
     @Test
     fun `edit nominal memperbarui saldo`() = runTest {
-        val id = txDao.insert(tx(TxType.PENGELUARAN, 25_000, dari = bni))
+        val t = tx(TxType.PENGELUARAN, 25_000, dari = bni)
+        txDao.insert(t)
         assertEquals(975_000L, saldo(bni))
 
-        val current = txDao.getById(id)!!
+        val current = txDao.getById(t.id)!!
         txDao.update(current.copy(nominal = 50_000))
         assertEquals(950_000L, saldo(bni))
     }
 
     @Test
     fun `edit pindah akun memindah saldo`() = runTest {
-        val id = txDao.insert(tx(TxType.PENGELUARAN, 30_000, dari = bni))
-        val current = txDao.getById(id)!!
+        val t = tx(TxType.PENGELUARAN, 30_000, dari = bni)
+        txDao.insert(t)
+        val current = txDao.getById(t.id)!!
         txDao.update(current.copy(akunDariId = gopay))
         assertEquals(1_000_000L, saldo(bni)) // bni kembali utuh
         assertEquals(-30_000L, saldo(gopay)) // gopay turun
@@ -71,9 +73,10 @@ class EditDeleteBalanceTest {
 
     @Test
     fun `hapus transaksi mengembalikan saldo`() = runTest {
-        val id = txDao.insert(tx(TxType.PENGELUARAN, 25_000, dari = bni))
+        val t = tx(TxType.PENGELUARAN, 25_000, dari = bni)
+        txDao.insert(t)
         assertEquals(975_000L, saldo(bni))
-        txDao.deleteById(id)
+        txDao.deleteById(t.id)
         assertEquals(1_000_000L, saldo(bni))
     }
 
@@ -92,17 +95,18 @@ class EditDeleteBalanceTest {
         assertEquals(1_000_000L, total())
     }
 
-    private fun account(kode: String, nama: String, jenis: AccountType, saldoAwal: Long, urutan: Int) =
-        AccountEntity(kode = kode, nama = nama, jenis = jenis.wire, saldoAwal = saldoAwal, urutan = urutan)
+    private fun account(id: String, kode: String, nama: String, jenis: AccountType, saldoAwal: Long, urutan: Int) =
+        AccountEntity(id = id, kode = kode, nama = nama, jenis = jenis.wire, saldoAwal = saldoAwal, urutan = urutan)
 
     private fun tx(
         tipe: TxType,
         nominal: Long,
-        dari: Long? = null,
-        ke: Long? = null,
+        dari: String? = null,
+        ke: String? = null,
         kategori: String = "lainnya",
         batchId: String? = null,
     ) = TransactionEntity(
+        id = java.util.UUID.randomUUID().toString(),
         tipe = tipe.wire, nominal = nominal, kategori = kategori,
         akunDariId = dari, akunKeId = ke, tanggal = "2026-06-16", catatan = "",
         batchId = batchId, sumberInput = SourceInput.MANUAL.wire, createdAt = 0L,

@@ -9,6 +9,6 @@ import javax.inject.Inject
 class ObserveAccountTransactions @Inject constructor(
     private val transactionRepository: TransactionRepository,
 ) {
-    operator fun invoke(accountId: Long): Flow<List<Transaction>> =
+    operator fun invoke(accountId: String): Flow<List<Transaction>> =
         transactionRepository.observeForAccount(accountId)
 }

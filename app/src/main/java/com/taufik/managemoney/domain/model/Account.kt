@@ -1,8 +1,8 @@
 package com.taufik.managemoney.domain.model
 
-/** Akun/sumber dana (bank, e-wallet, tunai). */
+/** Akun/sumber dana (bank, e-wallet, tunai). id = UUID (kosong = belum tersimpan). */
 data class Account(
-    val id: Long = 0,
+    val id: String = "",
     val kode: String,
     val nama: String,
     val jenis: AccountType,
@@ -13,7 +13,7 @@ data class Account(
 
 /** Saldo akun hasil hitung dari ledger (saldoAwal + masuk − keluar). */
 data class AccountBalance(
-    val accountId: Long,
+    val accountId: String,
     val kode: String,
     val nama: String,
     val jenis: AccountType,

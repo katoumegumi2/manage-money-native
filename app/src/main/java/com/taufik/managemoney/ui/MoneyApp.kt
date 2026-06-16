@@ -127,7 +127,7 @@ fun MoneyApp() {
             }
             composable(
                 route = ACCOUNT_DETAIL_ROUTE,
-                arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.LongType }),
+                arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.StringType }),
             ) {
                 AccountDetailScreen(onBack = { navController.popBackStack() })
             }
@@ -166,7 +166,7 @@ fun MoneyApp() {
             }
             composable(
                 route = EDIT_TX_ROUTE,
-                arguments = listOf(navArgument(ARG_TX_ID) { type = NavType.LongType }),
+                arguments = listOf(navArgument(ARG_TX_ID) { type = NavType.StringType }),
             ) {
                 EditTransactionScreen(onDone = { navController.popBackStack() })
             }

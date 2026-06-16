@@ -13,7 +13,7 @@ enum class AmountStyle { INCOME, EXPENSE, TRANSFER }
 
 /** Baris transaksi siap-tampil (judul, subjudul, nominal bertanda, emoji). */
 data class TxRowUi(
-    val id: Long,
+    val id: String,
     val emoji: String,
     val title: String,
     val subtitle: String,
@@ -29,9 +29,9 @@ data class TxRowUi(
  *   bila null (Beranda), transfer ditampilkan netral (tanpa tanda).
  */
 fun Transaction.toRowUi(
-    namesById: Map<Long, String>,
+    namesById: Map<String, String>,
     today: LocalDate,
-    perspectiveId: Long? = null,
+    perspectiveId: String? = null,
 ): TxRowUi {
     val dari = akunDariId?.let { namesById[it] } ?: "?"
     val ke = akunKeId?.let { namesById[it] } ?: "?"

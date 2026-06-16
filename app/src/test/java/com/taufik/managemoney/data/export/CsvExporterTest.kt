@@ -10,17 +10,17 @@ import java.time.LocalDate
 
 class CsvExporterTest {
 
-    private val kodeById = mapOf(1L to "bni", 2L to "tunai")
+    private val kodeById = mapOf("1" to "bni", "2" to "tunai")
 
     private fun tx(
         tipe: TxType,
         nominal: Long,
-        dari: Long? = null,
-        ke: Long? = null,
+        dari: String? = null,
+        ke: String? = null,
         kategori: String = "lainnya",
         catatan: String = "",
     ) = Transaction(
-        id = 1, tipe = tipe, nominal = nominal, kategori = kategori,
+        id = "1", tipe = tipe, nominal = nominal, kategori = kategori,
         akunDariId = dari, akunKeId = ke, tanggal = LocalDate.of(2026, 6, 16),
         catatan = catatan, sumberInput = SourceInput.MANUAL, createdAt = 0L,
     )
@@ -28,7 +28,7 @@ class CsvExporterTest {
     @Test
     fun `header dan baris benar`() {
         val csv = CsvExporter.export(
-            listOf(tx(TxType.PENGELUARAN, 25_000, dari = 1, kategori = "makanan", catatan = "kopi")),
+            listOf(tx(TxType.PENGELUARAN, 25_000, dari = "1", kategori = "makanan", catatan = "kopi")),
             kodeById,
         )
         val lines = csv.trim().split("\r\n")
@@ -39,7 +39,7 @@ class CsvExporterTest {
     @Test
     fun `catatan dengan koma dan kutip di-escape`() {
         val csv = CsvExporter.export(
-            listOf(tx(TxType.PEMASUKAN, 1000, ke = 1, kategori = "gaji", catatan = """beli "kopi", roti""")),
+            listOf(tx(TxType.PEMASUKAN, 1000, ke = "1", kategori = "gaji", catatan = """beli "kopi", roti""")),
             kodeById,
         )
         val line = csv.trim().split("\r\n")[1]
@@ -49,7 +49,7 @@ class CsvExporterTest {
     @Test
     fun `transfer punya akun dari dan ke`() {
         val csv = CsvExporter.export(
-            listOf(tx(TxType.TRANSFER, 300_000, dari = 1, ke = 2)),
+            listOf(tx(TxType.TRANSFER, 300_000, dari = "1", ke = "2")),
             kodeById,
         )
         val line = csv.trim().split("\r\n")[1]

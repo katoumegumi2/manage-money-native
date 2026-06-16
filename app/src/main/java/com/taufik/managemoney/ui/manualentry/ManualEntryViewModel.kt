@@ -63,8 +63,8 @@ class ManualEntryViewModel @Inject constructor(
     fun setTipe(tipe: TxType) = edit { it.copy(tipe = tipe, kategori = Categories.defaultFor(tipe)) }
     fun setNominal(value: Long) = edit { it.copy(nominal = value) }
     fun setKategori(value: String) = edit { it.copy(kategori = value) }
-    fun setAkunDari(id: Long) = edit { it.copy(akunDariId = id) }
-    fun setAkunKe(id: Long) = edit { it.copy(akunKeId = id) }
+    fun setAkunDari(id: String) = edit { it.copy(akunDariId = id) }
+    fun setAkunKe(id: String) = edit { it.copy(akunKeId = id) }
     fun setTanggal(value: LocalDate) = edit { it.copy(tanggal = value) }
     fun setCatatan(value: String) = edit { it.copy(catatan = value) }
 

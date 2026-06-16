@@ -43,11 +43,14 @@ class DatabaseBackupTest {
     @Test
     fun `cadangkan lalu pulihkan mengembalikan data`() = runTest {
         var db = openDb()
-        val bni = db.accountDao().insert(
-            AccountEntity(kode = "bni", nama = "BNI", jenis = AccountType.BANK.wire, saldoAwal = 1_000_000, urutan = 1),
+        val bni = "id-bni"
+        val txId = "id-tx"
+        db.accountDao().insert(
+            AccountEntity(id = bni, kode = "bni", nama = "BNI", jenis = AccountType.BANK.wire, saldoAwal = 1_000_000, urutan = 1),
         )
-        val txId = db.transactionDao().insert(
+        db.transactionDao().insert(
             TransactionEntity(
+                id = txId,
                 tipe = TxType.PENGELUARAN.wire, nominal = 25_000, kategori = "makanan",
                 akunDariId = bni, akunKeId = null, tanggal = "2026-06-16", catatan = "kopi",
                 batchId = null, sumberInput = SourceInput.MANUAL.wire, createdAt = 0L,
@@ -74,5 +77,5 @@ class DatabaseBackupTest {
 }
 
 /** helper: saldo satu akun. */
-private suspend fun com.taufik.managemoney.data.db.dao.AccountDao.observeBalancesOnce(id: Long): Long =
+private suspend fun com.taufik.managemoney.data.db.dao.AccountDao.observeBalancesOnce(id: String): Long =
     observeBalances().first().first { it.accountId == id }.saldo

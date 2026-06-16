@@ -31,8 +31,8 @@ class MonthlyTrendTest {
     private lateinit var accountDao: AccountDao
     private lateinit var txDao: TransactionDao
     private lateinit var repo: TransactionRepository
-    private var bni = 0L
-    private var gopay = 0L
+    private val bni = "id-bni"
+    private val gopay = "id-gopay"
 
     @Before
     fun setUp() = runTest {
@@ -43,8 +43,8 @@ class MonthlyTrendTest {
         accountDao = db.accountDao()
         txDao = db.transactionDao()
         repo = TransactionRepository(txDao)
-        bni = accountDao.insert(account("bni", "BNI", AccountType.BANK, 0, 1))
-        gopay = accountDao.insert(account("gopay", "GoPay", AccountType.EWALLET, 0, 2))
+        accountDao.insert(account(bni, "bni", "BNI", AccountType.BANK, 0, 1))
+        accountDao.insert(account(gopay, "gopay", "GoPay", AccountType.EWALLET, 0, 2))
     }
 
     @After
@@ -79,16 +79,17 @@ class MonthlyTrendTest {
         assertEquals(0L, mei.keluar)
     }
 
-    private fun account(kode: String, nama: String, jenis: AccountType, saldoAwal: Long, urutan: Int) =
-        AccountEntity(kode = kode, nama = nama, jenis = jenis.wire, saldoAwal = saldoAwal, urutan = urutan)
+    private fun account(id: String, kode: String, nama: String, jenis: AccountType, saldoAwal: Long, urutan: Int) =
+        AccountEntity(id = id, kode = kode, nama = nama, jenis = jenis.wire, saldoAwal = saldoAwal, urutan = urutan)
 
     private fun tx(
         tipe: TxType,
         nominal: Long,
-        dari: Long? = null,
-        ke: Long? = null,
+        dari: String? = null,
+        ke: String? = null,
         tanggal: String,
     ) = TransactionEntity(
+        id = java.util.UUID.randomUUID().toString(),
         tipe = tipe.wire, nominal = nominal, kategori = "lainnya",
         akunDariId = dari, akunKeId = ke, tanggal = tanggal, catatan = "",
         batchId = null, sumberInput = SourceInput.MANUAL.wire, createdAt = 0L,

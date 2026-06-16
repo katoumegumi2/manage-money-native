@@ -45,10 +45,10 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 
 @Composable
 fun HomeScreen(
-    onAccountClick: (Long) -> Unit,
+    onAccountClick: (String) -> Unit,
     onSettings: () -> Unit,
     onAddManual: () -> Unit,
-    onEdit: (Long) -> Unit,
+    onEdit: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {

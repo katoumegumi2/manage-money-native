@@ -38,7 +38,7 @@ class AccountDetailViewModel @Inject constructor(
     observeAccountTransactions: ObserveAccountTransactions,
 ) : ViewModel() {
 
-    private val accountId: Long = savedStateHandle.get<Long>(ARG_ACCOUNT_ID) ?: 0L
+    private val accountId: String = savedStateHandle.get<String>(ARG_ACCOUNT_ID) ?: ""
     private val today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))
 
     val state: StateFlow<AccountDetailUiState> = combine(
