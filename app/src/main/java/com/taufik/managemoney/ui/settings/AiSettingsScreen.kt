@@ -87,6 +87,8 @@ fun AiSettingsScreen(
         ) {
             ThemeSection(themeMode, themeViewModel::set)
             HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 6.dp))
+            AccountSection()
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 6.dp))
             Text(
                 text = stringResource(R.string.settings_ai_title),
                 style = MaterialTheme.typography.titleLarge,

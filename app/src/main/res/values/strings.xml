@@ -143,4 +143,16 @@
     <string name="data_backup_ok">Cadangan tersimpan</string>
     <string name="data_restore_ok">Data dipulihkan</string>
     <string name="data_fail">Gagal, coba lagi</string>
+
+    <!-- Onboarding + akun Google (Phase 8b) -->
+    <string name="welcome_title">Catat keuangan, aman tercadang</string>
+    <string name="welcome_subtitle">Masuk dengan Google untuk mencadangkan data ke Google Drive pribadimu — bisa dipulihkan kapan saja di HP baru.</string>
+    <string name="welcome_sign_in">Masuk dengan Google</string>
+    <string name="welcome_skip">Pakai tanpa backup</string>
+    <string name="welcome_skip_note">Data tetap tersimpan di perangkat ini. Kamu bisa masuk nanti dari Pengaturan.</string>
+    <string name="account_section">Akun &amp; cadangan</string>
+    <string name="account_signed_in_as">Tertaut sebagai</string>
+    <string name="account_not_signed_in">Belum masuk — data hanya di perangkat ini</string>
+    <string name="account_sign_in">Masuk dengan Google</string>
+    <string name="account_sign_out">Keluar</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +56,13 @@ import com.taufik.managemoney.ui.settings.AiSettingsScreen
 import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
 @Composable
-fun MoneyApp() {
+fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()) {
+    val authState by authViewModel.state.collectAsStateWithLifecycle()
+    if (!authState.onboarded) {
+        com.taufik.managemoney.ui.auth.WelcomeScreen(viewModel = authViewModel)
+        return
+    }
+
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination

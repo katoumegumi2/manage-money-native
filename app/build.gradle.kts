@@ -9,11 +9,13 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
-// API key Gemini dari local.properties (gitignored). Kosong bila belum diatur → parser gagal anggun.
-val geminiApiKey: String = Properties().apply {
+// Rahasia dari local.properties (gitignored). Kosong bila belum diatur → fitur terkait gagal anggun.
+val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
-}.getProperty("GEMINI_API_KEY", "")
+}
+val geminiApiKey: String = localProps.getProperty("GEMINI_API_KEY", "")
+val googleWebClientId: String = localProps.getProperty("GOOGLE_WEB_CLIENT_ID", "")
 
 android {
     namespace = "com.taufik.managemoney"
@@ -30,6 +32,7 @@ android {
         vectorDrawables { useSupportLibrary = true }
 
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     buildTypes {
@@ -98,6 +101,12 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
+
+    // Google Sign-In (Credential Manager) + otorisasi Drive (Phase 8b)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.play.services.auth)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
