@@ -1,7 +1,6 @@
 package com.taufik.managemoney.data.ai
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.taufik.managemoney.BuildConfig
 import com.taufik.managemoney.domain.ai.TransactionParser
 import dagger.Module
 import dagger.Provides
@@ -51,8 +50,13 @@ object AiModule {
     @Singleton
     internal fun provideGeminiApi(retrofit: Retrofit): GeminiApi = retrofit.create(GeminiApi::class.java)
 
+    // OpenAI-compatible: pakai @Url absolut, jadi baseUrl Retrofit (Gemini) diabaikan saat dipanggil.
     @Provides
     @Singleton
-    internal fun provideTransactionParser(api: GeminiApi): TransactionParser =
-        GeminiParser(api = api, apiKey = BuildConfig.GEMINI_API_KEY)
+    internal fun provideOpenAiApi(retrofit: Retrofit): OpenAiApi = retrofit.create(OpenAiApi::class.java)
+
+    // Parser aktif = ConfigurableParser (pilih provider dari AiConfig saat runtime).
+    @Provides
+    @Singleton
+    internal fun provideTransactionParser(parser: ConfigurableParser): TransactionParser = parser
 }

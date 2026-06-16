@@ -40,6 +40,7 @@ import com.taufik.managemoney.ui.navigation.accountDetailRoute
 import com.taufik.managemoney.ui.navigation.confirmRoute
 import com.taufik.managemoney.ui.parse.ParseInputScreen
 import com.taufik.managemoney.ui.screens.PlaceholderScreen
+import com.taufik.managemoney.ui.settings.AiSettingsScreen
 import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
 @Composable
@@ -97,7 +98,7 @@ fun MoneyApp() {
             }
             composable(TopDestination.HISTORY.route) { PlaceholderScreen(stringResource(R.string.nav_history)) }
             composable(TopDestination.ACCOUNTS.route) { PlaceholderScreen(stringResource(R.string.nav_accounts)) }
-            composable(TopDestination.SETTINGS.route) { PlaceholderScreen(stringResource(R.string.nav_settings)) }
+            composable(TopDestination.SETTINGS.route) { AiSettingsScreen() }
             composable(
                 route = ACCOUNT_DETAIL_ROUTE,
                 arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.LongType }),

@@ -53,4 +53,19 @@
     <string name="account_mutations">Mutasi</string>
     <string name="account_no_mutations">Belum ada mutasi pada akun ini</string>
     <string name="account_not_found">Akun tidak ditemukan</string>
+
+    <!-- Pengaturan AI -->
+    <string name="settings_ai_title">Pengaturan AI</string>
+    <string name="settings_ai_subtitle">Pilih penyedia AI dan masukkan API key. Disimpan di perangkat, terenkripsi.</string>
+    <string name="settings_provider">Penyedia</string>
+    <string name="settings_model">Model</string>
+    <string name="settings_base_url">Base URL</string>
+    <string name="settings_api_key">API key</string>
+    <string name="settings_key_hint">Key hanya dipakai untuk memanggil penyedia; tidak dibagikan atau dicatat di log.</string>
+    <string name="settings_save">Simpan</string>
+    <string name="settings_saved">Tersimpan ✓</string>
+    <string name="settings_test">Tes parse</string>
+    <string name="settings_testing">Menguji…</string>
+    <string name="settings_show_key">Tampilkan key</string>
+    <string name="settings_hide_key">Sembunyikan key</string>
 </resources>
