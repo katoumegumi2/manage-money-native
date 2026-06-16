@@ -62,6 +62,13 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
         com.taufik.managemoney.ui.auth.WelcomeScreen(viewModel = authViewModel)
         return
     }
+    // Pasca-login: cek sekali apakah ada cadangan di Drive (tawarkan pulihkan / aktifkan backup).
+    val backupViewModel: com.taufik.managemoney.ui.backup.BackupViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val restoreChecked by backupViewModel.restoreChecked.collectAsStateWithLifecycle()
+    if (authState.signedIn && !restoreChecked) {
+        com.taufik.managemoney.ui.backup.RestoreGateScreen(viewModel = backupViewModel)
+        return
+    }
 
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()

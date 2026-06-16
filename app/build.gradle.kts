@@ -102,11 +102,17 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
 
-    // Google Sign-In (Credential Manager) + otorisasi Drive (Phase 8b)
+    // Google Sign-In (Credential Manager) + otorisasi Drive (Phase 8b/8c)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.play.services.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // Backup Drive terenkripsi + auto-backup (Phase 8c)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

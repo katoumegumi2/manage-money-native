@@ -40,6 +40,7 @@ class ConfirmViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val saveTransactionBatch: SaveTransactionBatch,
     savedStateHandle: SavedStateHandle,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val appContext: android.content.Context,
 ) : ViewModel() {
 
     private val today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))
@@ -93,6 +94,8 @@ class ConfirmViewModel @Inject constructor(
             val result = saveTransactionBatch(current.items.map { it.toDraft() }, SourceInput.MANUAL)
             result.onSuccess { ids ->
                 _state.update { it.copy(saving = false, savedCount = ids.size) }
+                // Picu auto-backup terenkripsi (no-op bila backup belum diaktifkan).
+                com.taufik.managemoney.data.backup.BackupScheduler.backupNow(appContext)
             }.onFailure { e ->
                 _state.update {
                     it.copy(

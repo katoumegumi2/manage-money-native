@@ -7,7 +7,11 @@ import com.taufik.managemoney.data.auth.AuthState
 import com.taufik.managemoney.data.auth.AuthStateStore
 import com.taufik.managemoney.data.auth.GoogleAuthManager
 import com.taufik.managemoney.data.auth.SignInError
+import com.taufik.managemoney.data.backup.BackupScheduler
+import com.taufik.managemoney.data.backup.BackupStateStore
+import com.taufik.managemoney.data.backup.PassphraseStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +24,9 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val authStateStore: AuthStateStore,
     private val googleAuthManager: GoogleAuthManager,
+    private val passphraseStore: PassphraseStore,
+    private val backupStateStore: BackupStateStore,
+    @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
     val state: StateFlow<AuthState> = authStateStore.state.stateIn(
@@ -44,7 +51,10 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _busy.value = true
             googleAuthManager.signIn(activityContext)
-                .onSuccess { acc -> authStateStore.setSignedIn(acc.email, acc.name) }
+                .onSuccess { acc ->
+                    backupStateStore.setRestoreChecked(false) // akun baru tertaut → cek cadangan Drive
+                    authStateStore.setSignedIn(acc.email, acc.name)
+                }
                 .onFailure { e ->
                     _message.value = when (e) {
                         is SignInError.Cancelled -> null // batal: diam
@@ -62,6 +72,11 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signOut() {
-        viewModelScope.launch { authStateStore.clearAccount() }
+        viewModelScope.launch {
+            BackupScheduler.cancel(appContext)
+            passphraseStore.clear()
+            backupStateStore.setRestoreChecked(false) // login lagi → cek ulang cadangan
+            authStateStore.clearAccount()
+        }
     }
 }

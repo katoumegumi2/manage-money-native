@@ -155,4 +155,24 @@
     <string name="account_not_signed_in">Belum masuk — data hanya di perangkat ini</string>
     <string name="account_sign_in">Masuk dengan Google</string>
     <string name="account_sign_out">Keluar</string>
+
+    <!-- Backup Drive terenkripsi (Phase 8c) -->
+    <string name="backup_section">Cadangan Google Drive</string>
+    <string name="backup_last">Cadangan terakhir: %1$s · %2$d KB</string>
+    <string name="backup_never">Belum ada cadangan</string>
+    <string name="backup_now">Backup sekarang</string>
+    <string name="backup_passphrase">Passphrase (min. 6 karakter)</string>
+    <string name="backup_set_passphrase">Atur passphrase</string>
+    <string name="backup_change_passphrase">Ubah passphrase</string>
+    <string name="restore_from_drive">Pulihkan dari Drive</string>
+    <string name="restore_checking">Mengecek cadangan di Drive…</string>
+    <string name="restore_found_title">Cadangan ditemukan</string>
+    <string name="restore_found_subtitle">Masukkan passphrase yang kamu pakai saat mencadangkan untuk memulihkan datamu.</string>
+    <string name="restore_action">Pulihkan</string>
+    <string name="restore_skip">Lewati, mulai baru</string>
+    <string name="backup_enable_title">Aktifkan cadangan otomatis</string>
+    <string name="backup_enable_subtitle">Buat passphrase untuk mengenkripsi cadangan. Simpan baik-baik — tanpa ini cadangan tak bisa dipulihkan.</string>
+    <string name="backup_enable_action">Aktifkan &amp; backup sekarang</string>
+    <string name="action_save_generic">Simpan</string>
+    <string name="action_cancel_generic">Batal</string>
 </resources>
