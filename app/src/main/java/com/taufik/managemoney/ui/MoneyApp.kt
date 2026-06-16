@@ -1,14 +1,11 @@
 package com.taufik.managemoney.ui
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -16,10 +13,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.taufik.managemoney.ui.components.MicFab
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -53,7 +52,6 @@ import com.taufik.managemoney.ui.navigation.editTxRoute
 import com.taufik.managemoney.ui.parse.ParseInputScreen
 import com.taufik.managemoney.ui.reports.ReportsScreen
 import com.taufik.managemoney.ui.settings.AiSettingsScreen
-import com.taufik.managemoney.ui.theme.Gold
 import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
 @Composable
@@ -80,35 +78,31 @@ fun MoneyApp() {
     Scaffold(
         bottomBar = {
             if (showChrome) {
-                NavigationBar {
-                    TopDestination.entries.forEachIndexed { index, dest ->
-                        // Sisipkan celah di tengah (slot FAB mic) antara Riwayat & Laporan.
-                        if (index == 2) Spacer(Modifier.weight(1f))
-                        val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = { openTab(dest.route) },
-                            icon = { Icon(dest.icon, contentDescription = null) },
-                            label = { Text(stringResource(dest.labelRes)) },
-                        )
+                // Bottom nav + FAB mic yang menumpuk di tepi atas bar (separuh masuk), bukan melayang.
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    NavigationBar {
+                        TopDestination.entries.forEachIndexed { index, dest ->
+                            // Sisipkan celah di tengah (slot FAB mic) antara Riwayat & Laporan.
+                            if (index == 2) Spacer(Modifier.weight(1f))
+                            val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = { openTab(dest.route) },
+                                icon = { Icon(dest.icon, contentDescription = null) },
+                                label = { Text(stringResource(dest.labelRes)) },
+                            )
+                        }
                     }
+                    MicFab(
+                        onClick = { navController.navigate(VOICE_INPUT_ROUTE) },
+                        contentDescription = stringResource(R.string.action_voice),
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (-28).dp),
+                    )
                 }
             }
         },
-        floatingActionButton = {
-            if (showChrome) {
-                FloatingActionButton(
-                    onClick = { navController.navigate(VOICE_INPUT_ROUTE) },
-                    shape = CircleShape,
-                    containerColor = Gold,
-                    contentColor = androidx.compose.ui.graphics.Color(0xFF1B1306),
-                    modifier = Modifier.size(64.dp),
-                ) {
-                    Icon(Icons.Filled.Mic, contentDescription = stringResource(R.string.action_voice), modifier = Modifier.size(28.dp))
-                }
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
     ) { innerPadding ->
         NavHost(
             navController = navController,
