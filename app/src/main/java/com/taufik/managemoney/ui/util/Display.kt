@@ -9,6 +9,9 @@ import com.taufik.managemoney.ui.theme.BadgeMandiri
 import com.taufik.managemoney.ui.theme.BadgeSeabank
 import com.taufik.managemoney.ui.theme.BadgeShopeepay
 import com.taufik.managemoney.ui.theme.BadgeTunai
+import com.taufik.managemoney.ui.theme.Expense
+import com.taufik.managemoney.ui.theme.Income
+import com.taufik.managemoney.ui.theme.Transfer
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -37,6 +40,20 @@ fun jenisLabel(jenis: AccountType): String = when (jenis) {
     AccountType.BANK -> "Bank"
     AccountType.EWALLET -> "E-Wallet"
     AccountType.TUNAI -> "Tunai"
+}
+
+/** Warna aksen tipe transaksi (tag/aksen pada kartu konfirmasi). */
+fun txTypeColor(tipe: TxType): Color = when (tipe) {
+    TxType.PENGELUARAN -> Expense
+    TxType.PEMASUKAN -> Income
+    TxType.TRANSFER -> Transfer
+}
+
+/** Label tipe transaksi (sentence case) untuk tag/segmen. */
+fun txTypeLabel(tipe: TxType): String = when (tipe) {
+    TxType.PENGELUARAN -> "Pengeluaran"
+    TxType.PEMASUKAN -> "Pemasukan"
+    TxType.TRANSFER -> "Transfer"
 }
 
 /** Emoji ikon baris transaksi berdasar tipe & kategori. */

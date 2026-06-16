@@ -1,10 +1,14 @@
 package com.taufik.managemoney.domain.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 /** Jenis transaksi. `wire` = nilai yang dipakai di DB & kontrak parser AI. */
+@Serializable
 enum class TxType(val wire: String) {
-    PENGELUARAN("pengeluaran"),
-    PEMASUKAN("pemasukan"),
-    TRANSFER("transfer");
+    @SerialName("pengeluaran") PENGELUARAN("pengeluaran"),
+    @SerialName("pemasukan") PEMASUKAN("pemasukan"),
+    @SerialName("transfer") TRANSFER("transfer");
 
     companion object {
         fun fromWire(value: String): TxType =

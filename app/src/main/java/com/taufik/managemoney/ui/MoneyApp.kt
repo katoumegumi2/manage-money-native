@@ -1,8 +1,9 @@
 package com.taufik.managemoney.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -23,11 +25,17 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.taufik.managemoney.R
 import com.taufik.managemoney.ui.account.AccountDetailScreen
+import com.taufik.managemoney.ui.confirm.ConfirmScreen
 import com.taufik.managemoney.ui.home.HomeScreen
+import com.taufik.managemoney.ui.manualentry.ManualEntryScreen
 import com.taufik.managemoney.ui.navigation.ACCOUNT_DETAIL_ROUTE
 import com.taufik.managemoney.ui.navigation.ARG_ACCOUNT_ID
+import com.taufik.managemoney.ui.navigation.ARG_CONFIRM_PAYLOAD
+import com.taufik.managemoney.ui.navigation.CONFIRM_ROUTE
+import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
+import com.taufik.managemoney.ui.navigation.confirmRoute
 import com.taufik.managemoney.ui.screens.PlaceholderScreen
 
 @Composable
@@ -35,33 +43,42 @@ fun MoneyApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
+    val context = LocalContext.current
+
+    // Layar input penuh (manual & konfirmasi) menyembunyikan bottom nav + FAB.
+    val fullScreenRoutes = setOf(MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE)
+    val showChrome = currentDestination?.route !in fullScreenRoutes
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                TopDestination.entries.forEach { dest ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(dest.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(dest.icon, contentDescription = null) },
-                        label = { Text(stringResource(dest.labelRes)) },
-                    )
+            if (showChrome) {
+                NavigationBar {
+                    TopDestination.entries.forEach { dest ->
+                        val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(dest.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(dest.icon, contentDescription = null) },
+                            label = { Text(stringResource(dest.labelRes)) },
+                        )
+                    }
                 }
             }
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { /* Phase 5: buka overlay mendengarkan */ },
-                icon = { Icon(Icons.Filled.Mic, contentDescription = null) },
-                text = { Text(stringResource(R.string.action_voice)) },
-            )
+            if (showChrome) {
+                ExtendedFloatingActionButton(
+                    onClick = { navController.navigate(MANUAL_ENTRY_ROUTE) },
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text(stringResource(R.string.action_add)) },
+                )
+            }
         },
     ) { innerPadding ->
         NavHost(
@@ -82,6 +99,28 @@ fun MoneyApp() {
                 arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.LongType }),
             ) {
                 AccountDetailScreen(onBack = { navController.popBackStack() })
+            }
+            composable(MANUAL_ENTRY_ROUTE) {
+                ManualEntryScreen(
+                    onBack = { navController.popBackStack() },
+                    onContinue = { payload -> navController.navigate(confirmRoute(payload)) },
+                )
+            }
+            composable(
+                route = CONFIRM_ROUTE,
+                arguments = listOf(navArgument(ARG_CONFIRM_PAYLOAD) { type = NavType.StringType }),
+            ) {
+                ConfirmScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { count ->
+                        Toast.makeText(
+                            context,
+                            context.resources.getQuantityString(R.plurals.saved_count, count, count),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                        navController.popBackStack(TopDestination.HOME.route, inclusive = false)
+                    },
+                )
             }
         }
     }

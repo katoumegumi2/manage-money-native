@@ -8,7 +8,14 @@
     <string name="nav_settings">Pengaturan</string>
 
     <string name="action_voice">Catat suara</string>
+    <string name="action_add">Tambah</string>
     <string name="action_back">Kembali</string>
+
+    <!-- Konfirmasi / simpan -->
+    <plurals name="saved_count">
+        <item quantity="one">Tersimpan</item>
+        <item quantity="other">%1$d transaksi tersimpan</item>
+    </plurals>
 
     <!-- Beranda -->
     <string name="home_total_label">Total saldo · %1$d akun</string>
