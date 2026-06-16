@@ -7,7 +7,10 @@ const val ACCOUNT_DETAIL_ROUTE = "account/{$ARG_ACCOUNT_ID}"
 
 fun accountDetailRoute(accountId: Long): String = "account/$accountId"
 
-/** Input cepat: ketik kalimat → parse AI → Konfirmasi (Phase 5 diganti suara). */
+/** Input suara: mic → STT → parse AI → Konfirmasi (jalur utama). */
+const val VOICE_INPUT_ROUTE = "voice"
+
+/** Input cepat: ketik kalimat → parse AI → Konfirmasi (fallback "ketik saja"). */
 const val PARSE_INPUT_ROUTE = "parse"
 
 /** Form input manual transaksi. */

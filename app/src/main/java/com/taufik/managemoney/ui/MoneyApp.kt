@@ -3,7 +3,7 @@ package com.taufik.managemoney.ui
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -35,10 +35,12 @@ import com.taufik.managemoney.ui.navigation.CONFIRM_ROUTE
 import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
 import com.taufik.managemoney.ui.navigation.PARSE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
+import com.taufik.managemoney.ui.navigation.VOICE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
 import com.taufik.managemoney.ui.navigation.confirmRoute
 import com.taufik.managemoney.ui.parse.ParseInputScreen
 import com.taufik.managemoney.ui.screens.PlaceholderScreen
+import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
 @Composable
 fun MoneyApp() {
@@ -48,7 +50,7 @@ fun MoneyApp() {
     val context = LocalContext.current
 
     // Layar input penuh (catat/manual/konfirmasi) menyembunyikan bottom nav + FAB.
-    val fullScreenRoutes = setOf(PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE)
+    val fullScreenRoutes = setOf(VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE)
     val showChrome = currentDestination?.route !in fullScreenRoutes
 
     Scaffold(
@@ -76,9 +78,9 @@ fun MoneyApp() {
         floatingActionButton = {
             if (showChrome) {
                 ExtendedFloatingActionButton(
-                    onClick = { navController.navigate(PARSE_INPUT_ROUTE) },
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                    text = { Text(stringResource(R.string.action_add)) },
+                    onClick = { navController.navigate(VOICE_INPUT_ROUTE) },
+                    icon = { Icon(Icons.Filled.Mic, contentDescription = null) },
+                    text = { Text(stringResource(R.string.action_voice)) },
                 )
             }
         },
@@ -101,6 +103,26 @@ fun MoneyApp() {
                 arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.LongType }),
             ) {
                 AccountDetailScreen(onBack = { navController.popBackStack() })
+            }
+            composable(VOICE_INPUT_ROUTE) {
+                VoiceInputScreen(
+                    onParsed = { payload ->
+                        navController.navigate(confirmRoute(payload)) {
+                            popUpTo(VOICE_INPUT_ROUTE) { inclusive = true }
+                        }
+                    },
+                    onType = {
+                        navController.navigate(PARSE_INPUT_ROUTE) {
+                            popUpTo(VOICE_INPUT_ROUTE) { inclusive = true }
+                        }
+                    },
+                    onManual = {
+                        navController.navigate(MANUAL_ENTRY_ROUTE) {
+                            popUpTo(VOICE_INPUT_ROUTE) { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable(PARSE_INPUT_ROUTE) {
                 ParseInputScreen(
