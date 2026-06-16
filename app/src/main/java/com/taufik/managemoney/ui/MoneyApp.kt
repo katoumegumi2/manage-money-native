@@ -113,6 +113,8 @@ fun MoneyApp() {
                 HomeScreen(
                     onAccountClick = { id -> navController.navigate(accountDetailRoute(id)) },
                     onSettings = { navController.navigate(SETTINGS_ROUTE) },
+                    onAddManual = { navController.navigate(MANUAL_ENTRY_ROUTE) },
+                    onEdit = { id -> navController.navigate(editTxRoute(id)) },
                 )
             }
             composable(TopDestination.HISTORY.route) {

@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,6 +47,8 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 fun HomeScreen(
     onAccountClick: (Long) -> Unit,
     onSettings: () -> Unit,
+    onAddManual: () -> Unit,
+    onEdit: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -55,7 +59,7 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(horizontal = 18.dp),
     ) {
-        item { HeaderSection(onSettings) }
+        item { HeaderSection(onSettings, onAddManual) }
         item { HeroSection(state) }
         item { Spacer(Modifier.height(8.dp)) }
 
@@ -90,7 +94,7 @@ fun HomeScreen(
             item { EmptyRecent() }
         } else {
             items(state.recent, key = { it.id }) { row ->
-                TxRow(row)
+                TxRow(row, modifier = Modifier.clickable { onEdit(row.id) }, trailingChevron = true)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
             }
         }
@@ -100,7 +104,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HeaderSection(onSettings: () -> Unit) {
+private fun HeaderSection(onSettings: () -> Unit, onAddManual: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -115,6 +119,13 @@ private fun HeaderSection(onSettings: () -> Unit) {
             Text(
                 text = stringResource(R.string.nav_home),
                 style = MaterialTheme.typography.titleLarge,
+            )
+        }
+        IconButton(onClick = onAddManual) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.action_add_manual),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         IconButton(onClick = onSettings) {

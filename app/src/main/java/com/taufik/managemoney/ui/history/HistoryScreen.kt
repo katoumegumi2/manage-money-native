@@ -89,7 +89,7 @@ fun HistoryScreen(
                     )
                 }
                 items(group.rows, key = { it.id }) { row ->
-                    TxRow(row, modifier = Modifier.clickable { onEdit(row.id) })
+                    TxRow(row, modifier = Modifier.clickable { onEdit(row.id) }, trailingChevron = true)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                 }
             }
