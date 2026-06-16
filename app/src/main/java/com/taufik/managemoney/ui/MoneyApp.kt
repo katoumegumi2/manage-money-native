@@ -98,7 +98,7 @@ fun MoneyApp() {
                         contentDescription = stringResource(R.string.action_voice),
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .offset(y = (-28).dp),
+                            .offset(y = (-32).dp),
                     )
                 }
             }

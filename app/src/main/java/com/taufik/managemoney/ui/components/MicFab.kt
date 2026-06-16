@@ -30,11 +30,11 @@ fun MicFab(
 ) {
     Box(
         modifier = modifier
-            .size(64.dp)
-            .shadow(10.dp, CircleShape)
+            .size(76.dp)
+            .shadow(12.dp, CircleShape)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.background) // ring (border) sewarna latar
-            .padding(5.dp)
+            .padding(6.dp)
             .clip(CircleShape)
             .background(Color(0xFFD99A2B)) // gold
             .clickable(onClick = onClick),
@@ -44,7 +44,7 @@ fun MicFab(
             imageVector = Icons.Filled.Mic,
             contentDescription = contentDescription,
             tint = Color(0xFF1B1306),
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(34.dp),
         )
     }
 }
