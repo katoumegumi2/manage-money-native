@@ -90,11 +90,10 @@ class SpeechRecognizerManager @Inject constructor(
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, localeTag)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
-            // Beri ruang kalimat panjang & jeda: jangan terlalu cepat memotong.
-            // (Extra ini bersifat saran; sebagian recognizer Google mengabaikannya.)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 8_000)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3_000)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2_500)
+            // Toleransi jeda agar tak terpotong saat berpikir — TANPA memaksa durasi minimum
+            // (min-length memaksa rekam hening di ekor → hasil final malah jelek).
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2_000)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2_000)
         }
 
     private fun firstText(bundle: Bundle?): String? =

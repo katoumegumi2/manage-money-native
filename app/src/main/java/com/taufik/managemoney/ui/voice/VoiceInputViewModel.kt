@@ -41,23 +41,36 @@ class VoiceInputViewModel @Inject constructor(
 
     private var listenJob: Job? = null
 
+    /** Partial terakhir (transkrip live). Kadang lebih lengkap dari hasil final → dipakai sebagai fallback. */
+    private var lastPartial = ""
+
     fun startListening() {
         listenJob?.cancel()
+        lastPartial = ""
         _state.value = VoiceUiState(phase = VoicePhase.LISTENING)
         listenJob = viewModelScope.launch {
             stt.listen().collect { event ->
                 when (event) {
                     SttEvent.Ready, SttEvent.BeginSpeech, SttEvent.EndSpeech -> Unit
-                    is SttEvent.Partial ->
+                    is SttEvent.Partial -> {
+                        if (event.text.isNotBlank()) lastPartial = event.text
                         _state.update { it.copy(partial = event.text) }
-                    is SttEvent.Result -> {
-                        _state.update { it.copy(finalText = event.text, partial = event.text) }
-                        parse(event.text)
                     }
-                    is SttEvent.Failure ->
-                        _state.update {
-                            it.copy(phase = VoicePhase.IDLE, sttError = event.error)
+                    is SttEvent.Result -> {
+                        // Final kadang lebih buruk/pendek dari partial terakhir → pilih yang lebih lengkap.
+                        val best = if (event.text.length >= lastPartial.length) event.text else lastPartial
+                        _state.update { it.copy(finalText = best, partial = best) }
+                        parse(best)
+                    }
+                    is SttEvent.Failure -> {
+                        // Final kosong tapi sempat ada transkrip live → pakai itu, jangan buang.
+                        if ((event.error == SttError.NO_MATCH || event.error == SttError.NO_SPEECH) && lastPartial.isNotBlank()) {
+                            _state.update { it.copy(finalText = lastPartial, partial = lastPartial) }
+                            parse(lastPartial)
+                        } else {
+                            _state.update { it.copy(phase = VoicePhase.IDLE, sttError = event.error) }
                         }
+                    }
                 }
             }
         }
