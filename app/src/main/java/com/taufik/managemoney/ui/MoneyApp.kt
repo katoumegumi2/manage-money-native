@@ -33,9 +33,11 @@ import com.taufik.managemoney.ui.navigation.ARG_ACCOUNT_ID
 import com.taufik.managemoney.ui.navigation.ARG_CONFIRM_PAYLOAD
 import com.taufik.managemoney.ui.navigation.CONFIRM_ROUTE
 import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
+import com.taufik.managemoney.ui.navigation.PARSE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
 import com.taufik.managemoney.ui.navigation.confirmRoute
+import com.taufik.managemoney.ui.parse.ParseInputScreen
 import com.taufik.managemoney.ui.screens.PlaceholderScreen
 
 @Composable
@@ -45,8 +47,8 @@ fun MoneyApp() {
     val currentDestination = backStackEntry?.destination
     val context = LocalContext.current
 
-    // Layar input penuh (manual & konfirmasi) menyembunyikan bottom nav + FAB.
-    val fullScreenRoutes = setOf(MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE)
+    // Layar input penuh (catat/manual/konfirmasi) menyembunyikan bottom nav + FAB.
+    val fullScreenRoutes = setOf(PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE)
     val showChrome = currentDestination?.route !in fullScreenRoutes
 
     Scaffold(
@@ -74,7 +76,7 @@ fun MoneyApp() {
         floatingActionButton = {
             if (showChrome) {
                 ExtendedFloatingActionButton(
-                    onClick = { navController.navigate(MANUAL_ENTRY_ROUTE) },
+                    onClick = { navController.navigate(PARSE_INPUT_ROUTE) },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(stringResource(R.string.action_add)) },
                 )
@@ -99,6 +101,13 @@ fun MoneyApp() {
                 arguments = listOf(navArgument(ARG_ACCOUNT_ID) { type = NavType.LongType }),
             ) {
                 AccountDetailScreen(onBack = { navController.popBackStack() })
+            }
+            composable(PARSE_INPUT_ROUTE) {
+                ParseInputScreen(
+                    onBack = { navController.popBackStack() },
+                    onParsed = { payload -> navController.navigate(confirmRoute(payload)) },
+                    onManual = { navController.navigate(MANUAL_ENTRY_ROUTE) },
+                )
             }
             composable(MANUAL_ENTRY_ROUTE) {
                 ManualEntryScreen(
