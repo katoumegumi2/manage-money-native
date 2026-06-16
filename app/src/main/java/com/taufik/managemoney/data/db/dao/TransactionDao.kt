@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.Flow
 /** Baris rekap: total nominal per kategori. */
 data class CategorySumRow(val kategori: String, val total: Long)
 
+/** Baris tren: total nominal per bulan (YYYY-MM) per tipe. */
+data class MonthlySumRow(val ym: String, val tipe: String, val total: Long)
+
 @Dao
 interface TransactionDao {
 
@@ -66,6 +69,19 @@ interface TransactionDao {
         """,
     )
     fun observeSumByTypeSince(tipe: String, sinceIso: String): Flow<Long>
+
+    /**
+     * Total nominal per bulan (YYYY-MM) untuk pemasukan & pengeluaran sejak tanggal tertentu.
+     * Transfer dikecualikan (net-zero). Dipakai grafik tren bulanan di Laporan.
+     */
+    @Query(
+        """
+        SELECT substr(tanggal, 1, 7) AS ym, tipe AS tipe, SUM(nominal) AS total FROM transactions
+        WHERE tipe IN ('pemasukan', 'pengeluaran') AND tanggal >= :sinceIso
+        GROUP BY ym, tipe ORDER BY ym
+        """,
+    )
+    fun observeMonthlyTotals(sinceIso: String): Flow<List<MonthlySumRow>>
 
     @Query("SELECT * FROM transactions WHERE batchId = :batchId ORDER BY createdAt")
     suspend fun getByBatch(batchId: String): List<TransactionEntity>

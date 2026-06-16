@@ -20,9 +20,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.taufik.managemoney.R
 import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.ui.components.AccountPicker
 import com.taufik.managemoney.ui.components.CatatanField
@@ -45,10 +47,10 @@ fun ManualEntryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tambah manual") },
+                title = { Text(stringResource(R.string.action_add_manual)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
             )
@@ -62,7 +64,7 @@ fun ManualEntryScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                 ) {
-                    Text("Lanjut")
+                    Text(stringResource(R.string.manual_continue))
                 }
             }
         },
@@ -89,13 +91,13 @@ fun ManualEntryScreen(
 
             when (draft.tipe) {
                 TxType.PENGELUARAN -> AccountPicker(
-                    label = "Dari",
+                    label = stringResource(R.string.field_from_short),
                     accounts = state.accounts,
                     selectedId = draft.akunDariId,
                     onSelect = viewModel::setAkunDari,
                 )
                 TxType.PEMASUKAN -> AccountPicker(
-                    label = "Ke",
+                    label = stringResource(R.string.field_to_short),
                     accounts = state.accounts,
                     selectedId = draft.akunKeId,
                     onSelect = viewModel::setAkunKe,

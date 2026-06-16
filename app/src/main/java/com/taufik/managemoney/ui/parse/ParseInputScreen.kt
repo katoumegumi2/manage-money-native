@@ -25,10 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.taufik.managemoney.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,10 +52,10 @@ fun ParseInputScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Catat transaksi") },
+                title = { Text(stringResource(R.string.parse_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
             )
@@ -67,7 +69,7 @@ fun ParseInputScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(
-                "Tulis transaksimu dengan bahasa sehari-hari, mis. \"beli kopi 25rb sama bensin ceban\".",
+                stringResource(R.string.parse_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -75,7 +77,7 @@ fun ParseInputScreen(
             OutlinedTextField(
                 value = state.text,
                 onValueChange = viewModel::setText,
-                label = { Text("Transaksi") },
+                label = { Text(stringResource(R.string.parse_field_label)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp),
@@ -84,14 +86,14 @@ fun ParseInputScreen(
 
             if (state.emptyResult) {
                 InfoBox(
-                    text = "Tidak ada transaksi terdeteksi. Coba kalimat lain atau tambah manual.",
+                    text = stringResource(R.string.parse_empty),
                     container = MaterialTheme.colorScheme.surfaceVariant,
                     onContainer = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             state.error?.let { msg ->
                 InfoBox(
-                    text = "$msg\nKamu masih bisa menambah transaksi secara manual.",
+                    text = stringResource(R.string.parse_error_suffix, msg),
                     container = MaterialTheme.colorScheme.errorContainer,
                     onContainer = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -109,14 +111,14 @@ fun ParseInputScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(Modifier.height(0.dp))
-                    Text("  Memproses…")
+                    Text("  " + stringResource(R.string.voice_processing))
                 } else {
-                    Text("Proses")
+                    Text(stringResource(R.string.parse_process))
                 }
             }
 
             OutlinedButton(onClick = onManual, modifier = Modifier.fillMaxWidth()) {
-                Text("Tambah manual")
+                Text(stringResource(R.string.action_add_manual))
             }
         }
     }

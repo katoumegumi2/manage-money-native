@@ -40,6 +40,26 @@
         <item quantity="one">Tersimpan</item>
         <item quantity="other">%1$d transaksi tersimpan</item>
     </plurals>
+    <string name="confirm_title">Konfirmasi</string>
+    <string name="confirm_empty">Tidak ada transaksi terdeteksi</string>
+    <string name="confirm_need_check">perlu dicek</string>
+    <string name="confirm_save_all">Simpan semua (%1$d)</string>
+    <string name="issue_nominal">Isi nominal lebih dari 0</string>
+    <string name="issue_transfer_same">Akun asal dan tujuan harus berbeda</string>
+    <string name="issue_account_required">Pilih akun dulu</string>
+    <string name="field_from_short">Dari</string>
+    <string name="field_to_short">Ke</string>
+
+    <!-- Input manual -->
+    <string name="manual_continue">Lanjut</string>
+
+    <!-- Ketik kalimat (parse) -->
+    <string name="parse_title">Catat transaksi</string>
+    <string name="parse_hint">Tulis transaksimu dengan bahasa sehari-hari, mis. \"beli kopi 25rb sama bensin ceban\".</string>
+    <string name="parse_field_label">Transaksi</string>
+    <string name="parse_empty">Tidak ada transaksi terdeteksi. Coba kalimat lain atau tambah manual.</string>
+    <string name="parse_error_suffix">%1$s\nKamu masih bisa menambah transaksi secara manual.</string>
+    <string name="parse_process">Proses</string>
 
     <!-- Beranda -->
     <string name="home_total_label">Total saldo · %1$d akun</string>
@@ -63,6 +83,8 @@
 
     <!-- Laporan -->
     <string name="reports_empty">Belum ada pengeluaran bulan ini</string>
+    <string name="reports_trend_title">Tren 6 bulan</string>
+    <string name="reports_trend_empty">Belum cukup data untuk grafik tren</string>
 
     <!-- Pengaturan AI -->
     <string name="settings_ai_title">Pengaturan AI</string>

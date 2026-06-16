@@ -36,10 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.taufik.managemoney.R
 import com.taufik.managemoney.domain.model.DraftIssue
 import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.ui.components.AccountPicker
@@ -69,10 +71,10 @@ fun ConfirmScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Konfirmasi") },
+                title = { Text(stringResource(R.string.confirm_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
             )
@@ -172,7 +174,7 @@ private fun TxCard(
                 Spacer(Modifier.weight(1f))
                 if (item.perluDicek) {
                     Text(
-                        "perlu dicek",
+                        stringResource(R.string.confirm_need_check),
                         color = Gold,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
@@ -182,7 +184,7 @@ private fun TxCard(
                     IconButton(onClick = onRemove, modifier = Modifier.size(32.dp)) {
                         Icon(
                             Icons.Outlined.Delete,
-                            contentDescription = "Hapus",
+                            contentDescription = stringResource(R.string.action_delete),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -201,14 +203,14 @@ private fun TxCard(
 
             when (item.tipe) {
                 TxType.PENGELUARAN -> AccountPicker(
-                    label = "Dari",
+                    label = stringResource(R.string.field_from_short),
                     accounts = accounts,
                     selectedId = item.akunDariId,
                     onSelect = onAkunDari,
                     isError = showErrors && DraftIssue.AKUN_DARI_WAJIB in issues,
                 )
                 TxType.PEMASUKAN -> AccountPicker(
-                    label = "Ke",
+                    label = stringResource(R.string.field_to_short),
                     accounts = accounts,
                     selectedId = item.akunKeId,
                     onSelect = onAkunKe,
@@ -276,7 +278,7 @@ private fun SaveBar(count: Int, enabled: Boolean, saving: Boolean, onSave: () ->
                 )
                 Spacer(Modifier.size(8.dp))
             }
-            Text(if (count > 1) "Simpan semua ($count)" else "Simpan")
+            Text(if (count > 1) stringResource(R.string.confirm_save_all, count) else stringResource(R.string.action_save))
         }
     }
 }
@@ -285,16 +287,17 @@ private fun SaveBar(count: Int, enabled: Boolean, saving: Boolean, onSave: () ->
 private fun EmptyConfirm(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize(), Alignment.Center) {
         Text(
-            "Tidak ada transaksi terdeteksi",
+            stringResource(R.string.confirm_empty),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
 
+@Composable
 private fun issueHint(issues: Set<DraftIssue>): String = when {
-    DraftIssue.NOMINAL_TIDAK_VALID in issues -> "Isi nominal lebih dari 0"
-    DraftIssue.TRANSFER_AKUN_SAMA in issues -> "Akun asal dan tujuan harus berbeda"
-    DraftIssue.AKUN_DARI_WAJIB in issues || DraftIssue.AKUN_KE_WAJIB in issues -> "Pilih akun dulu"
+    DraftIssue.NOMINAL_TIDAK_VALID in issues -> stringResource(R.string.issue_nominal)
+    DraftIssue.TRANSFER_AKUN_SAMA in issues -> stringResource(R.string.issue_transfer_same)
+    DraftIssue.AKUN_DARI_WAJIB in issues || DraftIssue.AKUN_KE_WAJIB in issues -> stringResource(R.string.issue_account_required)
     else -> ""
 }

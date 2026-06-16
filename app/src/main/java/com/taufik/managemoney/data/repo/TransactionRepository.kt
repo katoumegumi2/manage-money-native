@@ -4,6 +4,7 @@ import com.taufik.managemoney.data.db.dao.TransactionDao
 import com.taufik.managemoney.data.db.toDomain
 import com.taufik.managemoney.data.db.toEntity
 import com.taufik.managemoney.domain.model.CategorySum
+import com.taufik.managemoney.domain.model.MonthlyTotal
 import com.taufik.managemoney.domain.model.Transaction
 import com.taufik.managemoney.domain.model.TxType
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,11 @@ class TransactionRepository @Inject constructor(
     /** Total nominal satu tipe sejak tanggal ISO (inklusif) — ringkasan masuk/keluar. */
     fun observeSumByTypeSince(tipe: TxType, sinceIso: String): Flow<Long> =
         transactionDao.observeSumByTypeSince(tipe.wire, sinceIso)
+
+    /** Total masuk/keluar per bulan sejak tanggal ISO — grafik tren bulanan. */
+    fun observeMonthlyTotals(sinceIso: String): Flow<List<MonthlyTotal>> =
+        transactionDao.observeMonthlyTotals(sinceIso)
+            .map { rows -> rows.map { MonthlyTotal(it.ym, TxType.fromWire(it.tipe), it.total) } }
 
     suspend fun insert(tx: Transaction): Long = transactionDao.insert(tx.toEntity())
 
