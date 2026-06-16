@@ -49,7 +49,7 @@ fun AccountTile(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AccountBadge(abbr = visual.abbr, color = visual.color, size = 32)
+                AccountAvatar(kode = account.kode, abbr = visual.abbr, color = visual.color, size = 32)
                 Text(
                     text = jenisLabel(account.jenis).uppercase(),
                     style = MaterialTheme.typography.labelMedium,

@@ -10,7 +10,7 @@ import com.taufik.managemoney.data.db.entity.TransactionEntity
 
 @Database(
     entities = [AccountEntity::class, TransactionEntity::class],
-    version = 1,
+    version = 3,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -20,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val NAME = "money.db"
 
-        /** Seed 6 akun bawaan saat DB pertama dibuat (sekali jalan). */
+        /** Seed katalog akun bawaan saat DB pertama dibuat (sekali jalan). */
         val seedCallback = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)

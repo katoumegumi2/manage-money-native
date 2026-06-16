@@ -78,27 +78,62 @@ fun emojiFor(tipe: TxType, kategori: String): String {
 /** Warna + singkatan badge akun. Dipetakan per kode (brand), fallback per jenis. */
 data class AccountVisual(val color: Color, val abbr: String)
 
+/** Warna khas brand (perkiraan warna korporat). Dipakai badge fallback bila logo asli belum ada. */
+private val brandColor: Map<String, Color> = mapOf(
+    // Bank
+    "bca" to Color(0xFF1F4E9B),
+    "bni" to BadgeBni,
+    "bri" to Color(0xFF00529C),
+    "mandiri" to BadgeMandiri,
+    "bsi" to Color(0xFF00A39D),
+    "cimb" to Color(0xFF8C1D2C),
+    "permata" to Color(0xFF12877F),
+    "danamon" to Color(0xFFF58220),
+    "btn" to Color(0xFF00529B),
+    "seabank" to BadgeSeabank,
+    "jago" to Color(0xFFFF6A00),
+    "jenius" to Color(0xFF00B5CC),
+    "blu" to Color(0xFF0098DA),
+    "allobank" to Color(0xFF1D2A6D),
+    "bankjatim" to Color(0xFFC8102E),
+    // E-wallet
+    "gopay" to Color(0xFF00AED6),
+    "ovo" to Color(0xFF4B2E83),
+    "dana" to Color(0xFF1391E9),
+    "shopeepay" to BadgeShopeepay,
+    "linkaja" to Color(0xFFE2211C),
+    "sakuku" to Color(0xFF00A0E3),
+    "isaku" to Color(0xFFE60012),
+    "astrapay" to Color(0xFF11468F),
+    // Tunai
+    "tunai" to BadgeTunai,
+)
+
+/** Singkatan badge (maks ~4 huruf) bila berbeda dari 3 huruf pertama kode. */
+private val brandAbbr: Map<String, String> = mapOf(
+    "mandiri" to "MDR",
+    "seabank" to "SEA",
+    "permata" to "PMT",
+    "danamon" to "DNM",
+    "allobank" to "ALLO",
+    "bankjatim" to "JTM",
+    "jenius" to "JNS",
+    "gopay" to "GP",
+    "shopeepay" to "SP",
+    "linkaja" to "LINK",
+    "sakuku" to "SKK",
+    "isaku" to "ISKU",
+    "astrapay" to "APAY",
+    "tunai" to "TN",
+)
+
 fun accountVisual(kode: String, jenis: AccountType): AccountVisual {
-    val color = when (kode.lowercase(localeId)) {
-        "bni" -> BadgeBni
-        "mandiri" -> BadgeMandiri
-        "seabank" -> BadgeSeabank
-        "gopay" -> BadgeGopay
-        "shopeepay" -> BadgeShopeepay
-        "tunai" -> BadgeTunai
-        else -> when (jenis) {
-            AccountType.BANK -> BadgeMandiri
-            AccountType.EWALLET -> BadgeGopay
-            AccountType.TUNAI -> BadgeTunai
-        }
+    val key = kode.lowercase(localeId)
+    val color = brandColor[key] ?: when (jenis) {
+        AccountType.BANK -> BadgeMandiri
+        AccountType.EWALLET -> BadgeGopay
+        AccountType.TUNAI -> BadgeTunai
     }
-    val abbr = when (kode.lowercase(localeId)) {
-        "mandiri" -> "MDR"
-        "seabank" -> "SEA"
-        "gopay" -> "GP"
-        "shopeepay" -> "SP"
-        "tunai" -> "TN"
-        else -> kode.take(3).uppercase(localeId)
-    }
+    val abbr = brandAbbr[key] ?: kode.take(3).uppercase(localeId)
     return AccountVisual(color, abbr)
 }

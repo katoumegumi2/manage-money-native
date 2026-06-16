@@ -35,6 +35,10 @@ interface AccountDao {
     @Query("SELECT COUNT(*) FROM accounts")
     suspend fun count(): Int
 
+    /** Jumlah akun aktif — untuk jaga minimal 1 akun aktif tersisa. */
+    @Query("SELECT COUNT(*) FROM accounts WHERE aktif = 1")
+    fun observeActiveCount(): kotlinx.coroutines.flow.Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(account: AccountEntity): Long
 
@@ -59,6 +63,19 @@ interface AccountDao {
         """,
     )
     fun observeBalances(): Flow<List<AccountBalanceRow>>
+
+    /** Saldo SEMUA akun (aktif + nonaktif) — untuk layar Kelola akun. */
+    @Query(
+        """
+        SELECT a.id AS accountId, a.kode AS kode, a.nama AS nama, a.jenis AS jenis,
+            a.saldoAwal
+            + COALESCE((SELECT SUM(t.nominal) FROM transactions t WHERE t.akunKeId   = a.id), 0)
+            - COALESCE((SELECT SUM(t.nominal) FROM transactions t WHERE t.akunDariId = a.id), 0) AS saldo
+        FROM accounts a
+        ORDER BY a.urutan
+        """,
+    )
+    fun observeAllBalances(): Flow<List<AccountBalanceRow>>
 
     /** Total = Σ saldo seluruh akun aktif. Transfer antar akun aktif net-zero; admin mengurangi total. */
     @Query(

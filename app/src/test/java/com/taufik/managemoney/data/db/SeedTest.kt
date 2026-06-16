@@ -31,12 +31,19 @@ class SeedTest {
     fun tearDown() = db.close()
 
     @Test
-    fun `seed enam akun saat pertama dibuat`() = runTest {
-        val accounts = db.accountDao().observeActive().first()
-        assertEquals(6, accounts.size)
+    fun `seed katalog penuh saat pertama dibuat`() = runTest {
+        val all = db.accountDao().observeAll().first()
+        assertEquals(DatabaseSeed.accounts.size, all.size)
+        // kode unik
+        assertEquals(all.size, all.map { it.kode }.toSet().size)
+    }
+
+    @Test
+    fun `akun aktif default = enam yang umum`() = runTest {
+        val active = db.accountDao().observeActive().first()
         assertEquals(
-            listOf("bni", "mandiri", "seabank", "gopay", "shopeepay", "tunai"),
-            accounts.map { it.kode },
+            listOf("bca", "bni", "bri", "mandiri", "gopay", "tunai"),
+            active.map { it.kode },
         )
     }
 

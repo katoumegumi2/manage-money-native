@@ -1,5 +1,6 @@
 package com.taufik.managemoney.ui.accounts
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,15 +20,19 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,7 +42,7 @@ import com.taufik.managemoney.R
 import com.taufik.managemoney.core.formatRupiah
 import com.taufik.managemoney.domain.model.Account
 import com.taufik.managemoney.domain.model.AccountType
-import com.taufik.managemoney.ui.components.AccountBadge
+import com.taufik.managemoney.ui.components.AccountAvatar
 import com.taufik.managemoney.ui.components.NominalField
 import com.taufik.managemoney.ui.theme.MonoFamily
 import com.taufik.managemoney.ui.util.accountVisual
@@ -49,28 +54,63 @@ fun AccountsScreen(
     viewModel: AccountsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var editing by remember { mutableStateOf<Account?>(null) }
     var adding by remember { mutableStateOf(false) }
+
+    LaunchedEffect(error) {
+        error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearError()
+        }
+    }
 
     LazyColumn(modifier = modifier.fillMaxSize().padding(horizontal = 18.dp)) {
         item {
             Text(
                 text = stringResource(R.string.nav_accounts),
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 14.dp, bottom = 8.dp),
-            )
-        }
-        items(state.items, key = { it.account.id }) { row ->
-            AccountListItem(
-                account = row.account,
-                saldo = row.saldo,
-                onClick = { editing = row.account },
+                modifier = Modifier.padding(top = 14.dp, bottom = 4.dp),
             )
         }
         item {
+            Text(
+                text = stringResource(R.string.accounts_active_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+
+        // Kelompokkan per jenis: Bank → E-Wallet → Tunai (urutan dalam grup ikut `urutan`).
+        AccountType.entries.forEach { type ->
+            val rows = state.items.filter { it.account.jenis == type }
+            if (rows.isNotEmpty()) {
+                item(key = "sec-$type") {
+                    Text(
+                        text = sectionLabel(type),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                    )
+                }
+                items(rows, key = { it.account.id }) { row ->
+                    AccountListItem(
+                        account = row.account,
+                        saldo = row.saldo,
+                        onClick = { editing = row.account },
+                        onToggle = { aktif -> viewModel.setActive(row.account, aktif) },
+                    )
+                }
+            }
+        }
+
+        item {
             OutlinedButton(
                 onClick = { adding = true },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             ) {
                 Text(stringResource(R.string.accounts_add))
             }
@@ -101,27 +141,32 @@ fun AccountsScreen(
 }
 
 @Composable
-private fun AccountListItem(account: Account, saldo: Long, onClick: () -> Unit) {
+private fun sectionLabel(type: AccountType): String = when (type) {
+    AccountType.BANK -> stringResource(R.string.accounts_section_bank)
+    AccountType.EWALLET -> stringResource(R.string.accounts_section_ewallet)
+    AccountType.TUNAI -> stringResource(R.string.accounts_section_tunai)
+}
+
+@Composable
+private fun AccountListItem(account: Account, saldo: Long, onClick: () -> Unit, onToggle: (Boolean) -> Unit) {
     val v = accountVisual(account.kode, account.jenis)
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 11.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AccountBadge(abbr = v.abbr, color = v.color, size = 38)
-        Column(modifier = Modifier.weight(1f).padding(horizontal = 13.dp)) {
+        // Akun nonaktif diredupkan agar jelas tidak tampil di Beranda.
+        val dim = if (account.aktif) 1f else 0.45f
+        AccountAvatar(kode = account.kode, abbr = v.abbr, color = v.color, size = 38, modifier = Modifier.alpha(dim))
+        Column(modifier = Modifier.weight(1f).padding(horizontal = 13.dp).alpha(dim)) {
             Text(account.nama, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
             Text(
-                text = stringResource(R.string.account_initial_balance, formatRupiah(account.saldoAwal)),
+                text = formatRupiah(saldo),
+                fontFamily = MonoFamily,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Text(
-            text = formatRupiah(saldo),
-            fontFamily = MonoFamily,
-            fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        Switch(checked = account.aktif, onCheckedChange = onToggle)
     }
 }
 

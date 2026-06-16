@@ -17,8 +17,18 @@ class AccountRepository @Inject constructor(
     fun observeActiveAccounts(): Flow<List<Account>> =
         accountDao.observeActive().map { list -> list.map { it.toDomain() } }
 
+    /** Semua akun (aktif + nonaktif) — untuk Kelola akun. */
+    fun observeAllAccounts(): Flow<List<Account>> =
+        accountDao.observeAll().map { list -> list.map { it.toDomain() } }
+
     fun observeBalances(): Flow<List<AccountBalance>> =
         accountDao.observeBalances().map { rows -> rows.map { it.toDomain() } }
+
+    /** Saldo semua akun (aktif + nonaktif) — untuk Kelola akun. */
+    fun observeAllBalances(): Flow<List<AccountBalance>> =
+        accountDao.observeAllBalances().map { rows -> rows.map { it.toDomain() } }
+
+    fun observeActiveCount(): Flow<Int> = accountDao.observeActiveCount()
 
     fun observeTotal(): Flow<Long> = accountDao.observeTotal()
 

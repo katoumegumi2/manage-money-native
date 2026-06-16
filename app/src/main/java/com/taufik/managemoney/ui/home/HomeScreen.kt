@@ -70,14 +70,22 @@ fun HomeScreen(
                     .padding(vertical = 5.dp),
                 horizontalArrangement = Arrangement.spacedBy(11.dp),
             ) {
-                pair.forEach { acc ->
+                if (pair.size == 1) {
+                    // Tile ganjil terakhir → selebar penuh agar tidak ada kotak kosong.
                     AccountTile(
-                        account = acc,
-                        onClick = { onAccountClick(acc.accountId) },
-                        modifier = Modifier.weight(1f),
+                        account = pair[0],
+                        onClick = { onAccountClick(pair[0].accountId) },
+                        modifier = Modifier.fillMaxWidth(),
                     )
+                } else {
+                    pair.forEach { acc ->
+                        AccountTile(
+                            account = acc,
+                            onClick = { onAccountClick(acc.accountId) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
-                if (pair.size == 1) Spacer(Modifier.weight(1f))
             }
         }
 

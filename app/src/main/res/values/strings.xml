@@ -127,6 +127,11 @@
     <string name="account_edit_title">Edit akun</string>
     <string name="account_name">Nama</string>
     <string name="account_code">Kode</string>
+    <string name="accounts_active_hint">Akun yang aktif muncul di Beranda dan pilihan input. Matikan yang tidak kamu pakai.</string>
+    <string name="accounts_active_toggle">Aktifkan akun</string>
+    <string name="accounts_section_bank">Bank</string>
+    <string name="accounts_section_ewallet">E-Wallet</string>
+    <string name="accounts_section_tunai">Tunai</string>
 
     <!-- Data &amp; cadangan -->
     <string name="data_section">Data &amp; cadangan</string>

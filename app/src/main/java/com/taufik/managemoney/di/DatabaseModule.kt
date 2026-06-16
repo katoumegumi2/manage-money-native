@@ -3,6 +3,7 @@ package com.taufik.managemoney.di
 import android.content.Context
 import androidx.room.Room
 import com.taufik.managemoney.data.db.AppDatabase
+import com.taufik.managemoney.data.db.Migrations
 import com.taufik.managemoney.data.db.dao.AccountDao
 import com.taufik.managemoney.data.db.dao.TransactionDao
 import dagger.Module
@@ -21,6 +22,7 @@ object DatabaseModule {
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NAME)
             .addCallback(AppDatabase.seedCallback)
+            .addMigrations(*Migrations.ALL)
             .build()
 
     @Provides

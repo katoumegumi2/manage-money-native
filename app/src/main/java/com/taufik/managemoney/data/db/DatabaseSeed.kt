@@ -4,16 +4,46 @@ import com.taufik.managemoney.data.db.entity.AccountEntity
 import com.taufik.managemoney.domain.model.AccountType
 
 /**
- * 6 akun bawaan, di-seed saat DB pertama kali dibuat. saldoAwal = 0 (user mengisi lewat Kelola akun).
- * Lihat desain-data-keuangan.md.
+ * Katalog sumber uang populer di Indonesia. Di-seed saat DB pertama dibuat, dan ditambahkan
+ * ke DB lama lewat [Migrations.MIGRATION_1_2] (INSERT OR IGNORE per kode unik).
+ *
+ * `aktif` = true hanya untuk segelintir yang umum dipakai; sisanya nonaktif agar Beranda tidak
+ * penuh. User mengaktifkan/menonaktifkan sendiri lewat layar Kelola akun. saldoAwal = 0.
  */
 object DatabaseSeed {
+    private fun bank(kode: String, nama: String, urutan: Int, aktif: Boolean = false) =
+        AccountEntity(kode = kode, nama = nama, jenis = AccountType.BANK.wire, saldoAwal = 0, urutan = urutan, aktif = aktif)
+
+    private fun ewallet(kode: String, nama: String, urutan: Int, aktif: Boolean = false) =
+        AccountEntity(kode = kode, nama = nama, jenis = AccountType.EWALLET.wire, saldoAwal = 0, urutan = urutan, aktif = aktif)
+
     val accounts: List<AccountEntity> = listOf(
-        AccountEntity(kode = "bni", nama = "BNI", jenis = AccountType.BANK.wire, saldoAwal = 0, urutan = 1),
-        AccountEntity(kode = "mandiri", nama = "Mandiri", jenis = AccountType.BANK.wire, saldoAwal = 0, urutan = 2),
-        AccountEntity(kode = "seabank", nama = "SeaBank", jenis = AccountType.BANK.wire, saldoAwal = 0, urutan = 3),
-        AccountEntity(kode = "gopay", nama = "GoPay", jenis = AccountType.EWALLET.wire, saldoAwal = 0, urutan = 4),
-        AccountEntity(kode = "shopeepay", nama = "ShopeePay", jenis = AccountType.EWALLET.wire, saldoAwal = 0, urutan = 5),
-        AccountEntity(kode = "tunai", nama = "Tunai", jenis = AccountType.TUNAI.wire, saldoAwal = 0, urutan = 6),
+        // Bank
+        bank("bca", "BCA", 1, aktif = true),
+        bank("bni", "BNI", 2, aktif = true),
+        bank("bri", "BRI", 3, aktif = true),
+        bank("mandiri", "Mandiri", 4, aktif = true),
+        bank("bsi", "BSI", 5),
+        bank("cimb", "CIMB Niaga", 6),
+        bank("permata", "Permata", 7),
+        bank("danamon", "Danamon", 8),
+        bank("btn", "BTN", 9),
+        bank("seabank", "SeaBank", 10),
+        bank("jago", "Bank Jago", 11),
+        bank("jenius", "Jenius", 12),
+        bank("blu", "blu", 13),
+        bank("allobank", "Allo Bank", 14),
+        bank("bankjatim", "Bank Jatim", 15),
+        // E-wallet
+        ewallet("gopay", "GoPay", 20, aktif = true),
+        ewallet("ovo", "OVO", 21),
+        ewallet("dana", "DANA", 22),
+        ewallet("shopeepay", "ShopeePay", 23),
+        ewallet("linkaja", "LinkAja", 24),
+        ewallet("sakuku", "Sakuku", 25),
+        ewallet("isaku", "i.saku", 26),
+        ewallet("astrapay", "AstraPay", 27),
+        // Tunai
+        AccountEntity(kode = "tunai", nama = "Tunai", jenis = AccountType.TUNAI.wire, saldoAwal = 0, urutan = 30, aktif = true),
     )
 }
