@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Catatan Keuangan</string>
+
+    <string name="nav_home">Beranda</string>
+    <string name="nav_history">Riwayat</string>
+    <string name="nav_accounts">Akun</string>
+    <string name="nav_settings">Pengaturan</string>
+
+    <string name="action_voice">Catat suara</string>
+    <string name="action_back">Kembali</string>
+
+    <!-- Beranda -->
+    <string name="home_total_label">Total saldo · %1$d akun</string>
+    <string name="home_in">Masuk</string>
+    <string name="home_out">Keluar</string>
+    <string name="home_recent">Transaksi terbaru</string>
+    <string name="home_empty_title">Belum ada transaksi</string>
+    <string name="home_empty_hint">Catat lewat tombol suara atau tambah manual</string>
+
+    <!-- Detail akun -->
+    <string name="account_initial_balance">Saldo awal %1$s</string>
+    <string name="account_mutations">Mutasi</string>
+    <string name="account_no_mutations">Belum ada mutasi pada akun ini</string>
+    <string name="account_not_found">Akun tidak ditemukan</string>
+</resources>

@@ -1,0 +1,21 @@
+*.iml
+.gradle/
+/local.properties
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/app/build/
+/.idea/
+*.keystore
+!debug.keystore
+
+# Secrets — JANGAN commit
+local.properties
+*.apikey
+secrets.properties
+
+# Kotlin build cache
+/.kotlin/
