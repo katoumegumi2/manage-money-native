@@ -68,4 +68,42 @@
     <string name="settings_testing">Menguji…</string>
     <string name="settings_show_key">Tampilkan key</string>
     <string name="settings_hide_key">Sembunyikan key</string>
+
+    <!-- Aksi umum -->
+    <string name="action_save">Simpan</string>
+    <string name="action_delete">Hapus</string>
+    <string name="action_cancel">Batal</string>
+    <string name="field_account_from">Dari akun</string>
+    <string name="field_account_to">Ke akun</string>
+
+    <!-- Riwayat -->
+    <string name="history_search">Cari catatan atau kategori</string>
+    <string name="history_all">Semua</string>
+    <string name="history_account_all">Semua akun</string>
+    <string name="history_recap_title">Pengeluaran bulan ini</string>
+    <string name="history_empty">Tidak ada transaksi cocok</string>
+
+    <!-- Edit transaksi -->
+    <string name="edit_title">Edit transaksi</string>
+    <string name="edit_not_found">Transaksi tidak ditemukan</string>
+    <string name="edit_delete_title">Hapus transaksi?</string>
+    <string name="edit_delete_msg">Saldo akan menyesuaikan otomatis. Tindakan ini tak bisa dibatalkan.</string>
+    <string name="edit_delete_batch">Hapus seluruh batch</string>
+
+    <!-- Kelola akun -->
+    <string name="accounts_add">Tambah akun</string>
+    <string name="account_edit_title">Edit akun</string>
+    <string name="account_name">Nama</string>
+    <string name="account_code">Kode</string>
+
+    <!-- Data &amp; cadangan -->
+    <string name="data_section">Data &amp; cadangan</string>
+    <string name="data_export_csv">Ekspor CSV</string>
+    <string name="data_backup">Cadangkan data</string>
+    <string name="data_restore">Pulihkan data</string>
+    <string name="data_restore_warning">Memulihkan akan menimpa seluruh data saat ini, lalu aplikasi dimulai ulang.</string>
+    <string name="data_export_ok">CSV tersimpan</string>
+    <string name="data_backup_ok">Cadangan tersimpan</string>
+    <string name="data_restore_ok">Data dipulihkan</string>
+    <string name="data_fail">Gagal, coba lagi</string>
 </resources>

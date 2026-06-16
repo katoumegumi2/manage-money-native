@@ -25,21 +25,26 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.taufik.managemoney.R
 import com.taufik.managemoney.ui.account.AccountDetailScreen
+import com.taufik.managemoney.ui.accounts.AccountsScreen
 import com.taufik.managemoney.ui.confirm.ConfirmScreen
+import com.taufik.managemoney.ui.edit.EditTransactionScreen
+import com.taufik.managemoney.ui.history.HistoryScreen
 import com.taufik.managemoney.ui.home.HomeScreen
 import com.taufik.managemoney.ui.manualentry.ManualEntryScreen
 import com.taufik.managemoney.ui.navigation.ACCOUNT_DETAIL_ROUTE
 import com.taufik.managemoney.ui.navigation.ARG_ACCOUNT_ID
 import com.taufik.managemoney.ui.navigation.ARG_CONFIRM_PAYLOAD
+import com.taufik.managemoney.ui.navigation.ARG_TX_ID
 import com.taufik.managemoney.ui.navigation.CONFIRM_ROUTE
+import com.taufik.managemoney.ui.navigation.EDIT_TX_ROUTE
 import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
 import com.taufik.managemoney.ui.navigation.PARSE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.VOICE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
 import com.taufik.managemoney.ui.navigation.confirmRoute
+import com.taufik.managemoney.ui.navigation.editTxRoute
 import com.taufik.managemoney.ui.parse.ParseInputScreen
-import com.taufik.managemoney.ui.screens.PlaceholderScreen
 import com.taufik.managemoney.ui.settings.AiSettingsScreen
 import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
@@ -51,7 +56,7 @@ fun MoneyApp() {
     val context = LocalContext.current
 
     // Layar input penuh (catat/manual/konfirmasi) menyembunyikan bottom nav + FAB.
-    val fullScreenRoutes = setOf(VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE)
+    val fullScreenRoutes = setOf(VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE)
     val showChrome = currentDestination?.route !in fullScreenRoutes
 
     Scaffold(
@@ -96,8 +101,10 @@ fun MoneyApp() {
                     onAccountClick = { id -> navController.navigate(accountDetailRoute(id)) },
                 )
             }
-            composable(TopDestination.HISTORY.route) { PlaceholderScreen(stringResource(R.string.nav_history)) }
-            composable(TopDestination.ACCOUNTS.route) { PlaceholderScreen(stringResource(R.string.nav_accounts)) }
+            composable(TopDestination.HISTORY.route) {
+                HistoryScreen(onEdit = { id -> navController.navigate(editTxRoute(id)) })
+            }
+            composable(TopDestination.ACCOUNTS.route) { AccountsScreen() }
             composable(TopDestination.SETTINGS.route) { AiSettingsScreen() }
             composable(
                 route = ACCOUNT_DETAIL_ROUTE,
@@ -137,6 +144,12 @@ fun MoneyApp() {
                     onBack = { navController.popBackStack() },
                     onContinue = { payload -> navController.navigate(confirmRoute(payload)) },
                 )
+            }
+            composable(
+                route = EDIT_TX_ROUTE,
+                arguments = listOf(navArgument(ARG_TX_ID) { type = NavType.LongType }),
+            ) {
+                EditTransactionScreen(onDone = { navController.popBackStack() })
             }
             composable(
                 route = CONFIRM_ROUTE,

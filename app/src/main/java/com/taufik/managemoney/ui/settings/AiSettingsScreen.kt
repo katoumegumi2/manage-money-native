@@ -168,5 +168,7 @@ fun AiSettingsScreen(
                 )
             }
         }
+
+        DataActions()
     }
 }

@@ -4,14 +4,37 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.taufik.managemoney.data.db.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
+
+/** Baris rekap: total nominal per kategori. */
+data class CategorySumRow(val kategori: String, val total: Long)
 
 @Dao
 interface TransactionDao {
 
     @Insert
     suspend fun insert(tx: TransactionEntity): Long
+
+    @Update
+    suspend fun update(tx: TransactionEntity)
+
+    @Query("SELECT * FROM transactions ORDER BY tanggal DESC, createdAt DESC")
+    fun observeAll(): Flow<List<TransactionEntity>>
+
+    @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Long): TransactionEntity?
+
+    /** Rekap pengeluaran per kategori sejak tanggal (untuk laporan bulan ini). */
+    @Query(
+        """
+        SELECT kategori AS kategori, SUM(nominal) AS total FROM transactions
+        WHERE tipe = 'pengeluaran' AND tanggal >= :sinceIso
+        GROUP BY kategori ORDER BY total DESC
+        """,
+    )
+    fun observeExpenseByCategorySince(sinceIso: String): Flow<List<CategorySumRow>>
 
     /** Tulis satu batch konfirmasi (transfer + admin, atau belanja multi-item) sekaligus. */
     @Transaction

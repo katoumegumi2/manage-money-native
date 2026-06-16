@@ -3,6 +3,7 @@ package com.taufik.managemoney.data.repo
 import com.taufik.managemoney.data.db.dao.TransactionDao
 import com.taufik.managemoney.data.db.toDomain
 import com.taufik.managemoney.data.db.toEntity
+import com.taufik.managemoney.domain.model.CategorySum
 import com.taufik.managemoney.domain.model.Transaction
 import com.taufik.managemoney.domain.model.TxType
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,18 @@ class TransactionRepository @Inject constructor(
 
     fun observeForAccount(accountId: Long): Flow<List<Transaction>> =
         transactionDao.observeForAccount(accountId).map { list -> list.map { it.toDomain() } }
+
+    fun observeAll(): Flow<List<Transaction>> =
+        transactionDao.observeAll().map { list -> list.map { it.toDomain() } }
+
+    suspend fun getById(id: Long): Transaction? = transactionDao.getById(id)?.toDomain()
+
+    suspend fun update(tx: Transaction) = transactionDao.update(tx.toEntity())
+
+    /** Rekap pengeluaran per kategori sejak tanggal ISO (laporan). */
+    fun observeExpenseByCategorySince(sinceIso: String): Flow<List<CategorySum>> =
+        transactionDao.observeExpenseByCategorySince(sinceIso)
+            .map { rows -> rows.map { CategorySum(it.kategori, it.total) } }
 
     /** Total nominal satu tipe sejak tanggal ISO (inklusif) — ringkasan masuk/keluar. */
     fun observeSumByTypeSince(tipe: TxType, sinceIso: String): Flow<Long> =
