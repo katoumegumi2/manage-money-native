@@ -1,6 +1,7 @@
 package com.taufik.managemoney.data.ai
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.taufik.managemoney.domain.ai.FinancialAnalyst
 import com.taufik.managemoney.domain.ai.TransactionParser
 import dagger.Module
 import dagger.Provides
@@ -59,4 +60,8 @@ object AiModule {
     @Provides
     @Singleton
     internal fun provideTransactionParser(parser: ConfigurableParser): TransactionParser = parser
+
+    @Provides
+    @Singleton
+    internal fun provideFinancialAnalyst(analyst: FinancialAnalystImpl): FinancialAnalyst = analyst
 }

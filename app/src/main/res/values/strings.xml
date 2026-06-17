@@ -175,4 +175,16 @@
     <string name="backup_enable_action">Aktifkan &amp; backup sekarang</string>
     <string name="action_save_generic">Simpan</string>
     <string name="action_cancel_generic">Batal</string>
+
+    <!-- Laporan + Analisis AI (Phase 9) -->
+    <string name="reports_net_label">Arus kas bersih bulan ini</string>
+    <string name="reports_insight_title">Insight AI</string>
+    <string name="reports_insight_generate">Buat ringkasan AI</string>
+    <string name="reports_insight_retry">Coba lagi</string>
+    <string name="reports_insight_generating">Menganalisis angka kamu…</string>
+    <string name="reports_insight_refresh">Perbarui</string>
+    <string name="reports_insight_hint">Biarkan AI menafsir angka bulan ini jadi insight singkat &amp; actionable.</string>
+    <string name="reports_delta_up">Pengeluaran naik %1$d%% vs bulan lalu</string>
+    <string name="reports_delta_down">Pengeluaran turun %1$d%% vs bulan lalu</string>
+    <string name="reports_delta_same">Pengeluaran sama dengan bulan lalu</string>
 </resources>
