@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -45,6 +46,7 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 
 @Composable
 fun ReportsScreen(
+    onAskAi: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ReportsViewModel = hiltViewModel(),
 ) {
@@ -75,6 +77,8 @@ fun ReportsScreen(
         NetHeroCard(state)
         Spacer(Modifier.height(14.dp))
         InsightCard(state.insight, onGenerate = viewModel::generateInsight)
+        Spacer(Modifier.height(10.dp))
+        AskAiButton(onAskAi)
         Spacer(Modifier.height(14.dp))
         CategorySection(state)
         Spacer(Modifier.height(14.dp))
@@ -369,6 +373,32 @@ private fun LegendDot(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         Box(modifier = Modifier.size(9.dp).clip(RoundedCornerShape(3.dp)).background(color))
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Tombol masuk ke chat "Tanya AI". */
+@Composable
+private fun AskAiButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = Gold)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(R.string.ask_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(
+                stringResource(R.string.ask_entry_subtitle),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text("›", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

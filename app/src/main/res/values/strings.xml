@@ -187,4 +187,17 @@
     <string name="reports_delta_up">Pengeluaran naik %1$d%% vs bulan lalu</string>
     <string name="reports_delta_down">Pengeluaran turun %1$d%% vs bulan lalu</string>
     <string name="reports_delta_same">Pengeluaran sama dengan bulan lalu</string>
+
+    <!-- Tanya AI (chat) -->
+    <string name="ask_title">Tanya AI</string>
+    <string name="ask_entry_subtitle">Tanya bebas soal keuanganmu bulan ini</string>
+    <string name="ask_placeholder">Ketik pertanyaan…</string>
+    <string name="ask_send">Kirim</string>
+    <string name="ask_thinking">AI sedang berpikir…</string>
+    <string name="ask_empty_title">Tanya apa saja soal keuanganmu</string>
+    <string name="ask_empty_subtitle">AI menjawab dari ringkasan bulan ini (total, kategori, saldo akun).</string>
+    <string name="ask_example_1">Berapa total pengeluaranku bulan ini?</string>
+    <string name="ask_example_2">Kategori apa yang paling boros?</string>
+    <string name="ask_example_3">Aku lebih hemat dari bulan lalu nggak?</string>
+    <string name="ask_disclaimer">Jawaban berbasis ringkasan angka, bukan rincian per transaksi.</string>
 </resources>

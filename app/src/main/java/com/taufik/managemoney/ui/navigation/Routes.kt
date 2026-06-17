@@ -25,6 +25,9 @@ const val MANUAL_ENTRY_ROUTE = "manual"
 /** Pengaturan (AI + tema + data) — dibuka dari ikon gear di Beranda, bukan tab. */
 const val SETTINGS_ROUTE = "settings"
 
+/** Chat "Tanya AI" — tanya bebas tentang keuangan (dibuka dari Laporan). */
+const val ASK_AI_ROUTE = "ask"
+
 /** Layar konfirmasi; argumen = payload Base64 `List<ParsedTransaction>` (lihat [ConfirmPayload]). */
 const val ARG_CONFIRM_PAYLOAD = "payload"
 const val CONFIRM_ROUTE = "confirm/{$ARG_CONFIRM_PAYLOAD}"

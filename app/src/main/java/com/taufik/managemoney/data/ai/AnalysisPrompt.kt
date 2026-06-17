@@ -1,6 +1,7 @@
 package com.taufik.managemoney.data.ai
 
 import com.taufik.managemoney.domain.model.AggregatedFinance
+import com.taufik.managemoney.domain.model.AskContext
 
 /** Prompt analisis — TERPISAH dari prompt parser (lihat docs/private/fitur-analisis-ai.md). */
 internal const val ANALYSIS_SYSTEM_INSTRUCTION = """
@@ -35,5 +36,35 @@ internal fun buildAnalysisUserContent(data: AggregatedFinance): String {
           "pengeluaran_per_kategori":[$cats]
         }
         Buat insight untuk periode ini.
+    """.trimIndent()
+}
+
+/** Prompt "Tanya AI" — jawab hanya dari DATA agregat. */
+internal const val ASK_SYSTEM_INSTRUCTION = """
+Kamu asisten keuangan pribadi. Jawab pertanyaan user HANYA berdasarkan DATA agregat (JSON) yang diberikan.
+
+ATURAN:
+- JANGAN mengarang angka. Kalau jawaban tidak ada di DATA, katakan jujur datanya belum cukup dan sebut data apa yang kurang (mis. "rincian per transaksi belum tersedia").
+- DATA hanya agregat bulan ini (total, per kategori, saldo akun) — TIDAK ada rincian per transaksi/merchant. Jadi pertanyaan spesifik seperti "habis berapa buat kopi" tak bisa dijawab persis; arahkan ke kategori terdekat (mis. makanan).
+- Mata uang Rupiah, format "Rp 1.234.567".
+- Jawab singkat (1-3 kalimat), langsung ke poin, Bahasa Indonesia santai. Tanpa markdown.
+"""
+
+internal fun buildAskUserContent(question: String, ctx: AskContext): String {
+    val cats = ctx.categories.joinToString(",") { """{"kategori":"${it.kategori}","total":${it.total}}""" }
+    val accs = ctx.accounts.joinToString(",") { """{"akun":"${it.nama}","saldo":${it.saldo}}""" }
+    return """
+        DATA (hari ini ${ctx.today}, periode ${ctx.period}):
+        {
+          "pemasukan_bulan_ini":${ctx.masuk},
+          "pengeluaran_bulan_ini":${ctx.keluar},
+          "net_bulan_ini":${ctx.net},
+          "pemasukan_bulan_lalu":${ctx.prevMasuk},
+          "pengeluaran_bulan_lalu":${ctx.prevKeluar},
+          "pengeluaran_per_kategori":[$cats],
+          "saldo_akun":[$accs]
+        }
+
+        PERTANYAAN: $question
     """.trimIndent()
 }

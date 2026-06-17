@@ -44,6 +44,7 @@ import com.taufik.managemoney.ui.navigation.CONFIRM_ROUTE
 import com.taufik.managemoney.ui.navigation.EDIT_TX_ROUTE
 import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
 import com.taufik.managemoney.ui.navigation.PARSE_INPUT_ROUTE
+import com.taufik.managemoney.ui.navigation.ASK_AI_ROUTE
 import com.taufik.managemoney.ui.navigation.SETTINGS_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.VOICE_INPUT_ROUTE
@@ -77,7 +78,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
 
     // Layar input/penuh menyembunyikan bottom nav + FAB.
     val fullScreenRoutes = setOf(
-        VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE, SETTINGS_ROUTE,
+        VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE, SETTINGS_ROUTE, ASK_AI_ROUTE,
     )
     val showChrome = currentDestination?.route !in fullScreenRoutes
 
@@ -134,10 +135,15 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
             composable(TopDestination.HISTORY.route) {
                 HistoryScreen(onEdit = { id -> navController.navigate(editTxRoute(id)) })
             }
-            composable(TopDestination.REPORTS.route) { ReportsScreen() }
+            composable(TopDestination.REPORTS.route) {
+                ReportsScreen(onAskAi = { navController.navigate(ASK_AI_ROUTE) })
+            }
             composable(TopDestination.ACCOUNTS.route) { AccountsScreen() }
             composable(SETTINGS_ROUTE) {
                 AiSettingsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(ASK_AI_ROUTE) {
+                com.taufik.managemoney.ui.ask.AskAiScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = ACCOUNT_DETAIL_ROUTE,
