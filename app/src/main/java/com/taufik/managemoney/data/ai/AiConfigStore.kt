@@ -61,6 +61,23 @@ class AiConfigStore @Inject constructor(
 
     suspend fun current(): AiConfig = config.first()
 
+    /**
+     * Daftar konfigurasi untuk parsing dengan **failover**: provider aktif lebih dulu, lalu
+     * provider lain yang punya API key tersimpan (pakai model/baseUrl default-nya).
+     * ConfigurableParser mencoba berurutan sampai ada yang sukses (mis. Gemini gagal jaringan → DeepSeek).
+     */
+    suspend fun parseCandidates(): List<AiConfig> = withContext(Dispatchers.IO) {
+        val active = current()
+        val fallbacks = AiProvider.entries
+            .filter { it != active.provider && it != AiProvider.CUSTOM } // CUSTOM butuh baseUrl dari user
+            .mapNotNull { p ->
+                val key = readKey(p)
+                if (key.isBlank()) null
+                else AiConfig(p, p.defaultModel, p.defaultBaseUrl, key)
+            }
+        listOf(active) + fallbacks
+    }
+
     /** Key tersimpan untuk sebuah provider; fallback `BuildConfig.GEMINI_API_KEY` bila Gemini & belum diatur. */
     suspend fun keyFor(provider: AiProvider): String = withContext(Dispatchers.IO) { readKey(provider) }
 

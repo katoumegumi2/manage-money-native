@@ -18,7 +18,15 @@ internal class ConfigurableParser @Inject constructor(
 ) : TransactionParser {
 
     override suspend fun parse(req: ParseRequest): Result<List<ParsedTransaction>> {
-        val cfg = configStore.current()
-        return ParserFactory.create(cfg, geminiApi, openAiApi).parse(req)
+        // Failover: coba provider aktif → provider lain yang punya key. Sukses pertama menang.
+        val candidates = configStore.parseCandidates()
+        var last: Result<List<ParsedTransaction>>? = null
+        for (cfg in candidates) {
+            if (cfg.apiKey.isBlank()) continue
+            val result = ParserFactory.create(cfg, geminiApi, openAiApi).parse(req)
+            if (result.isSuccess) return result
+            last = result
+        }
+        return last ?: Result.failure(ParseException("Belum ada provider AI dengan API key. Atur di Pengaturan."))
     }
 }
