@@ -127,7 +127,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 HomeScreen(
                     onAccountClick = { id -> navController.navigate(accountDetailRoute(id)) },
                     onSettings = { navController.navigate(SETTINGS_ROUTE) },
-                    onAddManual = { navController.navigate(MANUAL_ENTRY_ROUTE) },
+                    onAddTyped = { navController.navigate(PARSE_INPUT_ROUTE) },
                     onEdit = { id -> navController.navigate(editTxRoute(id)) },
                 )
             }

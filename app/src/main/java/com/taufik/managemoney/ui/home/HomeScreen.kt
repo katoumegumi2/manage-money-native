@@ -47,7 +47,7 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 fun HomeScreen(
     onAccountClick: (String) -> Unit,
     onSettings: () -> Unit,
-    onAddManual: () -> Unit,
+    onAddTyped: () -> Unit,
     onEdit: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -59,7 +59,7 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(horizontal = 18.dp),
     ) {
-        item { HeaderSection(onSettings, onAddManual) }
+        item { HeaderSection(onSettings, onAddTyped) }
         item { HeroSection(state) }
         item { Spacer(Modifier.height(8.dp)) }
 
@@ -112,7 +112,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HeaderSection(onSettings: () -> Unit, onAddManual: () -> Unit) {
+private fun HeaderSection(onSettings: () -> Unit, onAddTyped: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -129,10 +129,10 @@ private fun HeaderSection(onSettings: () -> Unit, onAddManual: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
             )
         }
-        IconButton(onClick = onAddManual) {
+        IconButton(onClick = onAddTyped) {
             Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.action_add_manual),
+                contentDescription = stringResource(R.string.parse_title),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
