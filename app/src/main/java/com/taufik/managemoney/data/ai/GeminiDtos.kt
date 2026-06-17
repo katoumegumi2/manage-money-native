@@ -18,7 +18,17 @@ internal data class GeminiContent(
 )
 
 @Serializable
-internal data class GeminiPart(val text: String)
+internal data class GeminiPart(
+    val text: String? = null,
+    @SerialName("inline_data") val inlineData: GeminiInlineData? = null,
+)
+
+/** Bagian gambar untuk input vision Gemini (data = base64 tanpa prefix). */
+@Serializable
+internal data class GeminiInlineData(
+    @SerialName("mime_type") val mimeType: String,
+    val data: String,
+)
 
 @Serializable
 internal data class GenerationConfig(

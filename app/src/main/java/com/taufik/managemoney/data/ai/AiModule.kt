@@ -2,6 +2,7 @@ package com.taufik.managemoney.data.ai
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.taufik.managemoney.domain.ai.FinancialAnalyst
+import com.taufik.managemoney.domain.ai.ImageTransactionParser
 import com.taufik.managemoney.domain.ai.TransactionParser
 import dagger.Module
 import dagger.Provides
@@ -29,6 +30,7 @@ object AiModule {
     fun provideJson(): Json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        explicitNulls = false // jangan kirim field null (mis. part teks vs gambar Gemini)
     }
 
     @Provides
@@ -64,4 +66,8 @@ object AiModule {
     @Provides
     @Singleton
     internal fun provideFinancialAnalyst(analyst: FinancialAnalystImpl): FinancialAnalyst = analyst
+
+    @Provides
+    @Singleton
+    internal fun provideImageTransactionParser(parser: ImageParser): ImageTransactionParser = parser
 }

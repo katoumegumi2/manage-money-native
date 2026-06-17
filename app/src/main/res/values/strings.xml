@@ -200,4 +200,9 @@
     <string name="ask_example_2">Kategori apa yang paling boros?</string>
     <string name="ask_example_3">Aku lebih hemat dari bulan lalu nggak?</string>
     <string name="ask_disclaimer">Jawaban berbasis ringkasan angka, bukan rincian per transaksi.</string>
+
+    <!-- Input via Share Sheet -->
+    <string name="share_processing">Membaca bukti bayar…</string>
+    <string name="share_empty">Tidak terdeteksi transaksi dari yang dibagikan.</string>
+    <string name="share_unsupported">Jenis konten ini belum didukung.</string>
 </resources>
