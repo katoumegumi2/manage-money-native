@@ -91,6 +91,7 @@
     <string name="settings_ai_subtitle">Pilih penyedia AI dan masukkan API key. Disimpan di perangkat, terenkripsi.</string>
     <string name="settings_provider">Penyedia</string>
     <string name="settings_model">Model</string>
+    <string name="settings_model_suggested">Pilihan umum (ketuk untuk pakai):</string>
     <string name="settings_base_url">Base URL</string>
     <string name="settings_api_key">API key</string>
     <string name="settings_key_hint">Key hanya dipakai untuk memanggil penyedia; tidak dibagikan atau dicatat di log.</string>
@@ -195,11 +196,11 @@
     <string name="ask_send">Kirim</string>
     <string name="ask_thinking">AI sedang berpikir…</string>
     <string name="ask_empty_title">Tanya apa saja soal keuanganmu</string>
-    <string name="ask_empty_subtitle">AI menjawab dari ringkasan bulan ini (total, kategori, saldo akun).</string>
-    <string name="ask_example_1">Berapa total pengeluaranku bulan ini?</string>
+    <string name="ask_empty_subtitle">AI bisa menelusuri transaksimu — saldo, rincian per kategori, sampai utang dari catatan.</string>
+    <string name="ask_example_1">Rincian belanja bulan ini buat apa aja?</string>
     <string name="ask_example_2">Kategori apa yang paling boros?</string>
-    <string name="ask_example_3">Aku lebih hemat dari bulan lalu nggak?</string>
-    <string name="ask_disclaimer">Jawaban berbasis ringkasan angka, bukan rincian per transaksi.</string>
+    <string name="ask_example_3">Siapa yang masih utang ke aku?</string>
+    <string name="ask_disclaimer">Jawaban dihitung dari datamu di aplikasi. Bisa keliru — cek lagi angka pentingnya.</string>
 
     <!-- Input via Share Sheet -->
     <string name="share_processing">Membaca bukti bayar…</string>

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taufik.managemoney.data.repo.AccountRepository
 import com.taufik.managemoney.domain.model.Account
+import com.taufik.managemoney.domain.model.Categories
 import com.taufik.managemoney.domain.model.SourceInput
 import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.domain.usecase.SaveTransactionBatch
@@ -72,6 +73,23 @@ class ConfirmViewModel @Inject constructor(
 
     fun setNominal(index: Int, value: Long) = updateItem(index) { it.copy(nominal = value, perluDicek = false) }
     fun setKategori(index: Int, value: String) = updateItem(index) { it.copy(kategori = value) }
+
+    /**
+     * Ganti tipe transaksi (mis. transfer dari luar → pemasukan); sesuaikan kategori bila tak valid,
+     * dan bersihkan akun yang tak relevan agar tak nyangkut (pemasukan tak pakai "dari",
+     * pengeluaran tak pakai "ke") — mencegah akun dari==ke saat pindah ke transfer.
+     */
+    fun setTipe(index: Int, tipe: TxType) = updateItem(index) {
+        if (it.tipe == tipe) return@updateItem it
+        val kategori = if (it.kategori in Categories.forType(tipe)) it.kategori else Categories.defaultFor(tipe)
+        it.copy(
+            tipe = tipe,
+            kategori = kategori,
+            akunDariId = if (tipe == TxType.PEMASUKAN) null else it.akunDariId,
+            akunKeId = if (tipe == TxType.PENGELUARAN) null else it.akunKeId,
+            perluDicek = false,
+        )
+    }
     fun setAkunDari(index: Int, id: String) = updateItem(index) { it.copy(akunDariId = id, perluDicek = false) }
     fun setAkunKe(index: Int, id: String) = updateItem(index) { it.copy(akunKeId = id, perluDicek = false) }
     fun setTanggal(index: Int, value: LocalDate) = updateItem(index) { it.copy(tanggal = value) }

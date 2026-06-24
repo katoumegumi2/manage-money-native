@@ -86,8 +86,16 @@ class EditTransactionViewModel @Inject constructor(
         _state.update { s -> s.copy(editable = s.editable?.let(transform), error = null) }
 
     fun setTipe(tipe: TxType) = edit {
-        // ganti tipe → samakan kategori default & rapikan akun sesuai tipe
-        it.copy(tipe = tipe, kategori = Categories.defaultFor(tipe))
+        if (it.tipe == tipe) return@edit it
+        // ganti tipe → pertahankan kategori bila masih valid, lalu bersihkan akun yang tak relevan
+        // (pemasukan tak pakai "dari", pengeluaran tak pakai "ke") agar tak ada FK nyasar / akun dari==ke.
+        val kategori = if (it.kategori in Categories.forType(tipe)) it.kategori else Categories.defaultFor(tipe)
+        it.copy(
+            tipe = tipe,
+            kategori = kategori,
+            akunDariId = if (tipe == TxType.PEMASUKAN) null else it.akunDariId,
+            akunKeId = if (tipe == TxType.PENGELUARAN) null else it.akunKeId,
+        )
     }
 
     fun setNominal(value: Long) = edit { it.copy(nominal = value) }

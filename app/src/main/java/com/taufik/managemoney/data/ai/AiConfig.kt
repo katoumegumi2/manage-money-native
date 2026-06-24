@@ -12,12 +12,32 @@ enum class AiProvider(
     val defaultBaseUrl: String,
     val defaultModel: String,
     val openAiCompatible: Boolean,
+    /**
+     * Saran model untuk pilihan cepat (chip) di Pengaturan AI. Yang lebih mampu = insight lebih detail.
+     * Bukan daftar tertutup — field Model tetap bebas diketik bila provider punya model lain.
+     */
+    val suggestedModels: List<String> = emptyList(),
 ) {
-    GEMINI("Gemini", "", "gemini-2.5-flash-lite", false),
-    DEEPSEEK("DeepSeek", "https://api.deepseek.com/chat/completions", "deepseek-chat", true),
-    OPENAI("OpenAI", "https://api.openai.com/v1/chat/completions", "gpt-4o-mini", true),
-    OPENROUTER("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", "deepseek/deepseek-chat-v3-0324:free", true),
-    GROQ("Groq", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile", true),
+    GEMINI(
+        "Gemini", "", "gemini-2.5-flash-lite", false,
+        suggestedModels = listOf("gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"),
+    ),
+    DEEPSEEK(
+        "DeepSeek", "https://api.deepseek.com/chat/completions", "deepseek-chat", true,
+        suggestedModels = listOf("deepseek-chat", "deepseek-reasoner"),
+    ),
+    OPENAI(
+        "OpenAI", "https://api.openai.com/v1/chat/completions", "gpt-4o-mini", true,
+        suggestedModels = listOf("gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1"),
+    ),
+    OPENROUTER(
+        "OpenRouter", "https://openrouter.ai/api/v1/chat/completions", "deepseek/deepseek-chat-v3-0324:free", true,
+        suggestedModels = listOf("deepseek/deepseek-chat-v3-0324:free", "deepseek/deepseek-r1:free", "google/gemini-2.5-flash"),
+    ),
+    GROQ(
+        "Groq", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile", true,
+        suggestedModels = listOf("llama-3.3-70b-versatile", "llama-3.1-8b-instant"),
+    ),
     CUSTOM("Custom (OpenAI-compatible)", "", "", true),
 }
 

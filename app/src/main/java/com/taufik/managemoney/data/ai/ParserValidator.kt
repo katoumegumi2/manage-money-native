@@ -13,7 +13,8 @@ class ParseException(message: String, cause: Throwable? = null) : Exception(mess
 /**
  * Validator §3.5 (sama untuk semua provider):
  * bersihkan fence ```json → parse JSON array → validasi tiap elemen
- * (kategori sesuai tipe, nominal ≥ 0, tanggal YYYY-MM-DD, akun non-null ada di daftar).
+ * (kategori sesuai tipe, nominal ≥ 0, tanggal YYYY-MM-DD). Akun dikanonikalisasi ke kode
+ * (case-insensitive); akun di luar daftar → null + perlu dicek (bukan error, mis. bank eksternal).
  * Balasan `[]` → list kosong (sukses). Gagal apa pun → [Result.failure].
  */
 object ParserValidator {
@@ -30,15 +31,25 @@ object ParserValidator {
             return Result.failure(ParseException("Balasan bukan JSON yang valid", e))
         }
 
+        // Kanonikalisasi kode akun: model bisa balas beda kapitalisasi (mis. "SeaBank" vs "seabank").
+        // Akun yang tak ada di daftar (mis. bank eksternal/teman pada transfer masuk) BUKAN error —
+        // jadikan null & tandai perlu dicek agar transaksi tetap masuk Konfirmasi untuk dilengkapi.
+        val canonicalByLower = accountCodes.associateBy { it.lowercase() }
+        val normalized = ArrayList<ParsedTransaction>(list.size)
         list.forEachIndexed { i, tx ->
-            validate(tx, accountCodes)?.let {
-                return Result.failure(ParseException("Transaksi #${i + 1}: $it"))
-            }
+            validate(tx)?.let { return failAt(i, it) }
+            val dari = tx.akunDari?.lowercase()?.let { canonicalByLower[it] }
+            val ke = tx.akunKe?.lowercase()?.let { canonicalByLower[it] }
+            val akunTakDikenal = (tx.akunDari != null && dari == null) || (tx.akunKe != null && ke == null)
+            normalized += tx.copy(akunDari = dari, akunKe = ke, perluDicek = tx.perluDicek || akunTakDikenal)
         }
-        return Result.success(list)
+        return Result.success(normalized)
     }
 
-    private fun validate(tx: ParsedTransaction, accountCodes: Set<String>): String? {
+    private fun failAt(index: Int, reason: String): Result<List<ParsedTransaction>> =
+        Result.failure(ParseException("Transaksi #${index + 1}: $reason"))
+
+    private fun validate(tx: ParsedTransaction): String? {
         if (tx.nominal < 0) return "nominal negatif"
         if (tx.kategori !in Categories.forType(tx.tipe)) {
             return "kategori '${tx.kategori}' tak sesuai tipe ${tx.tipe.wire}"
@@ -49,8 +60,6 @@ object ParserValidator {
         } catch (e: DateTimeParseException) {
             return "tanggal '${tx.tanggal}' tidak valid"
         }
-        tx.akunDari?.let { if (it !in accountCodes) return "akun_dari '$it' tak dikenal" }
-        tx.akunKe?.let { if (it !in accountCodes) return "akun_ke '$it' tak dikenal" }
         return null
     }
 

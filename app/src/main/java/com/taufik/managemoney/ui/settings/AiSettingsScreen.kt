@@ -128,6 +128,28 @@ fun AiSettingsScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
+        if (state.provider.suggestedModels.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.settings_model_suggested),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                state.provider.suggestedModels.forEach { m ->
+                    FilterChip(
+                        selected = m == state.model,
+                        onClick = { viewModel.setModel(m) },
+                        label = { Text(m) },
+                    )
+                }
+            }
+        }
+
         if (state.showBaseUrl) {
             OutlinedTextField(
                 value = state.baseUrl,

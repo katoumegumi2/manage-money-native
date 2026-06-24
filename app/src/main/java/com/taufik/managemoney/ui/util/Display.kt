@@ -62,15 +62,22 @@ fun emojiFor(tipe: TxType, kategori: String): String {
     return when (kategori.lowercase(localeId)) {
         "makanan" -> "🍽️" // 🍽️
         "transport" -> "🛵" // 🛵
+        "bbm" -> "⛽" // ⛽
         "belanja" -> "🛒" // 🛒
         "tagihan" -> "💡" // 💡
+        "langganan" -> "🔁" // 🔁
         "hiburan" -> "🎬" // 🎬
         "kesehatan" -> "💊" // 💊
+        "perawatan" -> "🔧" // 🔧
+        "laundry" -> "🧺" // 🧺
         "admin" -> "🧾" // 🧾
+        "investasi" -> "📈" // 📈
         "gaji" -> "💰" // 💰
         "usaha" -> "💼" // 💼
         "bonus" -> "🎁" // 🎁
         "sampingan" -> "💸" // 💸
+        "penjualan" -> "🏷️" // 🏷️
+        "refund" -> "↩️" // ↩️
         else -> if (tipe == TxType.PEMASUKAN) "💵" else "🧾" // 💵 / 🧾
     }
 }

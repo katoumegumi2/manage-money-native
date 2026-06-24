@@ -3,10 +3,13 @@ package com.taufik.managemoney.domain.model
 /** Kategori per tipe transaksi (lihat CLAUDE.md / brief). Transfer selalu "lainnya". */
 object Categories {
     val PENGELUARAN = listOf(
-        "makanan", "belanja", "transport", "tagihan",
-        "hiburan", "kesehatan", "admin", "lainnya",
+        "makanan", "belanja", "transport", "bbm", "tagihan", "langganan",
+        "hiburan", "kesehatan", "perawatan", "laundry", "admin", "investasi", "lainnya",
     )
-    val PEMASUKAN = listOf("gaji", "usaha", "bonus", "sampingan", "transfer", "lainnya")
+    val PEMASUKAN = listOf(
+        "gaji", "usaha", "bonus", "sampingan", "investasi",
+        "penjualan", "refund", "transfer", "lainnya",
+    )
     val TRANSFER = listOf("lainnya")
 
     fun forType(tipe: TxType): List<String> = when (tipe) {

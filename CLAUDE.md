@@ -60,7 +60,7 @@ saldoAwal
   Total = SUM(saldo). Ekspos sebagai `Flow<List<AccountBalance>>` & `Flow<Long>`.
 - Aturan simpan: pengeluaran→`akunDari` wajib; pemasukan→`akunKe` wajib; transfer→keduanya wajib & berbeda. Akun null tak boleh tersimpan. Satu batch konfirmasi = `batchId` sama.
 - Seed akun: `bni, mandiri, seabank` (bank), `gopay, shopeepay` (ewallet), `tunai` (tunai).
-- Kategori — pengeluaran: `makanan, belanja, transport, tagihan, hiburan, kesehatan, admin, lainnya`; pemasukan: `gaji, usaha, bonus, sampingan, transfer, lainnya`; transfer: `lainnya`.
+- Kategori — pengeluaran: `makanan, belanja, transport, bbm, tagihan, langganan, hiburan, kesehatan, perawatan, laundry, admin, investasi, lainnya`; pemasukan: `gaji, usaha, bonus, sampingan, investasi, penjualan, refund, transfer, lainnya`; transfer: `lainnya`. Sumber kebenaran: `domain/model/Categories.kt` (prompt parser & UI harus ikut).
 
 ## Design tokens (Material 3, light + dark)
 - Warna: ink `#1E2A3A`, paper `#EDF0F2`, card `#FFFFFF`, gold (aksi/voice) `#D99A2B`,

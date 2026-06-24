@@ -29,14 +29,27 @@ JENIS TRANSAKSI (tipe)
 
 KATEGORI
 Pilih TEPAT SATU. Jangan mengarang kategori baru.
-- Jika tipe = pengeluaran -> pilih dari: makanan, belanja, transport, tagihan, hiburan, kesehatan, admin, lainnya
-- Jika tipe = pemasukan  -> pilih dari: gaji, usaha, bonus, sampingan, transfer, lainnya
+- Jika tipe = pengeluaran -> pilih dari: makanan, belanja, transport, bbm, tagihan, langganan, hiburan, kesehatan, perawatan, laundry, admin, investasi, lainnya
+- Jika tipe = pemasukan  -> pilih dari: gaji, usaha, bonus, sampingan, investasi, penjualan, refund, transfer, lainnya
 - Jika tipe = transfer   -> kategori = lainnya
 Definisi yang gampang keliru:
 - makanan  = makanan/minuman SIAP SANTAP: makan/jajan di luar, kopi, warung, resto, delivery. Contoh: "gacoan", "nasi warung".
 - belanja  = BAHAN & BARANG kebutuhan: groceries (beras, telur, minyak), sabun, kebutuhan rumah, beli barang.
+- transport = ongkos jalan: ojol/taksi, parkir, tol, tiket bus/kereta. TANPA bensin.
+- bbm = isi bahan bakar kendaraan: bensin, pertalite, pertamax, solar. (BUKAN parkir/tol -> transport.)
+- tagihan = tagihan rutin rumah/utilitas: listrik, air, pulsa/paket data, internet/wifi, BPJS.
+- langganan = langganan berulang aplikasi/digital: streaming (YouTube, Netflix, Spotify), AI (ChatGPT, Claude), software/cloud.
+- kesehatan = berobat, obat, dokter, rumah sakit, vitamin.
+- perawatan = servis/perbaikan kendaraan & barang (repair, ganti oli), ATAU perawatan diri (salon, potong rambut, skincare treatment).
+- laundry = cuci/laundry pakaian.
 - admin = biaya admin/transfer/top-up bank atau e-wallet.
-- gaji=gaji rutin; usaha=pendapatan bisnis sendiri (mis. klien SIMRS); bonus=THR/insentif; sampingan=freelance; transfer=kiriman masuk tak jelas sumbernya; lainnya=selain itu.
+- investasi (pengeluaran) = nabung/menabung/nyisihin buat tabungan, setoran tabungan, ATAU beli aset investasi (reksadana, saham, emas, kripto, deposito). Mis. "nabung 500rb", "sisihin 1jt buat tabungan", "beli emas".
+  PENGECUALIAN: jika uang dipindah ke akun SENDIRI yang ADA di {{DAFTAR_AKUN}} (mis. "nabung ke seabank") -> itu TRANSFER, bukan kategori investasi.
+- gaji=gaji rutin; usaha=pendapatan bisnis sendiri (mis. klien SIMRS); bonus=THR/insentif; sampingan=freelance.
+- investasi (pemasukan) = hasil investasi: bunga, dividen, profit jual aset.
+- penjualan = hasil menjual barang pribadi/bekas.
+- refund = pengembalian dana, cashback, reimburse.
+- transfer (pemasukan) = kiriman masuk tak jelas sumbernya; lainnya = selain itu.
 
 AKUN / SUMBER DANA
 Akun tersedia: {{DAFTAR_AKUN}}  (daftar ini di-inject oleh app; e-wallet & bank digital diperlakukan sama seperti rekening biasa).
@@ -51,6 +64,12 @@ BIAYA ADMIN
 - Biaya admin/transfer (mis. "admin 2500", "kena biaya 6500") adalah PENGELUARAN tersendiri, BUKAN bagian dari nominal transfer.
 - Buat transaksi terpisah: tipe=pengeluaran, kategori=admin, nominal=biaya, akun_dari=akun sumber transaksi tsb, akun_ke=null.
 - HANYA buat jika biaya admin DISEBUT. Jangan mengarang biaya.
+
+CATATAN (WAJIB diisi)
+- "catatan" = deskripsi singkat & SPESIFIK transaksi: APA yang dibeli / merchant / sumbernya, diambil dari kalimat asli. Mis. "kopi di Tuku", "bensin pertamax", "langganan YouTube Premium", "servis motor", "gaji bulanan", "jual iphone bekas".
+- Padatkan jadi 2-6 kata. Buang kata sambungan, nominal, dan nama akun (akun & nominal sudah punya field sendiri).
+- Pertahankan nama merchant/produk/orang yang disebut. Jangan generik seperti "pengeluaran" atau "transaksi".
+- Boleh kosong HANYA jika kalimat memang tak punya deskripsi sama sekali (mis. cuma "transfer 50rb ke gopay").
 
 OUTPUT
 - Balas HANYA dengan JSON array. Tanpa teks pembuka, tanpa penjelasan, tanpa blok markdown.
@@ -67,7 +86,7 @@ OUTPUT
     "akun_dari": kode akun atau null,
     "akun_ke": kode akun atau null,
     "tanggal": "YYYY-MM-DD",
-    "catatan": string singkat (deskripsi asli),
+    "catatan": deskripsi singkat & spesifik 2-6 kata dari kalimat asli (lihat aturan CATATAN; jangan generik),
     "perlu_dicek": boolean
   }
 """

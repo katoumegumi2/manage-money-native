@@ -69,13 +69,27 @@ class ParserValidatorTest {
     }
 
     @Test
-    fun `akun di luar daftar ditolak`() {
-        assertTrue(parse("[${el(akunDari = "bca")}]").isFailure)
+    fun `akun di luar daftar jadi null dan perlu dicek`() {
+        // bank eksternal/teman (mis. transfer masuk) bukan akun user → jangan tolak,
+        // null-kan & tandai perlu dicek agar tetap bisa dilengkapi di Konfirmasi.
+        val result = parse("[${el(akunDari = "bca")}]")
+        assertTrue(result.isSuccess)
+        val tx = result.getOrThrow()[0]
+        assertEquals(null, tx.akunDari)
+        assertTrue(tx.perluDicek)
     }
 
     @Test
     fun `akun dalam daftar diterima`() {
         assertTrue(parse("[${el(akunDari = "bni")}]").isSuccess)
+    }
+
+    @Test
+    fun `akun beda kapitalisasi dikanonikalisasi ke kode`() {
+        // model (mis. vision) bisa balas "SeaBank"; harus cocok ke kode "seabank"
+        val result = parse("[${el(akunDari = "SeaBank")}]")
+        assertTrue(result.isSuccess)
+        assertEquals("seabank", result.getOrThrow()[0].akunDari)
     }
 
     @Test
@@ -97,6 +111,28 @@ class ParserValidatorTest {
     @Test
     fun `teks bukan json ditolak`() {
         assertTrue(parse("halo aku bukan json").isFailure)
+    }
+
+    @Test
+    fun `kategori pengeluaran baru diterima`() {
+        // bbm, langganan, perawatan, laundry, investasi adalah kategori pengeluaran valid
+        for (k in listOf("bbm", "langganan", "perawatan", "laundry", "investasi")) {
+            assertTrue("kategori $k harusnya valid", parse("[${el(kategori = k)}]").isSuccess)
+        }
+    }
+
+    @Test
+    fun `kategori pemasukan baru diterima`() {
+        for (k in listOf("investasi", "penjualan", "refund")) {
+            val raw = "[${el(tipe = "pemasukan", kategori = k, akunKe = "bni")}]"
+            assertTrue("kategori $k harusnya valid", parse(raw).isSuccess)
+        }
+    }
+
+    @Test
+    fun `catatan ikut terbawa hasil parse`() {
+        // el() mengisi catatan "x"; pastikan tidak hilang di pipeline validator
+        assertEquals("x", parse("[${el()}]").getOrThrow()[0].catatan)
     }
 
     @Test

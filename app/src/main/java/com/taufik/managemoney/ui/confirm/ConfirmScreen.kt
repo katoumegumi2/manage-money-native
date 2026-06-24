@@ -2,6 +2,7 @@ package com.taufik.managemoney.ui.confirm
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -122,6 +123,7 @@ fun ConfirmScreen(
                         accounts = state.accounts,
                         showErrors = state.showErrors,
                         canRemove = state.items.size > 1,
+                        onTipe = { viewModel.setTipe(index, it) },
                         onNominal = { viewModel.setNominal(index, it) },
                         onKategori = { viewModel.setKategori(index, it) },
                         onAkunDari = { viewModel.setAkunDari(index, it) },
@@ -142,6 +144,7 @@ private fun TxCard(
     accounts: List<com.taufik.managemoney.domain.model.Account>,
     showErrors: Boolean,
     canRemove: Boolean,
+    onTipe: (TxType) -> Unit,
     onNominal: (Long) -> Unit,
     onKategori: (String) -> Unit,
     onAkunDari: (String) -> Unit,
@@ -170,16 +173,7 @@ private fun TxCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TipeTag(item.tipe)
-                Spacer(Modifier.weight(1f))
-                if (item.perluDicek) {
-                    Text(
-                        stringResource(R.string.confirm_need_check),
-                        color = Gold,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
+                TypeSelector(selected = item.tipe, onSelect = onTipe, modifier = Modifier.weight(1f))
                 if (canRemove) {
                     IconButton(onClick = onRemove, modifier = Modifier.size(32.dp)) {
                         Icon(
@@ -189,6 +183,14 @@ private fun TxCard(
                         )
                     }
                 }
+            }
+            if (item.perluDicek) {
+                Text(
+                    stringResource(R.string.confirm_need_check),
+                    color = Gold,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                )
             }
 
             NominalField(
@@ -242,21 +244,33 @@ private fun TxCard(
     }
 }
 
+/** Pemilih tipe (pengeluaran/pemasukan/transfer) — user bisa koreksi klasifikasi AI. */
 @Composable
-private fun TipeTag(tipe: TxType) {
-    val color = txTypeColor(tipe)
-    Box(
-        modifier = Modifier
+private fun TypeSelector(selected: TxType, onSelect: (TxType) -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.14f))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
     ) {
-        Text(
-            text = txTypeLabel(tipe),
-            color = color,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
+        TxType.entries.forEach { tipe ->
+            val isSelected = tipe == selected
+            val color = txTypeColor(tipe)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(if (isSelected) color.copy(alpha = 0.16f) else Color.Transparent)
+                    .clickable { onSelect(tipe) }
+                    .padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = txTypeLabel(tipe),
+                    color = if (isSelected) color else MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                )
+            }
+        }
     }
 }
 
