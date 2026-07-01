@@ -52,7 +52,7 @@ import com.taufik.managemoney.ui.components.NominalField
 import com.taufik.managemoney.ui.components.TanggalField
 import com.taufik.managemoney.ui.components.TransferAccounts
 import com.taufik.managemoney.ui.model.EditableTx
-import com.taufik.managemoney.ui.theme.Gold
+import com.taufik.managemoney.ui.theme.Warn
 import com.taufik.managemoney.ui.util.txTypeColor
 import com.taufik.managemoney.ui.util.txTypeLabel
 
@@ -154,7 +154,7 @@ private fun TxCard(
     onRemove: () -> Unit,
 ) {
     val issues = item.issues
-    val borderColor = if (item.perluDicek) Gold else Color.Transparent
+    val borderColor = if (item.perluDicek) Warn else Color.Transparent
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,7 +187,7 @@ private fun TxCard(
             if (item.perluDicek) {
                 Text(
                     stringResource(R.string.confirm_need_check),
-                    color = Gold,
+                    color = Warn,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
                 )

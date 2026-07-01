@@ -1,5 +1,6 @@
 package com.taufik.managemoney.data.ai
 
+import android.util.Log
 import com.taufik.managemoney.data.repo.AccountRepository
 import com.taufik.managemoney.domain.ai.ImagePayload
 import com.taufik.managemoney.domain.ai.ImageTransactionParser
@@ -32,6 +33,7 @@ internal class ImageParser @Inject constructor(
         }
         val cfg = configStore.current()
         val model = if (cfg.provider == AiProvider.GEMINI) cfg.model else AiProvider.GEMINI.defaultModel
+        Log.d(TAG, "vision model=$model images=${images.size} b64len=${images.sumOf { it.base64.length }} mimes=${images.map { it.mimeType }}")
 
         val codes = accountRepository.observeActiveAccounts().first().map { it.kode }
         val today = LocalDate.now(ZoneId.of("Asia/Jakarta"))
@@ -51,9 +53,17 @@ internal class ImageParser @Inject constructor(
             withContext(Dispatchers.IO) { geminiApi.generate(model, key, body) }
                 .candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text
         } catch (e: Exception) {
+            Log.w(TAG, "vision HTTP gagal: ${e.message}", e)
             return Result.failure(ParseException("Gagal membaca gambar via Gemini", e))
-        } ?: return Result.failure(ParseException("Balasan Gemini kosong"))
+        } ?: run {
+            Log.w(TAG, "vision: balasan Gemini kosong (model=$model)")
+            return Result.failure(ParseException("Balasan Gemini kosong"))
+        }
 
         return ParserValidator.parse(text, codes.toSet())
+            .onSuccess { Log.d(TAG, "vision OK: ${it.size} transaksi") }
+            .onFailure { Log.w(TAG, "vision validasi gagal: ${it.message}; raw=${text.take(400)}") }
     }
 }
+
+private const val TAG = "ImageParser"

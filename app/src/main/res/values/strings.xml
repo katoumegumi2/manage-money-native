@@ -68,6 +68,16 @@
     <string name="home_recent">Transaksi terbaru</string>
     <string name="home_empty_title">Belum ada transaksi</string>
     <string name="home_empty_hint">Catat lewat tombol suara atau tambah manual</string>
+    <string name="home_accounts">Akun</string>
+    <string name="home_see_all">Lihat semua</string>
+    <string name="home_show_all_count">Lihat semua (%1$d)</string>
+    <string name="home_collapse">Sembunyikan</string>
+    <string name="greeting_morning">Selamat pagi,</string>
+    <string name="greeting_noon">Selamat siang,</string>
+    <string name="greeting_afternoon">Selamat sore,</string>
+    <string name="greeting_night">Selamat malam,</string>
+    <string name="greeting_default">Halo,</string>
+    <string name="home_user_fallback">kamu</string>
 
     <!-- Detail akun -->
     <string name="account_initial_balance">Saldo awal %1$s</string>

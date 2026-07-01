@@ -39,10 +39,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taufik.managemoney.R
 import com.taufik.managemoney.core.formatGrouped
 import com.taufik.managemoney.core.formatRupiah
+import com.taufik.managemoney.domain.model.TxType
+import com.taufik.managemoney.ui.components.BalanceHeroCard
+import com.taufik.managemoney.ui.components.BalanceHeroStat
 import com.taufik.managemoney.ui.theme.Expense
+import com.taufik.managemoney.ui.theme.ExpenseOnDark
 import com.taufik.managemoney.ui.theme.Gold
 import com.taufik.managemoney.ui.theme.Income
+import com.taufik.managemoney.ui.theme.IncomeOnDark
 import com.taufik.managemoney.ui.theme.MonoFamily
+import com.taufik.managemoney.ui.theme.MutedOnDark
+import com.taufik.managemoney.ui.util.categoryVisual
 
 @Composable
 fun ReportsScreen(
@@ -62,8 +69,7 @@ fun ReportsScreen(
         Column(modifier = Modifier.padding(top = 14.dp, bottom = 14.dp)) {
             Text(
                 text = stringResource(R.string.nav_reports),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
             )
             if (state.period.isNotBlank()) {
                 Text(
@@ -90,24 +96,15 @@ fun ReportsScreen(
 /** Kartu hero: arus kas bersih bulan ini + chip masuk/keluar + delta vs bulan lalu. */
 @Composable
 private fun NetHeroCard(state: ReportsUiState) {
-    val netColor = if (state.net >= 0) Income else Expense
-    SectionCard {
-        Text(
-            text = stringResource(R.string.reports_net_label),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = (if (state.net >= 0) "+" else "−") + formatRupiah(kotlin.math.abs(state.net)),
-            fontFamily = MonoFamily,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.headlineMedium,
-            color = netColor,
-            modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
-        )
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            FlowPill(stringResource(R.string.home_in), state.masuk, Income, Modifier.weight(1f))
-            FlowPill(stringResource(R.string.home_out), state.keluar, Expense, Modifier.weight(1f))
+    val net = state.net
+    BalanceHeroCard(
+        label = stringResource(R.string.reports_net_label),
+        amount = (if (net >= 0) "+" else "−") + formatRupiah(kotlin.math.abs(net)),
+        amountColor = if (net >= 0) IncomeOnDark else ExpenseOnDark,
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(22.dp)) {
+            BalanceHeroStat(stringResource(R.string.home_in), formatRupiah(state.masuk), Color.White)
+            BalanceHeroStat(stringResource(R.string.home_out), formatRupiah(state.keluar), Color.White)
         }
         state.keluarDeltaPct?.let { pct ->
             val up = pct > 0
@@ -119,33 +116,10 @@ private fun NetHeroCard(state: ReportsUiState) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
-                color = if (pct == 0) MaterialTheme.colorScheme.onSurfaceVariant else if (up) Expense else Income,
+                color = if (pct == 0) MutedOnDark else if (up) ExpenseOnDark else IncomeOnDark,
                 modifier = Modifier.padding(top = 12.dp),
             )
         }
-    }
-}
-
-@Composable
-private fun FlowPill(label: String, amount: Long, color: Color, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(color.copy(alpha = 0.10f))
-            .padding(horizontal = 14.dp, vertical = 10.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(color))
-            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Text(
-            text = formatRupiah(amount),
-            fontFamily = MonoFamily,
-            fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.titleMedium,
-            color = color,
-            modifier = Modifier.padding(top = 2.dp),
-        )
     }
 }
 
@@ -242,7 +216,7 @@ private fun GoldButton(text: String, onClick: () -> Unit) {
             .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, color = Color(0xFF1B1306), fontWeight = FontWeight.SemiBold)
+        Text(text, color = Color.White, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -266,9 +240,11 @@ private fun CategorySection(state: ReportsUiState) {
             Spacer(Modifier.height(6.dp))
             state.bars.forEach { bar ->
                 val pct = ((bar.total.toFloat() / total) * 100).toInt()
+                val barColor = categoryVisual(TxType.PENGELUARAN, bar.label).stroke
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(bar.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                        Box(modifier = Modifier.size(9.dp).clip(RoundedCornerShape(3.dp)).background(barColor))
+                        Text(bar.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f).padding(start = 8.dp))
                         Text(
                             text = formatGrouped(bar.total),
                             fontFamily = MonoFamily,
@@ -294,7 +270,7 @@ private fun CategorySection(state: ReportsUiState) {
                                 .fillMaxWidth(bar.fraction)
                                 .height(8.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(Expense),
+                                .background(barColor),
                         )
                     }
                 }
@@ -382,8 +358,8 @@ private fun AskAiButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -409,7 +385,7 @@ private fun SectionCard(content: @Composable androidx.compose.foundation.layout.
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(16.dp),
         content = content,
     )

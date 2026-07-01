@@ -3,7 +3,6 @@ package com.taufik.managemoney.ui.model
 import com.taufik.managemoney.core.formatGrouped
 import com.taufik.managemoney.domain.model.Transaction
 import com.taufik.managemoney.domain.model.TxType
-import com.taufik.managemoney.ui.util.emojiFor
 import com.taufik.managemoney.ui.util.kategoriLabel
 import com.taufik.managemoney.ui.util.relativeDateLabel
 import java.time.LocalDate
@@ -11,10 +10,11 @@ import java.time.LocalDate
 /** Gaya nominal di baris transaksi — menentukan warna & tanda. */
 enum class AmountStyle { INCOME, EXPENSE, TRANSFER }
 
-/** Baris transaksi siap-tampil (judul, subjudul, nominal bertanda, emoji). */
+/** Baris transaksi siap-tampil (judul, subjudul, nominal bertanda, ikon kategori). */
 data class TxRowUi(
     val id: String,
-    val emoji: String,
+    val tipe: TxType,
+    val kategori: String,
     val title: String,
     val subtitle: String,
     val amountText: String,
@@ -62,7 +62,8 @@ fun Transaction.toRowUi(
     }
     return TxRowUi(
         id = id,
-        emoji = emojiFor(tipe, kategori),
+        tipe = tipe,
+        kategori = kategori,
         title = title,
         subtitle = subtitle,
         amountText = "$sign${formatGrouped(nominal)}",

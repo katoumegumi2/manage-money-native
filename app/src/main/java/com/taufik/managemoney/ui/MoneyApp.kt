@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.taufik.managemoney.ui.components.MicFab
+import com.taufik.managemoney.ui.components.AddFab
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -108,12 +108,13 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                             )
                         }
                     }
-                    MicFab(
-                        onClick = { navController.navigate(VOICE_INPUT_ROUTE) },
-                        contentDescription = stringResource(R.string.action_voice),
+                    AddFab(
+                        onClick = { navController.navigate(PARSE_INPUT_ROUTE) },
+                        onLongClick = { navController.navigate(VOICE_INPUT_ROUTE) },
+                        contentDescription = stringResource(R.string.action_add),
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .offset(y = (-32).dp),
+                            .offset(y = (-24).dp),
                     )
                 }
             }
@@ -128,8 +129,9 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 HomeScreen(
                     onAccountClick = { id -> navController.navigate(accountDetailRoute(id)) },
                     onSettings = { navController.navigate(SETTINGS_ROUTE) },
-                    onAddTyped = { navController.navigate(PARSE_INPUT_ROUTE) },
                     onEdit = { id -> navController.navigate(editTxRoute(id)) },
+                    onSeeAllRecent = { openTab(TopDestination.HISTORY.route) },
+                    userName = authState.name ?: authState.email?.substringBefore("@"),
                 )
             }
             composable(TopDestination.HISTORY.route) {

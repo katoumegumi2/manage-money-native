@@ -200,7 +200,7 @@ private fun PulsingMic() {
             Icon(
                 imageVector = Icons.Filled.Mic,
                 contentDescription = null,
-                tint = Color(0xFF1B1306),
+                tint = Color.White,
                 modifier = Modifier.size(46.dp),
             )
         }

@@ -1,13 +1,12 @@
 package com.taufik.managemoney.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
@@ -24,38 +23,43 @@ import com.taufik.managemoney.ui.model.AmountStyle
 import com.taufik.managemoney.ui.model.TxRowUi
 import com.taufik.managemoney.ui.theme.Expense
 import com.taufik.managemoney.ui.theme.Income
-import com.taufik.managemoney.ui.theme.MonoFamily
 import com.taufik.managemoney.ui.theme.Transfer
+import com.taufik.managemoney.ui.util.categoryVisual
 
 /**
- * Satu baris transaksi: emoji + judul/subjudul + nominal bertanda berwarna.
+ * Satu baris transaksi (v3): ikon bulat 42px ber-tint kategori + judul/meta + nominal bertanda.
  * [trailingChevron] menampilkan tanda › untuk menandai baris bisa ditekan (edit).
  */
 @Composable
 fun TxRow(row: TxRowUi, modifier: Modifier = Modifier, trailingChevron: Boolean = false) {
+    val visual = categoryVisual(row.tipe, row.kategori)
     Row(
-        modifier = modifier.padding(vertical = 11.dp),
+        modifier = modifier.padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(38.dp)
-                .clip(RoundedCornerShape(11.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(11.dp)),
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(visual.bg),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = row.emoji, style = MaterialTheme.typography.titleMedium)
+            Icon(
+                imageVector = visual.icon,
+                contentDescription = null,
+                tint = visual.stroke,
+                modifier = Modifier.size(20.dp),
+            )
         }
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 13.dp),
+                .padding(horizontal = 12.dp),
         ) {
             Text(
                 text = row.title,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -71,9 +75,8 @@ fun TxRow(row: TxRowUi, modifier: Modifier = Modifier, trailingChevron: Boolean 
         Text(
             text = row.amountText,
             color = amountColor(row.style),
-            fontFamily = MonoFamily,
-            fontWeight = FontWeight.Medium,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
         )
         if (trailingChevron) {
