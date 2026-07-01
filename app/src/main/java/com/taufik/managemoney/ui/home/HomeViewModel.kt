@@ -2,6 +2,7 @@ package com.taufik.managemoney.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.taufik.managemoney.data.settings.HomeAccountOrderStore
 import com.taufik.managemoney.domain.model.AccountBalance
 import com.taufik.managemoney.domain.usecase.ObserveBalances
 import com.taufik.managemoney.domain.usecase.ObserveMonthlyFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
@@ -34,6 +36,7 @@ class HomeViewModel @Inject constructor(
     observeTotal: ObserveTotal,
     observeRecent: ObserveRecentTransactions,
     observeMonthlyFlow: ObserveMonthlyFlow,
+    private val orderStore: HomeAccountOrderStore,
 ) : ViewModel() {
 
     private val today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))
@@ -43,7 +46,9 @@ class HomeViewModel @Inject constructor(
         observeTotal(),
         observeRecent(),
         observeMonthlyFlow(today),
-    ) { balances, total, recent, monthly ->
+        orderStore.order,
+    ) { balances, total, recent, monthly, order ->
+        val ordered = applyOrder(balances, order)
         val namesById = balances.associate { it.accountId to it.nama }
         HomeUiState(
             loading = false,
@@ -51,7 +56,7 @@ class HomeViewModel @Inject constructor(
             jumlahAkun = balances.size,
             masuk = monthly.masuk,
             keluar = monthly.keluar,
-            accounts = balances,
+            accounts = ordered,
             recent = recent.map { it.toRowUi(namesById, today) },
         )
     }.stateIn(
@@ -59,4 +64,16 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HomeUiState(),
     )
+
+    /** Simpan urutan baru hasil drag-reorder di Beranda. */
+    fun reorder(ids: List<String>) {
+        viewModelScope.launch { orderStore.save(ids) }
+    }
+
+    /** Susun ulang akun mengikuti [order] tersimpan; akun yang belum ada di order ikut di belakang. */
+    private fun applyOrder(balances: List<AccountBalance>, order: List<String>): List<AccountBalance> {
+        if (order.isEmpty()) return balances
+        val pos = order.withIndex().associate { (i, id) -> id to i }
+        return balances.sortedBy { pos[it.accountId] ?: Int.MAX_VALUE }
+    }
 }

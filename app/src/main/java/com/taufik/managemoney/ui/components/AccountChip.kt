@@ -15,8 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,18 +34,23 @@ fun AccountChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     dragging: Boolean = false,
+    targeted: Boolean = false,
 ) {
     val visual = accountVisual(account.kode, account.jenis)
+    val shape = RoundedCornerShape(12.dp)
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .then(if (dragging) Modifier.shadow(10.dp, shape) else Modifier)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .then(
-                if (dragging) Modifier.border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
-                else Modifier,
+                when {
+                    dragging -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, shape)
+                    targeted -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), shape)
+                    else -> Modifier
+                },
             )
             .clickable(onClick = onClick)
-            .alpha(if (dragging) 0.35f else 1f)
             .padding(start = 11.dp, top = 9.dp, end = 9.dp, bottom = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -39,7 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taufik.managemoney.R
 import com.taufik.managemoney.core.formatGrouped
 import com.taufik.managemoney.core.formatRupiah
-import com.taufik.managemoney.ui.components.AccountChip
+import com.taufik.managemoney.ui.components.AccountReorderGrid
 import com.taufik.managemoney.ui.components.BalanceHeroCard
 import com.taufik.managemoney.ui.components.BalanceHeroStat
 import com.taufik.managemoney.ui.components.TxRow
@@ -85,29 +85,14 @@ fun HomeScreen(
         }
 
         val shown = if (accountsExpanded) state.accounts else state.accounts.take(DEFAULT_ACCOUNT_COUNT)
-        items(shown.chunked(2)) { pair ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (pair.size == 1) {
-                    AccountChip(
-                        account = pair[0],
-                        onClick = { onAccountClick(pair[0].accountId) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                } else {
-                    pair.forEach { acc ->
-                        AccountChip(
-                            account = acc,
-                            onClick = { onAccountClick(acc.accountId) },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                }
-            }
+        item {
+            AccountReorderGrid(
+                accounts = shown,
+                onClick = onAccountClick,
+                onReorder = { newIds ->
+                    viewModel.reorder(newIds + state.accounts.drop(shown.size).map { it.accountId })
+                },
+            )
         }
 
         item {
