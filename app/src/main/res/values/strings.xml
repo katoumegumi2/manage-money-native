@@ -213,6 +213,11 @@
     <!-- Tanya AI (chat) -->
     <string name="ask_title">Tanya AI</string>
     <string name="ask_entry_subtitle">Tanya bebas soal keuanganmu bulan ini</string>
+    <string name="ask_assistant_title">Asisten AI</string>
+    <string name="ask_assistant_subtitle">Paham seluruh catatanmu</string>
+    <string name="ask_provider_connected">%1$s · terhubung</string>
+    <string name="ask_provider_fallback">AI</string>
+    <string name="ask_try">Coba tanyakan</string>
     <string name="ask_placeholder">Ketik pertanyaan…</string>
     <string name="ask_send">Kirim</string>
     <string name="ask_thinking">AI sedang berpikir…</string>
