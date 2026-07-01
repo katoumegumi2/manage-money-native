@@ -82,7 +82,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
     // Layar input/penuh menyembunyikan bottom nav + FAB.
     val fullScreenRoutes = setOf(
         VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE,
-        SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE, ASK_AI_ROUTE,
+        SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE,
     )
     val showChrome = currentDestination?.route !in fullScreenRoutes
 
@@ -106,14 +106,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                             val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
                             NavigationBarItem(
                                 selected = selected,
-                                onClick = {
-                                    // Asisten AI = layar penuh (chat), bukan tab ber-state → push biasa.
-                                    if (dest == TopDestination.ASK_AI) {
-                                        navController.navigate(dest.route) { launchSingleTop = true }
-                                    } else {
-                                        openTab(dest.route)
-                                    }
-                                },
+                                onClick = { openTab(dest.route) },
                                 icon = { Icon(dest.icon, contentDescription = null) },
                                 label = { Text(stringResource(dest.labelRes)) },
                             )
@@ -149,7 +142,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 HistoryScreen(onEdit = { id -> navController.navigate(editTxRoute(id)) })
             }
             composable(TopDestination.REPORTS.route) {
-                ReportsScreen(onAskAi = { navController.navigate(ASK_AI_ROUTE) })
+                ReportsScreen()
             }
             composable(SETTINGS_ROUTE) {
                 SettingsMenuScreen(
@@ -165,7 +158,9 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 AiSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(ASK_AI_ROUTE) {
-                com.taufik.managemoney.ui.ask.AskAiScreen(onBack = { navController.popBackStack() })
+                com.taufik.managemoney.ui.ask.AskAiScreen(
+                    userName = authState.name ?: authState.email?.substringBefore("@"),
+                )
             }
             composable(
                 route = ACCOUNT_DETAIL_ROUTE,

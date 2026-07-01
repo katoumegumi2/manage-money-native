@@ -1,7 +1,6 @@
 package com.taufik.managemoney.ui.reports
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,22 +16,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,22 +43,27 @@ import com.taufik.managemoney.core.formatRupiah
 import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.ui.components.BalanceHeroCard
 import com.taufik.managemoney.ui.components.BalanceHeroStat
+import com.taufik.managemoney.ui.components.DonutChart
+import com.taufik.managemoney.ui.components.DonutSlice
 import com.taufik.managemoney.ui.theme.Expense
 import com.taufik.managemoney.ui.theme.ExpenseOnDark
-import com.taufik.managemoney.ui.theme.Gold
 import com.taufik.managemoney.ui.theme.Income
 import com.taufik.managemoney.ui.theme.IncomeOnDark
-import com.taufik.managemoney.ui.theme.MonoFamily
 import com.taufik.managemoney.ui.theme.MutedOnDark
 import com.taufik.managemoney.ui.util.categoryVisual
+import java.time.LocalDate
+import java.time.ZoneId
 
+private enum class ReportTab { SUMMARY, EXPENSE }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
-    onAskAi: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ReportsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var tab by remember { mutableStateOf(ReportTab.SUMMARY) }
 
     Column(
         modifier = modifier
@@ -65,8 +71,7 @@ fun ReportsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {
-        // Header + periode
-        Column(modifier = Modifier.padding(top = 16.dp, bottom = 14.dp)) {
+        Column(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)) {
             Text(
                 text = stringResource(R.string.nav_reports),
                 style = MaterialTheme.typography.headlineMedium,
@@ -80,15 +85,30 @@ fun ReportsScreen(
             }
         }
 
-        NetHeroCard(state)
-        Spacer(Modifier.height(14.dp))
-        InsightCard(state.insight, onGenerate = viewModel::generateInsight)
-        Spacer(Modifier.height(10.dp))
-        AskAiButton(onAskAi)
-        Spacer(Modifier.height(14.dp))
-        CategorySection(state)
-        Spacer(Modifier.height(14.dp))
-        TrendSection(state)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp)) {
+            val options = listOf(
+                ReportTab.SUMMARY to R.string.reports_tab_summary,
+                ReportTab.EXPENSE to R.string.reports_tab_expense,
+            )
+            options.forEachIndexed { index, (value, labelRes) ->
+                SegmentedButton(
+                    selected = tab == value,
+                    onClick = { tab = value },
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                ) { Text(stringResource(labelRes)) }
+            }
+        }
+
+        when (tab) {
+            ReportTab.SUMMARY -> {
+                NetHeroCard(state)
+                Spacer(Modifier.height(14.dp))
+                SummaryCategoryCard(state, onDetail = { tab = ReportTab.EXPENSE })
+                Spacer(Modifier.height(14.dp))
+                TrendSection(state)
+            }
+            ReportTab.EXPENSE -> ExpenseTab(state)
+        }
         Spacer(Modifier.height(96.dp))
     }
 }
@@ -123,156 +143,221 @@ private fun NetHeroCard(state: ReportsUiState) {
     }
 }
 
-/** Kartu insight AI (aksen emas). Narasi dari cache/generate; angka tetap dihitung lokal. */
+/** Ringkasan: "Pengeluaran bulan ini" = donut + legend kategori (nama · nominal · %). */
 @Composable
-private fun InsightCard(insight: InsightUi, onGenerate: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(Gold.copy(alpha = 0.10f))
-            .border(1.dp, Gold.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
-            .padding(16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = Gold, modifier = Modifier.size(20.dp))
-            Text(
-                text = stringResource(R.string.reports_insight_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(Modifier.weight(1f))
-            if (insight.text != null && !insight.loading) {
-                TextButton(onClick = onGenerate) { Text(stringResource(R.string.reports_insight_refresh)) }
-            }
-        }
-
-        when {
-            insight.loading -> Row(
-                modifier = Modifier.padding(top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = Gold)
-                Text(stringResource(R.string.reports_insight_generating), style = MaterialTheme.typography.bodyMedium)
-            }
-
-            insight.text != null -> InsightText(insight.text)
-
-            else -> {
-                Text(
-                    text = stringResource(R.string.reports_insight_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp, bottom = 10.dp),
-                )
-                insight.error?.let {
-                    Text(it, style = MaterialTheme.typography.labelMedium, color = Expense, modifier = Modifier.padding(bottom = 8.dp))
-                }
-                if (insight.canGenerate) {
-                    GoldButton(
-                        text = stringResource(
-                            if (insight.error != null) R.string.reports_insight_retry else R.string.reports_insight_generate,
-                        ),
-                        onClick = onGenerate,
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** Render teks insight: baris pertama = ringkasan; baris "- ..." = poin berbullet. */
-@Composable
-private fun InsightText(text: String) {
-    val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
-    Column(modifier = Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        lines.forEachIndexed { i, line ->
-            val bullet = line.startsWith("- ") || line.startsWith("• ")
-            if (bullet) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("•", color = Gold, style = MaterialTheme.typography.bodyMedium)
-                    Text(line.removePrefix("- ").removePrefix("• "), style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                Text(
-                    line,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = if (i == 0) FontWeight.SemiBold else FontWeight.Normal,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GoldButton(text: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Gold)
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, color = Color.White, fontWeight = FontWeight.SemiBold)
-    }
-}
-
-@Composable
-private fun CategorySection(state: ReportsUiState) {
+private fun SummaryCategoryCard(state: ReportsUiState, onDetail: () -> Unit) {
     SectionCard {
-        Text(
-            text = stringResource(R.string.history_recap_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        if (state.bars.isEmpty() && !state.loading) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.history_recap_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            if (state.bars.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.reports_detail),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable(onClick = onDetail),
+                )
+            }
+        }
+        if (state.bars.isEmpty()) {
             Text(
                 text = stringResource(R.string.reports_empty),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 12.dp),
             )
-        } else {
-            val total = state.bars.sumOf { it.total }.takeIf { it > 0 } ?: 1L
-            Spacer(Modifier.height(6.dp))
-            state.bars.forEach { bar ->
-                val pct = ((bar.total.toFloat() / total) * 100).toInt()
-                val barColor = categoryVisual(TxType.PENGELUARAN, bar.label).stroke
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Box(modifier = Modifier.size(9.dp).clip(RoundedCornerShape(3.dp)).background(barColor))
-                        Text(bar.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f).padding(start = 8.dp))
+            return@SectionCard
+        }
+        val total = state.bars.sumOf { it.total }.takeIf { it > 0 } ?: 1L
+        Spacer(Modifier.height(14.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+            DonutChart(
+                slices = state.bars.map { DonutSlice(it.total, categoryVisual(TxType.PENGELUARAN, it.label).stroke) },
+                diameter = 128.dp,
+                ringWidth = 18.dp,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringResource(R.string.reports_donut_total).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = formatGrouped(total),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                state.bars.forEach { bar ->
+                    val pct = ((bar.total.toFloat() / total) * 100).toInt()
+                    val color = categoryVisual(TxType.PENGELUARAN, bar.label).stroke
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(Modifier.size(8.dp).clip(RoundedCornerShape(3.dp)).background(color))
                         Text(
-                            text = formatGrouped(bar.total),
-                            fontFamily = MonoFamily,
-                            style = MaterialTheme.typography.labelLarge,
+                            bar.label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            formatGrouped(bar.total),
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
-                            text = "  $pct%",
-                            style = MaterialTheme.typography.labelMedium,
+                            "$pct%",
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(30.dp),
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+/** Tab Pengeluaran: donut besar + kartu statistik + rincian kategori (bar). */
+@Composable
+private fun ExpenseTab(state: ReportsUiState) {
+    if (state.bars.isEmpty()) {
+        SectionCard {
+            Text(
+                text = stringResource(R.string.reports_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
+        }
+        return
+    }
+    val total = state.bars.sumOf { it.total }
+    SectionCard {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+            DonutChart(
+                slices = state.bars.map { DonutSlice(it.total, categoryVisual(TxType.PENGELUARAN, it.label).stroke) },
+                diameter = 190.dp,
+                ringWidth = 26.dp,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringResource(R.string.reports_expense_center).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = formatRupiah(total),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = stringResource(R.string.reports_categories_count, state.bars.size),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+    Spacer(Modifier.height(12.dp))
+    val day = remember { LocalDate.now(ZoneId.of("Asia/Jakarta")).dayOfMonth }.coerceAtLeast(1)
+    val top = state.bars.maxByOrNull { it.total }
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        StatCard(Modifier.weight(1f), stringResource(R.string.reports_avg_per_day), formatRupiah(total / day))
+        StatCard(
+            Modifier.weight(1f),
+            stringResource(R.string.reports_top_category),
+            top?.label ?: "-",
+            sub = top?.let { formatRupiah(it.total) },
+        )
+    }
+    Spacer(Modifier.height(12.dp))
+    CategoryDetailCard(state)
+}
+
+@Composable
+private fun StatCard(modifier: Modifier, label: String, value: String, sub: String? = null) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(14.dp),
+    ) {
+        Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 4.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (sub != null) {
+            Text(sub, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** Rincian kategori (bar proporsional per warna kategori). */
+@Composable
+private fun CategoryDetailCard(state: ReportsUiState) {
+    SectionCard {
+        Text(
+            text = stringResource(R.string.reports_category_detail),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        val total = state.bars.sumOf { it.total }.takeIf { it > 0 } ?: 1L
+        Spacer(Modifier.height(6.dp))
+        state.bars.forEach { bar ->
+            val pct = ((bar.total.toFloat() / total) * 100).toInt()
+            val barColor = categoryVisual(TxType.PENGELUARAN, bar.label).stroke
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(9.dp).clip(RoundedCornerShape(3.dp)).background(barColor))
+                    Text(
+                        bar.label,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    )
+                    Text(
+                        formatGrouped(bar.total),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "  $pct%",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp)
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 6.dp)
+                            .fillMaxWidth(bar.fraction)
                             .height(8.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(bar.fraction)
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(barColor),
-                        )
-                    }
+                            .background(barColor),
+                    )
                 }
             }
         }
@@ -285,7 +370,7 @@ private fun TrendSection(state: ReportsUiState) {
         Text(
             text = stringResource(R.string.reports_trend_title),
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
         )
         if (!state.hasTrend && !state.loading) {
             Text(
@@ -352,33 +437,7 @@ private fun LegendDot(color: Color, label: String) {
     }
 }
 
-/** Tombol masuk ke chat "Tanya AI". */
-@Composable
-private fun AskAiButton(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = Gold)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(stringResource(R.string.ask_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Text(
-                stringResource(R.string.ask_entry_subtitle),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text("›", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-/** Kartu section konsisten (surface, rounded). */
+/** Kartu section konsisten (surface-2, rounded). */
 @Composable
 private fun SectionCard(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
     Column(
