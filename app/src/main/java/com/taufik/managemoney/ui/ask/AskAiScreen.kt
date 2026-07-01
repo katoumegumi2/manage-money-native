@@ -34,10 +34,7 @@ import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -405,25 +403,20 @@ private fun ThinkingBubble() {
     }
 }
 
-/** Bar input: field bulat + tombol mic + tombol kirim emerald. */
+/** Bar input: SATU kotak berisi teks + mic + tombol kirim (squircle) yang menyatu. */
 @Composable
 private fun ChatInputBar(value: String, onValue: (String) -> Unit, onSend: () -> Unit, sending: Boolean) {
     Surface(tonalElevation = 2.dp, color = MaterialTheme.colorScheme.background) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .padding(start = 16.dp, top = 6.dp, bottom = 6.dp, end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 46.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
+            Box(modifier = Modifier.weight(1f).heightIn(min = 36.dp), contentAlignment = Alignment.CenterStart) {
                 BasicTextField(
                     value = value,
                     onValueChange = onValue,
@@ -445,23 +438,33 @@ private fun ChatInputBar(value: String, onValue: (String) -> Unit, onSend: () ->
                     },
                 )
             }
-            IconButton(onClick = { }, modifier = Modifier.size(46.dp)) {
-                Icon(
-                    Icons.Filled.Mic,
-                    contentDescription = stringResource(R.string.ask_mic),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            FilledIconButton(
-                onClick = onSend,
-                enabled = value.isNotBlank() && !sending,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White,
-                ),
-                modifier = Modifier.size(46.dp),
+            Icon(
+                Icons.Filled.Mic,
+                contentDescription = stringResource(R.string.ask_mic),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(horizontal = 6.dp)
+                    .size(22.dp)
+                    .clickable(onClick = { }),
+            )
+            val sendEnabled = value.isNotBlank() && !sending
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (sendEnabled) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                    )
+                    .clickable(enabled = sendEnabled, onClick = onSend),
+                contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.ask_send))
+                Icon(
+                    Icons.AutoMirrored.Filled.Send,
+                    contentDescription = stringResource(R.string.ask_send),
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp),
+                )
             }
         }
     }
