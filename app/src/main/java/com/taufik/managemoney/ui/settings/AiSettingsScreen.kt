@@ -68,7 +68,7 @@ fun AiSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_settings)) },
+                title = { Text(stringResource(R.string.settings_system_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
@@ -87,7 +87,6 @@ fun AiSettingsScreen(
         ) {
             ThemeSection(themeMode, themeViewModel::set)
             HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 6.dp))
-            AccountSection()
             BackupSection()
             HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 6.dp))
             Text(

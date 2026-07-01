@@ -12,10 +12,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -48,8 +54,10 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 import com.taufik.managemoney.ui.util.accountVisual
 import com.taufik.managemoney.ui.util.jenisLabel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountsScreen(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AccountsViewModel = hiltViewModel(),
 ) {
@@ -66,14 +74,19 @@ fun AccountsScreen(
         }
     }
 
-    LazyColumn(modifier = modifier.fillMaxSize().padding(horizontal = 18.dp)) {
-        item {
-            Text(
-                text = stringResource(R.string.nav_accounts),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(top = 14.dp, bottom = 4.dp),
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.settings_accounts_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
+                },
             )
-        }
+        },
+    ) { innerPadding ->
+    LazyColumn(modifier = modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 18.dp)) {
         item {
             Text(
                 text = stringResource(R.string.accounts_active_hint),
@@ -116,6 +129,7 @@ fun AccountsScreen(
             }
         }
         item { Spacer(Modifier.height(96.dp)) }
+    }
     }
 
     editing?.let { acc ->

@@ -22,8 +22,14 @@ const val PARSE_INPUT_ROUTE = "parse"
 /** Form input manual transaksi. */
 const val MANUAL_ENTRY_ROUTE = "manual"
 
-/** Pengaturan (AI + tema + data) — dibuka dari ikon gear di Beranda, bukan tab. */
+/** Pengaturan (menu) — dibuka dari ikon gear di Beranda. Berisi 2 kartu: Rekening & Sistem. */
 const val SETTINGS_ROUTE = "settings"
+
+/** Pengaturan Rekening — kelola akun (aktif/nonaktif, saldo awal, tambah). Sub-layar Pengaturan. */
+const val ACCOUNTS_ROUTE = "settings/accounts"
+
+/** Pengaturan Sistem — tema, AI, cadangan Drive, data. Sub-layar Pengaturan. */
+const val SYSTEM_SETTINGS_ROUTE = "settings/system"
 
 /** Chat "Tanya AI" — tanya bebas tentang keuangan (dibuka dari Laporan). */
 const val ASK_AI_ROUTE = "ask"

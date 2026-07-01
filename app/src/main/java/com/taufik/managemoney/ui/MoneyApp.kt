@@ -46,6 +46,8 @@ import com.taufik.managemoney.ui.navigation.MANUAL_ENTRY_ROUTE
 import com.taufik.managemoney.ui.navigation.PARSE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.ASK_AI_ROUTE
 import com.taufik.managemoney.ui.navigation.SETTINGS_ROUTE
+import com.taufik.managemoney.ui.navigation.ACCOUNTS_ROUTE
+import com.taufik.managemoney.ui.navigation.SYSTEM_SETTINGS_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.VOICE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
@@ -54,6 +56,7 @@ import com.taufik.managemoney.ui.navigation.editTxRoute
 import com.taufik.managemoney.ui.parse.ParseInputScreen
 import com.taufik.managemoney.ui.reports.ReportsScreen
 import com.taufik.managemoney.ui.settings.AiSettingsScreen
+import com.taufik.managemoney.ui.settings.SettingsMenuScreen
 import com.taufik.managemoney.ui.voice.VoiceInputScreen
 
 @Composable
@@ -78,7 +81,8 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
 
     // Layar input/penuh menyembunyikan bottom nav + FAB.
     val fullScreenRoutes = setOf(
-        VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE, SETTINGS_ROUTE, ASK_AI_ROUTE,
+        VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE,
+        SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE, ASK_AI_ROUTE,
     )
     val showChrome = currentDestination?.route !in fullScreenRoutes
 
@@ -102,7 +106,14 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                             val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
                             NavigationBarItem(
                                 selected = selected,
-                                onClick = { openTab(dest.route) },
+                                onClick = {
+                                    // Asisten AI = layar penuh (chat), bukan tab ber-state → push biasa.
+                                    if (dest == TopDestination.ASK_AI) {
+                                        navController.navigate(dest.route) { launchSingleTop = true }
+                                    } else {
+                                        openTab(dest.route)
+                                    }
+                                },
                                 icon = { Icon(dest.icon, contentDescription = null) },
                                 label = { Text(stringResource(dest.labelRes)) },
                             )
@@ -140,8 +151,17 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
             composable(TopDestination.REPORTS.route) {
                 ReportsScreen(onAskAi = { navController.navigate(ASK_AI_ROUTE) })
             }
-            composable(TopDestination.ACCOUNTS.route) { AccountsScreen() }
             composable(SETTINGS_ROUTE) {
+                SettingsMenuScreen(
+                    onBack = { navController.popBackStack() },
+                    onAccounts = { navController.navigate(ACCOUNTS_ROUTE) },
+                    onSystem = { navController.navigate(SYSTEM_SETTINGS_ROUTE) },
+                )
+            }
+            composable(ACCOUNTS_ROUTE) {
+                AccountsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(SYSTEM_SETTINGS_ROUTE) {
                 AiSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(ASK_AI_ROUTE) {

@@ -7,6 +7,11 @@
     <string name="nav_reports">Laporan</string>
     <string name="nav_accounts">Akun</string>
     <string name="nav_settings">Pengaturan</string>
+    <string name="nav_ask">Asisten</string>
+    <string name="settings_accounts_title">Pengaturan Rekening</string>
+    <string name="settings_accounts_desc">Bank, e-wallet &amp; tunai</string>
+    <string name="settings_system_title">Pengaturan Sistem</string>
+    <string name="settings_system_desc">Tema, AI, cadangan &amp; data</string>
 
     <string name="action_voice">Catat suara</string>
     <string name="action_add">Tambah</string>
