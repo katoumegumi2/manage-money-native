@@ -3,7 +3,9 @@ package com.taufik.managemoney.ui
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -17,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.taufik.managemoney.ui.components.AddFab
@@ -84,7 +87,10 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
         VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE,
         SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE,
     )
-    val showChrome = currentDestination?.route !in fullScreenRoutes
+    // Saat keyboard muncul, sembunyikan bottom nav + FAB agar input (mis. chat AI) menempel
+    // ke atas keyboard (tak ada celah setinggi navbar).
+    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val showChrome = currentDestination?.route !in fullScreenRoutes && !imeVisible
 
     fun openTab(route: String) {
         navController.navigate(route) {
