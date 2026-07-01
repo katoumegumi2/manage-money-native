@@ -99,6 +99,12 @@
     <!-- Laporan -->
     <string name="reports_empty">Belum ada pengeluaran bulan ini</string>
     <string name="reports_trend_title">Tren 6 bulan</string>
+    <string name="reports_tab_summary">Ringkasan</string>
+    <string name="reports_tab_expense">Pengeluaran</string>
+    <string name="reports_expense_center">Total keluar</string>
+    <string name="reports_categories_count">%1$d kategori</string>
+    <string name="reports_avg_per_day">Rata-rata / hari</string>
+    <string name="reports_top_category">Kategori terbesar</string>
     <string name="reports_trend_empty">Belum cukup data untuk grafik tren</string>
 
     <!-- Pengaturan AI -->

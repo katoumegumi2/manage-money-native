@@ -21,12 +21,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +49,10 @@ import com.taufik.managemoney.core.formatRupiah
 import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.ui.components.BalanceHeroCard
 import com.taufik.managemoney.ui.components.BalanceHeroStat
+import com.taufik.managemoney.ui.components.DonutChart
+import com.taufik.managemoney.ui.components.DonutSlice
+import java.time.LocalDate
+import java.time.ZoneId
 import com.taufik.managemoney.ui.theme.Expense
 import com.taufik.managemoney.ui.theme.ExpenseOnDark
 import com.taufik.managemoney.ui.theme.Gold
@@ -51,6 +62,9 @@ import com.taufik.managemoney.ui.theme.MonoFamily
 import com.taufik.managemoney.ui.theme.MutedOnDark
 import com.taufik.managemoney.ui.util.categoryVisual
 
+private enum class ReportTab { SUMMARY, EXPENSE }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
     onAskAi: () -> Unit = {},
@@ -58,15 +72,16 @@ fun ReportsScreen(
     viewModel: ReportsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var tab by remember { mutableStateOf(ReportTab.SUMMARY) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
     ) {
         // Header + periode
-        Column(modifier = Modifier.padding(top = 14.dp, bottom = 14.dp)) {
+        Column(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp)) {
             Text(
                 text = stringResource(R.string.nav_reports),
                 style = MaterialTheme.typography.headlineMedium,
@@ -80,16 +95,116 @@ fun ReportsScreen(
             }
         }
 
-        NetHeroCard(state)
-        Spacer(Modifier.height(14.dp))
-        InsightCard(state.insight, onGenerate = viewModel::generateInsight)
-        Spacer(Modifier.height(10.dp))
-        AskAiButton(onAskAi)
-        Spacer(Modifier.height(14.dp))
-        CategorySection(state)
-        Spacer(Modifier.height(14.dp))
-        TrendSection(state)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp)) {
+            val options = listOf(
+                ReportTab.SUMMARY to R.string.reports_tab_summary,
+                ReportTab.EXPENSE to R.string.reports_tab_expense,
+            )
+            options.forEachIndexed { index, (value, labelRes) ->
+                SegmentedButton(
+                    selected = tab == value,
+                    onClick = { tab = value },
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                ) { Text(stringResource(labelRes)) }
+            }
+        }
+
+        when (tab) {
+            ReportTab.SUMMARY -> {
+                NetHeroCard(state)
+                Spacer(Modifier.height(14.dp))
+                InsightCard(state.insight, onGenerate = viewModel::generateInsight)
+                Spacer(Modifier.height(10.dp))
+                AskAiButton(onAskAi)
+                Spacer(Modifier.height(14.dp))
+                CategorySection(state)
+                Spacer(Modifier.height(14.dp))
+                TrendSection(state)
+            }
+            ReportTab.EXPENSE -> ExpenseTab(state, onAskAi)
+        }
         Spacer(Modifier.height(96.dp))
+    }
+}
+
+/** Tab Pengeluaran: donut besar + kartu statistik + rincian kategori. */
+@Composable
+private fun ExpenseTab(state: ReportsUiState, onAskAi: () -> Unit) {
+    if (state.bars.isEmpty()) {
+        SectionCard {
+            Text(
+                text = stringResource(R.string.reports_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
+        }
+        return
+    }
+    val total = state.bars.sumOf { it.total }
+    SectionCard {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+            DonutChart(
+                slices = state.bars.map { DonutSlice(it.total, categoryVisual(TxType.PENGELUARAN, it.label).stroke) },
+                diameter = 190.dp,
+                ringWidth = 26.dp,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringResource(R.string.reports_expense_center),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = formatRupiah(total),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = stringResource(R.string.reports_categories_count, state.bars.size),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+    Spacer(Modifier.height(12.dp))
+    val day = remember { LocalDate.now(ZoneId.of("Asia/Jakarta")).dayOfMonth }.coerceAtLeast(1)
+    val top = state.bars.maxByOrNull { it.total }
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        StatCard(Modifier.weight(1f), stringResource(R.string.reports_avg_per_day), formatRupiah(total / day))
+        StatCard(
+            Modifier.weight(1f),
+            stringResource(R.string.reports_top_category),
+            top?.label ?: "-",
+            sub = top?.let { formatRupiah(it.total) },
+        )
+    }
+    Spacer(Modifier.height(12.dp))
+    CategorySection(state)
+    Spacer(Modifier.height(12.dp))
+    AskAiButton(onAskAi)
+}
+
+@Composable
+private fun StatCard(modifier: Modifier, label: String, value: String, sub: String? = null) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(14.dp),
+    ) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+        if (sub != null) {
+            Text(sub, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
