@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -135,8 +136,8 @@ fun NominalField(
     }
 }
 
-/** Kategori sesuai tipe sebagai chip berikon (terpilih = gaya aktif). */
-@OptIn(ExperimentalLayoutApi::class)
+/** Kategori sesuai tipe: dropdown (kotak berikon + daftar berikon), agar tak berantakan dengan banyak pilihan. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KategoriPicker(
     tipe: TxType,
@@ -145,23 +146,47 @@ fun KategoriPicker(
     modifier: Modifier = Modifier,
 ) {
     val c = AppTheme.colors
+    var expanded by remember { mutableStateOf(false) }
     Column(modifier.fillMaxWidth()) {
         FieldLabel(stringResource(R.string.confirm_tile_category))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Categories.forType(tipe).forEach { k ->
-                val on = k == selected
-                Row(
-                    Modifier
-                        .clip(CircleShape)
-                        .background(if (on) c.chipOn else c.field)
-                        .then(if (on && c.isDark) Modifier.border(1.5.dp, c.accent, CircleShape) else Modifier)
-                        .clickable { onSelect(k) }
-                        .padding(start = 10.dp, end = 13.dp, top = 7.dp, bottom = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Sol(categoryVisual(tipe, k).icon, tint = if (on) c.chipOnContent else c.accentText, size = 16.dp)
-                    Spacer(Modifier.width(6.dp))
-                    Text(kategoriLabel(k), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (on) c.chipOnContent else c.chipOffContent)
+        androidx.compose.material3.ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+            Row(
+                Modifier
+                    .menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(c.field)
+                    .border(1.5.dp, if (expanded) c.accent else c.line, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(Modifier.size(30.dp).clip(CircleShape).background(c.accentSoft), contentAlignment = Alignment.Center) {
+                    Sol(categoryVisual(tipe, selected).icon, tint = if (c.isDark) c.accent else c.accentText, size = 16.dp)
+                }
+                Spacer(Modifier.width(10.dp))
+                Text(kategoriLabel(selected), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = c.ink, modifier = Modifier.weight(1f))
+                Sol(R.drawable.sol_chevron_down, tint = c.muted, size = 18.dp)
+            }
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                containerColor = if (c.isDark) Color(0xFF1C2029) else Color.White,
+                shape = RoundedCornerShape(18.dp),
+            ) {
+                Categories.forType(tipe).forEach { k ->
+                    val on = k == selected
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = {
+                            Text(kategoriLabel(k), style = MaterialTheme.typography.bodyMedium, fontWeight = if (on) FontWeight.Bold else FontWeight.Medium, color = if (on) c.accentText else c.ink)
+                        },
+                        leadingIcon = { Sol(categoryVisual(tipe, k).icon, tint = if (on) c.accent else c.muted, size = 18.dp) },
+                        trailingIcon = if (on) {
+                            { Sol(R.drawable.sol_check, tint = c.accent, size = 16.dp) }
+                        } else {
+                            null
+                        },
+                        onClick = { onSelect(k); expanded = false },
+                    )
                 }
             }
         }

@@ -256,7 +256,7 @@
     <string name="record_voice">Suara</string>
     <string name="record_voice_sub">Ucapkan saja, jeda boleh</string>
     <string name="record_photo">Foto struk</string>
-    <string name="record_photo_sub">Dari galeri / bukti bayar</string>
+    <string name="record_photo_sub">Langsung dari kamera</string>
     <string name="record_type">Ketik</string>
     <string name="record_type_sub">Bahasa sehari-hari</string>
     <string name="record_manual">Manual</string>
@@ -367,4 +367,6 @@
     <string name="history_period_3m">3 bulan</string>
     <string name="history_period_year">Tahun</string>
     <string name="history_period_all">Semua</string>
+    <string name="parse_camera">Foto struk</string>
+    <string name="parse_gallery">Dari galeri</string>
 </resources>

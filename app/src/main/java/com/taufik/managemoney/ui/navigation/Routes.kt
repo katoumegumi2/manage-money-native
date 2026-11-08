@@ -22,11 +22,13 @@ const val PARSE_INPUT_ROUTE = "parse"
 /** Argumen opsional layar Catat: teks awal (diproses otomatis) & buka pemilih foto langsung. */
 const val ARG_PARSE_TEXT = "text"
 const val ARG_PARSE_PICK = "pick"
-const val PARSE_INPUT_PATTERN = "parse?$ARG_PARSE_TEXT={$ARG_PARSE_TEXT}&$ARG_PARSE_PICK={$ARG_PARSE_PICK}"
+const val ARG_PARSE_CAMERA = "camera"
+const val PARSE_INPUT_PATTERN = "parse?$ARG_PARSE_TEXT={$ARG_PARSE_TEXT}&$ARG_PARSE_PICK={$ARG_PARSE_PICK}&$ARG_PARSE_CAMERA={$ARG_PARSE_CAMERA}"
 
-fun parseRoute(text: String? = null, pickImage: Boolean = false): String {
+/** [pickImage] = buka galeri; [camera] = langsung buka kamera bawaan untuk foto struk. */
+fun parseRoute(text: String? = null, pickImage: Boolean = false, camera: Boolean = false): String {
     val t = text?.let { android.net.Uri.encode(it) } ?: ""
-    return "parse?$ARG_PARSE_TEXT=$t&$ARG_PARSE_PICK=$pickImage"
+    return "parse?$ARG_PARSE_TEXT=$t&$ARG_PARSE_PICK=$pickImage&$ARG_PARSE_CAMERA=$camera"
 }
 
 /** Form input manual transaksi. */

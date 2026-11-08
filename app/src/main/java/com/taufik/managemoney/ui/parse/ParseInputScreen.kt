@@ -60,6 +60,7 @@ fun ParseInputScreen(
     onManual: () -> Unit,
     initialText: String? = null,
     autoPickImage: Boolean = false,
+    autoCamera: Boolean = false,
     viewModel: ParseInputViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -70,6 +71,23 @@ fun ParseInputScreen(
     ) { uris -> viewModel.processImages(uris) }
     val launchPicker = { pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
 
+    // Kamera bawaan HP (kualitas penuh) → file sementara via FileProvider → langsung diproses AI.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var cameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+    val takePhoto = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        val uri = cameraUri?.let(android.net.Uri::parse)
+        if (ok && uri != null) viewModel.processImages(listOf(uri))
+    }
+    val launchCamera = {
+        val dir = java.io.File(context.cacheDir, "camera").apply { mkdirs() }
+        dir.listFiles()?.forEach { it.delete() } // bersihkan foto sebelumnya
+        val file = java.io.File(dir, "struk_${System.currentTimeMillis()}.jpg")
+        val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", file)
+        cameraUri = uri.toString()
+        runCatching { takePhoto.launch(uri) }
+        Unit
+    }
+
     // Argumen awal hanya dipakai sekali (tidak terulang saat kembali dari Konfirmasi).
     var consumedArgs by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -78,6 +96,8 @@ fun ParseInputScreen(
         if (initialText != null) {
             viewModel.setText(initialText)
             viewModel.process()
+        } else if (autoCamera) {
+            launchCamera()
         } else if (autoPickImage) {
             launchPicker()
         }
@@ -160,19 +180,26 @@ fun ParseInputScreen(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 GhostPillButton(
-                    stringResource(R.string.parse_image),
+                    stringResource(R.string.parse_camera),
+                    onClick = launchCamera,
+                    enabled = !state.loading,
+                    icon = R.drawable.sol_camera,
+                    modifier = Modifier.weight(1f),
+                )
+                GhostPillButton(
+                    stringResource(R.string.parse_gallery),
                     onClick = launchPicker,
                     enabled = !state.loading,
                     icon = R.drawable.sol_gallery,
                     modifier = Modifier.weight(1f),
                 )
-                GhostPillButton(
-                    stringResource(R.string.action_add_manual),
-                    onClick = onManual,
-                    icon = R.drawable.sol_pen,
-                    modifier = Modifier.weight(1f),
-                )
             }
+            GhostPillButton(
+                stringResource(R.string.action_add_manual),
+                onClick = onManual,
+                icon = R.drawable.sol_pen,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

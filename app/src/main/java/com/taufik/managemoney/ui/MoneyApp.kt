@@ -135,7 +135,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                     userName = authState.name ?: authState.email?.substringBefore("@"),
                     onRecord = { showRecordSheet = true },
                     onTransfer = { navController.navigate(MANUAL_ENTRY_ROUTE) },
-                    onScan = { navController.navigate(parseRoute(pickImage = true)) },
+                    onScan = { navController.navigate(parseRoute(camera = true)) },
                 )
             }
             composable(TopDestination.HISTORY.route) {
@@ -201,11 +201,13 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 arguments = listOf(
                     navArgument(ARG_PARSE_TEXT) { type = NavType.StringType; nullable = true; defaultValue = null },
                     navArgument(ARG_PARSE_PICK) { type = NavType.BoolType; defaultValue = false },
+                    navArgument(com.taufik.managemoney.ui.navigation.ARG_PARSE_CAMERA) { type = NavType.BoolType; defaultValue = false },
                 ),
             ) { entry ->
                 ParseInputScreen(
                     initialText = entry.arguments?.getString(ARG_PARSE_TEXT)?.takeIf { it.isNotBlank() },
                     autoPickImage = entry.arguments?.getBoolean(ARG_PARSE_PICK) ?: false,
+                    autoCamera = entry.arguments?.getBoolean(com.taufik.managemoney.ui.navigation.ARG_PARSE_CAMERA) ?: false,
                     onBack = { navController.popBackStack() },
                     onParsed = { payload -> navController.navigate(confirmRoute(payload)) },
                     onManual = { navController.navigate(MANUAL_ENTRY_ROUTE) },
@@ -259,7 +261,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 showRecordSheet = false
                 when (mode) {
                     RecordMode.VOICE -> navController.navigate(VOICE_INPUT_ROUTE)
-                    RecordMode.PHOTO -> navController.navigate(parseRoute(pickImage = true))
+                    RecordMode.PHOTO -> navController.navigate(parseRoute(camera = true))
                     RecordMode.TYPE -> navController.navigate(PARSE_INPUT_ROUTE)
                     RecordMode.MANUAL -> navController.navigate(MANUAL_ENTRY_ROUTE)
                 }
