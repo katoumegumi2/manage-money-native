@@ -117,7 +117,7 @@ fun appColors(accent: Color, dark: Boolean, flow: FlowColorMode): AppColors {
             isDark = true,
             accent = accent, accentDeep = mix(accent, Color.Black, 0.78f), onAccent = onAcc,
             accentSoft = accent.copy(alpha = 0.18f), accentText = mix(accent, Color.White, 0.75f),
-            bg = Color(0xFF090B10), card = Color(0xFF15181F), cardBorder = Color(0x17FFFFFF),
+            bg = Color(0xFF090B10), card = Color(0xFF161A21), cardBorder = Color(0x17FFFFFF),
             field = Color(0x0DFFFFFF), line = Color(0x12FFFFFF),
             ink = ink, body = Color(0xFFB8BFCC), muted = Color(0xFF8C95A5),
             income = f.income, expense = f.expense, transfer = Color(0xFF8FA6C4),

@@ -10,4 +10,8 @@ class ObserveAllTransactions @Inject constructor(
     private val transactionRepository: TransactionRepository,
 ) {
     operator fun invoke(): Flow<List<Transaction>> = transactionRepository.observeAll()
+
+    /** [from] null = seluruh riwayat. */
+    operator fun invoke(from: java.time.LocalDate?, to: java.time.LocalDate): Flow<List<Transaction>> =
+        if (from == null) transactionRepository.observeAll() else transactionRepository.observeBetween(from, to)
 }

@@ -361,4 +361,10 @@
     <string name="date_yesterday">Kemarin</string>
     <string name="date_pick">Pilih</string>
     <string name="ask_header_sub">%1$s · paham seluruh catatanmu</string>
+    <!-- Periode Riwayat -->
+    <string name="history_period_week">7 hari</string>
+    <string name="history_period_month">Bulan</string>
+    <string name="history_period_3m">3 bulan</string>
+    <string name="history_period_year">Tahun</string>
+    <string name="history_period_all">Semua</string>
 </resources>

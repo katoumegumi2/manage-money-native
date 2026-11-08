@@ -8,6 +8,7 @@ import com.taufik.managemoney.domain.model.MonthlyTotal
 import com.taufik.managemoney.domain.model.Transaction
 import com.taufik.managemoney.domain.model.TxType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +25,12 @@ class TransactionRepository @Inject constructor(
 
     fun observeAll(): Flow<List<Transaction>> =
         transactionDao.observeAll().map { list -> list.map { it.toDomain() } }
+            .flowOn(kotlinx.coroutines.Dispatchers.Default)
+
+    /** Transaksi dalam rentang [from]..[to] (inklusif). Pemetaan entity→domain di luar thread UI. */
+    fun observeBetween(from: java.time.LocalDate, to: java.time.LocalDate): Flow<List<Transaction>> =
+        transactionDao.observeBetween(from.toString(), to.toString()).map { list -> list.map { it.toDomain() } }
+            .flowOn(kotlinx.coroutines.Dispatchers.Default)
 
     suspend fun getById(id: String): Transaction? = transactionDao.getById(id)?.toDomain()
 

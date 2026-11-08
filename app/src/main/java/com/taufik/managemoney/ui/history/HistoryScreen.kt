@@ -42,6 +42,8 @@ import com.taufik.managemoney.domain.model.TxType
 import com.taufik.managemoney.ui.components.AccountAvatar
 import com.taufik.managemoney.ui.components.LocalBottomBarSpace
 import com.taufik.managemoney.ui.components.SmallPill
+import com.taufik.managemoney.ui.components.SegmentedPills
+import com.taufik.managemoney.domain.usecase.HistoryPeriod
 import com.taufik.managemoney.ui.components.Sol
 import com.taufik.managemoney.ui.components.TxRow
 import com.taufik.managemoney.ui.components.appCard
@@ -73,6 +75,21 @@ fun HistoryScreen(
                 if (!state.loading) SmallPill(stringResource(R.string.history_count, state.count), on = true)
             }
         }
+        item {
+            SegmentedPills(
+                options = listOf(
+                    HistoryPeriod.WEEK to stringResource(R.string.history_period_week),
+                    HistoryPeriod.MONTH to stringResource(R.string.history_period_month),
+                    HistoryPeriod.THREE_MONTHS to stringResource(R.string.history_period_3m),
+                    HistoryPeriod.YEAR to stringResource(R.string.history_period_year),
+                    HistoryPeriod.ALL to stringResource(R.string.history_period_all),
+                ),
+                selected = state.filter.period,
+                onSelect = viewModel::setPeriod,
+                fill = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
         item { SearchPill(state.filter.query, viewModel::setQuery) }
         item {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -98,7 +115,7 @@ fun HistoryScreen(
             item { SummaryStrip(state.totalMasuk, state.totalKeluar) }
         }
         if (state.isEmpty && !state.loading) {
-            item { EmptyHistory(hasFilter = state.filter != HistoryFilter()) }
+            item { EmptyHistory(hasFilter = state.filter.copy(period = HistoryPeriod.MONTH) != HistoryFilter()) }
         } else {
             state.groups.forEach { group ->
                 item(key = "g-${group.label}") {

@@ -38,6 +38,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            // App pribadi (sideload): tanda tangan debug agar bisa dipasang menimpa build debug tanpa hapus data.
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

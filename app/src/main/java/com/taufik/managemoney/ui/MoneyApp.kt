@@ -120,6 +120,11 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
             navController = navController,
             startDestination = TopDestination.HOME.route,
             modifier = Modifier.fillMaxSize(),
+            // Default Navigation = crossfade 700 ms → terasa lambat saat pindah tab cepat. Pakai fade singkat.
+            enterTransition = { androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(150)) },
+            exitTransition = { androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(90)) },
+            popEnterTransition = { androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(150)) },
+            popExitTransition = { androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(90)) },
         ) {
             composable(TopDestination.HOME.route) {
                 HomeScreen(

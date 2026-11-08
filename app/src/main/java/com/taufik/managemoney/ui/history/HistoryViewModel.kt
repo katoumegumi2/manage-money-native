@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
@@ -25,6 +29,7 @@ private val localeId = Locale.forLanguageTag("id-ID")
 private val dateHeaderFormat = DateTimeFormatter.ofPattern("EEEE, d MMM yyyy", localeId)
 
 data class HistoryFilter(
+    val period: com.taufik.managemoney.domain.usecase.HistoryPeriod = com.taufik.managemoney.domain.usecase.HistoryPeriod.MONTH,
     val tipe: TxType? = null,
     val accountId: String? = null,
     val query: String = "",
@@ -54,8 +59,18 @@ class HistoryViewModel @Inject constructor(
     private val today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))
     private val filter = MutableStateFlow(HistoryFilter())
 
+    /** Hanya ambil transaksi periode terpilih dari DB (bukan seluruh riwayat); batas atas terbuka. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val periodTx = filter
+        .map { it.period }
+        .distinctUntilChanged()
+        .flatMapLatest { p ->
+            val (from, _) = com.taufik.managemoney.domain.usecase.historyRange(p, today)
+            observeAll(from, java.time.LocalDate.of(9999, 12, 31))
+        }
+
     val state: StateFlow<HistoryUiState> = combine(
-        observeAll(),
+        periodTx,
         observeAccounts(),
         filter,
     ) { transactions, accounts, f ->
@@ -92,11 +107,13 @@ class HistoryViewModel @Inject constructor(
             totalKeluar = filtered.filter { it.tipe == TxType.PENGELUARAN }.sumOf { it.nominal },
             count = filtered.size,
         )
-    }.stateIn(
+    }.flowOn(kotlinx.coroutines.Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = HistoryUiState(),
     )
+
+    fun setPeriod(p: com.taufik.managemoney.domain.usecase.HistoryPeriod) = filter.update { it.copy(period = p) }
 
     fun setTipe(tipe: TxType?) = filter.update { it.copy(tipe = tipe) }
     fun setAccount(accountId: String?) = filter.update { it.copy(accountId = accountId) }

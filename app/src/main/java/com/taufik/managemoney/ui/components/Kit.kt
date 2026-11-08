@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -66,9 +67,9 @@ fun Sol(
 fun Modifier.appCard(shape: Shape = RoundedCornerShape(24.dp), elevated: Boolean = true): Modifier = composed {
     val c = AppTheme.colors
     if (c.isDark) {
+        // Satu lapis solid + garis tepi (sebelumnya 2 lapis semi-transparan → blending mahal di GPU tiap kartu).
         this.clip(shape)
-            .background(Brush.verticalGradient(listOf(Color(0x14FFFFFF), Color(0x07FFFFFF))))
-            .background(c.card.copy(alpha = 0.55f))
+            .background(c.card)
             .border(1.dp, c.cardBorder, shape)
     } else {
         (if (elevated) this.shadow(10.dp, shape, ambientColor = Color(0x22141E3C), spotColor = Color(0x18141E3C)) else this)
@@ -80,33 +81,27 @@ fun Modifier.appCard(shape: Shape = RoundedCornerShape(24.dp), elevated: Boolean
 /** Latar layar: terang = gradasi aksen tipis di atas; gelap = pendar aksen di pojok kanan atas. */
 fun Modifier.screenBackground(): Modifier = composed {
     val c = AppTheme.colors
-    if (c.isDark) {
-        this.background(c.bg).drawBehind {
-            drawRect(
-                Brush.radialGradient(
-                    colors = listOf(c.accent.copy(alpha = 0.40f), Color.Transparent),
-                    center = Offset(size.width * 0.9f, -size.height * 0.04f),
-                    radius = size.width * 1.05f,
-                ),
+    // Brush di-cache per ukuran (drawWithCache) dan gradien hanya digambar di bagian atas layar
+    // — sebelumnya 2–3 lapis layar penuh dibuat ulang tiap frame (GPU ±8 ms/frame saat scroll).
+    this.background(c.bg).drawWithCache {
+        val h = size.height
+        if (c.isDark) {
+            val glowH = h * 0.55f
+            val glow = Brush.radialGradient(
+                colors = listOf(c.accent.copy(alpha = 0.38f), Color.Transparent),
+                center = Offset(size.width * 0.9f, -h * 0.04f),
+                radius = size.width * 1.05f,
             )
-            drawRect(
-                Brush.radialGradient(
-                    colors = listOf(c.accent.copy(alpha = 0.10f), Color.Transparent),
-                    center = Offset(-size.width * 0.1f, size.height * 0.7f),
-                    radius = size.width * 0.9f,
-                ),
+            onDrawBehind { drawRect(glow, size = androidx.compose.ui.geometry.Size(size.width, glowH)) }
+        } else {
+            val topH = h * 0.42f
+            val wash = Brush.verticalGradient(
+                0f to mix(c.accent, Color.White, 0.30f),
+                0.52f to mix(c.accent, c.bg, 0.10f),
+                1f to c.bg,
+                endY = topH,
             )
-        }
-    } else {
-        this.background(c.bg).drawBehind {
-            drawRect(
-                Brush.verticalGradient(
-                    0f to mix(c.accent, Color.White, 0.30f),
-                    0.22f to mix(c.accent, c.bg, 0.10f),
-                    0.40f to c.bg,
-                    endY = size.height,
-                ),
-            )
+            onDrawBehind { drawRect(wash, size = androidx.compose.ui.geometry.Size(size.width, topH)) }
         }
     }
 }

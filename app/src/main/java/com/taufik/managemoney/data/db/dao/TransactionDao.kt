@@ -27,6 +27,10 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY tanggal DESC, createdAt DESC")
     fun observeAll(): Flow<List<TransactionEntity>>
 
+    /** Transaksi dalam rentang tanggal ISO inklusif (memakai index `tanggal`) — Riwayat & Laporan per periode. */
+    @Query("SELECT * FROM transactions WHERE tanggal >= :fromIso AND tanggal <= :toIso ORDER BY tanggal DESC, createdAt DESC")
+    fun observeBetween(fromIso: String, toIso: String): Flow<List<TransactionEntity>>
+
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): TransactionEntity?
 

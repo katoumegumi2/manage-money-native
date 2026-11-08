@@ -5,6 +5,7 @@ import com.taufik.managemoney.domain.model.CategorySum
 import com.taufik.managemoney.domain.model.Transaction
 import com.taufik.managemoney.domain.model.TxType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -100,6 +101,11 @@ fun buildPeriodReport(txs: List<Transaction>, period: ReportPeriod, today: Local
 class ObservePeriodReport @Inject constructor(
     private val transactionRepository: TransactionRepository,
 ) {
-    operator fun invoke(period: ReportPeriod, today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))): Flow<PeriodReport> =
-        transactionRepository.observeAll().map { buildPeriodReport(it, period, today) }
+    operator fun invoke(period: ReportPeriod, today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))): Flow<PeriodReport> {
+        // Hanya baca transaksi dalam rentang periode (bukan seluruh riwayat), hitung di luar thread UI.
+        val probe = buildPeriodReport(emptyList(), period, today)
+        return transactionRepository.observeBetween(probe.start, probe.end)
+            .map { buildPeriodReport(it, period, today) }
+            .flowOn(kotlinx.coroutines.Dispatchers.Default)
+    }
 }
