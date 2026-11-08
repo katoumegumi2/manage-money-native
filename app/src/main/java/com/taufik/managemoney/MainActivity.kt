@@ -23,13 +23,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val mode by themeViewModel.mode.collectAsStateWithLifecycle()
-            val dark = when (mode) {
+            val prefs by themeViewModel.prefs.collectAsStateWithLifecycle()
+            val dark = when (prefs.mode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            ManageMoneyTheme(darkTheme = dark) {
+            ManageMoneyTheme(
+                darkTheme = dark,
+                accent = androidx.compose.ui.graphics.Color(prefs.accentArgb),
+                flowColor = prefs.flowColor,
+            ) {
                 MoneyApp()
             }
         }

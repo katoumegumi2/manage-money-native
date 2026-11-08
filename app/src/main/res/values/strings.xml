@@ -250,4 +250,62 @@
     <string name="share_processing">Membaca bukti bayar…</string>
     <string name="share_empty">Tidak terdeteksi transaksi dari yang dibagikan.</string>
     <string name="share_unsupported">Jenis konten ini belum didukung.</string>
+    <!-- Redesign v4: modal Catat -->
+    <string name="record_title">Catat transaksi</string>
+    <string name="record_subtitle">Pilih cara paling cepat buatmu</string>
+    <string name="record_voice">Suara</string>
+    <string name="record_voice_sub">Ucapkan saja, jeda boleh</string>
+    <string name="record_photo">Foto struk</string>
+    <string name="record_photo_sub">Dari galeri / bukti bayar</string>
+    <string name="record_type">Ketik</string>
+    <string name="record_type_sub">Bahasa sehari-hari</string>
+    <string name="record_manual">Manual</string>
+    <string name="record_manual_sub">Isi form sendiri</string>
+    <string name="record_quick_hint">beli kopi 25rb sama bensin ceban…</string>
+    <!-- Redesign v4: Beranda -->
+    <string name="home_total_short">Total saldo</string>
+    <string name="home_account_count">%1$d akun</string>
+    <string name="home_show_balance">Tampilkan saldo</string>
+    <string name="home_hide_balance">Sembunyikan saldo</string>
+    <string name="home_action_record">Catat</string>
+    <string name="home_action_transfer">Transfer</string>
+    <string name="home_action_scan">Struk</string>
+    <string name="home_net_month">Net bulan ini</string>
+    <string name="home_reorder">Atur urutan</string>
+    <string name="home_reorder_title">Atur urutan akun</string>
+    <string name="home_reorder_hint">Tekan lama lalu geser kartu untuk memindahkan.</string>
+    <string name="home_spend_month">Pengeluaran · %1$s</string>
+    <string name="home_month_running"> (berjalan)</string>
+    <string name="home_six_months">6 bulan</string>
+    <string name="home_spend_first">Bulan pertama dalam grafik</string>
+    <string name="home_spend_up">+%1$d%% vs bulan lalu</string>
+    <string name="home_spend_down">−%1$d%% vs bulan lalu</string>
+    <!-- Redesign v4: Laporan -->
+    <string name="reports_six_months">6 bulan terakhir</string>
+    <string name="reports_meter_title">Pengeluaran dibanding pemasukan</string>
+    <string name="reports_meter_caption">dari pemasukan terpakai</string>
+    <string name="reports_left">Sisa Rp %1$s dalam 6 bulan</string>
+    <string name="reports_over">Lebih keluar Rp %1$s dalam 6 bulan</string>
+    <string name="reports_flow">Arus kas</string>
+    <string name="reports_net">Net</string>
+    <string name="reports_flow_foot">*bulan berjalan · ketuk atau geser grafik untuk ganti bulan</string>
+    <string name="reports_where">Ke mana uangmu</string>
+    <string name="reports_where_empty">Belum ada pengeluaran bulan ini.</string>
+    <string name="reports_insight">Insight AI</string>
+    <string name="reports_insight_make">Buat insight</string>
+    <!-- Redesign v4: Konfirmasi -->
+    <plurals name="confirm_count">
+        <item quantity="one">%1$d transaksi terbaca</item>
+        <item quantity="other">%1$d transaksi terbaca</item>
+    </plurals>
+    <string name="confirm_saving">Menyimpan…</string>
+    <string name="confirm_need_check_short">Perlu dicek</string>
+    <string name="confirm_check_then_save">Cek lalu simpan</string>
+    <string name="confirm_tile_category">Kategori</string>
+    <string name="confirm_tile_from">Dari akun</string>
+    <string name="confirm_tile_to">Ke akun</string>
+    <string name="confirm_tile_date">Tanggal</string>
+    <string name="confirm_edit_detail">Ubah detail</string>
+    <string name="confirm_hide_editor">Tutup editor</string>
+    <string name="confirm_pick_account">Pilih akun</string>
 </resources>

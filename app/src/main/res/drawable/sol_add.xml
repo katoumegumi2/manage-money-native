@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solar Icons (480 Design, CC BY 4.0) — dibuat oleh gen_assets.py, jangan diedit manual. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M4 12L20 12" android:strokeColor="#FF000000" android:strokeWidth="2.2" android:strokeLineCap="round" />
+    <path android:pathData="M12.0204 4L12.0205 20.0003" android:strokeColor="#FF000000" android:strokeWidth="2.2" android:strokeLineCap="round" />
+</vector>

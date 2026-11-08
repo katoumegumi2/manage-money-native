@@ -8,44 +8,52 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.taufik.managemoney.R
 
-// Redesign v3: Plus Jakarta Sans = satu-satunya family untuk seluruh UI.
-// (lihat docs/private/design_handoff_catatan_keuangan)
-val PlusJakarta = FontFamily(
-    Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
-    Font(R.font.plus_jakarta_sans_medium, FontWeight.Medium),
-    Font(R.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
-    Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold),
-    Font(R.font.plus_jakarta_sans_extrabold, FontWeight.ExtraBold),
+// Redesign v4: judul = Space Grotesk, teks = Inter, angka = JetBrains Mono (tabular).
+// File statis per ketebalan (dibuat dari variable font + subset Latin) — variationSettings tak andal di semua HP.
+val SpaceGrotesk = FontFamily(
+    Font(R.font.space_grotesk_medium, FontWeight.Normal),
+    Font(R.font.space_grotesk_medium, FontWeight.Medium),
+    Font(R.font.space_grotesk_semibold, FontWeight.SemiBold),
+    Font(R.font.space_grotesk_bold, FontWeight.Bold),
+    Font(R.font.space_grotesk_bold, FontWeight.ExtraBold),
+)
+val Inter = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium),
+    Font(R.font.inter_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_bold, FontWeight.Bold),
+    Font(R.font.inter_extrabold, FontWeight.ExtraBold),
+)
+val MonoFamily = FontFamily(
+    Font(R.font.jetbrains_mono_regular, FontWeight.Normal),
+    Font(R.font.jetbrains_mono_medium, FontWeight.Medium),
+    Font(R.font.jetbrains_mono_semibold, FontWeight.SemiBold),
+    Font(R.font.jetbrains_mono_bold, FontWeight.Bold),
+    Font(R.font.jetbrains_mono_bold, FontWeight.ExtraBold),
 )
 
-// Alias lama tetap menunjuk PJS → call-site (display/body/angka) tak perlu diubah massal.
-val SpaceGrotesk = PlusJakarta
-val Inter = PlusJakarta
-val MonoFamily = PlusJakarta
+/** Alias lama (dipakai beberapa layar v3). */
+val PlusJakarta = Inter
 
-// Fitur angka tabular (rata lebar digit) — dipakai di komponen nominal.
+// Fitur angka tabular (rata lebar digit).
 const val NumberFontFeature = "tnum"
 
+/** Gaya nominal uang: mono tabular. Pakai `.copy(fontSize=...)` sesuai konteks. */
+val MoneyStyle = TextStyle(fontFamily = MonoFamily, fontWeight = FontWeight.Bold, fontFeatureSettings = NumberFontFeature, letterSpacing = (-0.3).sp)
+
 val AppTypography = Typography(
-    // Hero nominal detail (36/800, tracking rapat)
-    displayLarge = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, lineHeight = 42.sp, letterSpacing = (-0.9).sp, fontFeatureSettings = NumberFontFeature),
-    // Total saldo (27/800)
-    displayMedium = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.ExtraBold, fontSize = 27.sp, lineHeight = 32.sp, letterSpacing = (-0.7).sp, fontFeatureSettings = NumberFontFeature),
-    // Judul layar (25/800)
-    headlineMedium = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.ExtraBold, fontSize = 25.sp, lineHeight = 30.sp, letterSpacing = (-0.5).sp, fontFeatureSettings = NumberFontFeature),
-    headlineSmall = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 26.sp, letterSpacing = (-0.3).sp, fontFeatureSettings = NumberFontFeature),
-    titleLarge = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 26.sp, letterSpacing = (-0.3).sp, fontFeatureSettings = NumberFontFeature),
-    // Header section (15/700)
-    titleMedium = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 20.sp, fontFeatureSettings = NumberFontFeature),
-    titleSmall = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, lineHeight = 18.sp, fontFeatureSettings = NumberFontFeature),
-    bodyLarge = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp, fontFeatureSettings = NumberFontFeature),
-    // Judul baris transaksi/akun (~14.5/600 — caller set weight)
-    bodyMedium = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, fontFeatureSettings = NumberFontFeature),
-    // Nominal di list / link (14/600)
-    labelLarge = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, lineHeight = 18.sp, fontFeatureSettings = NumberFontFeature),
-    bodySmall = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp, fontFeatureSettings = NumberFontFeature),
-    // Meta / caption (12/500)
-    labelMedium = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp, fontFeatureSettings = NumberFontFeature),
-    // Label nav / caption uppercase (10–11/600)
-    labelSmall = TextStyle(fontFamily = PlusJakarta, fontWeight = FontWeight.SemiBold, fontSize = 10.sp, lineHeight = 14.sp, letterSpacing = 0.5.sp, fontFeatureSettings = NumberFontFeature),
+    displayLarge = TextStyle(fontFamily = MonoFamily, fontWeight = FontWeight.Bold, fontSize = 38.sp, lineHeight = 44.sp, letterSpacing = (-1.4).sp, fontFeatureSettings = NumberFontFeature),
+    displayMedium = TextStyle(fontFamily = MonoFamily, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-1).sp, fontFeatureSettings = NumberFontFeature),
+    displaySmall = TextStyle(fontFamily = MonoFamily, fontWeight = FontWeight.Bold, fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.5).sp, fontFeatureSettings = NumberFontFeature),
+    headlineMedium = TextStyle(fontFamily = SpaceGrotesk, fontWeight = FontWeight.Bold, fontSize = 26.sp, lineHeight = 32.sp, letterSpacing = (-0.5).sp),
+    headlineSmall = TextStyle(fontFamily = SpaceGrotesk, fontWeight = FontWeight.Bold, fontSize = 21.sp, lineHeight = 27.sp, letterSpacing = (-0.3).sp),
+    titleLarge = TextStyle(fontFamily = SpaceGrotesk, fontWeight = FontWeight.Bold, fontSize = 18.sp, lineHeight = 24.sp, letterSpacing = (-0.2).sp),
+    titleMedium = TextStyle(fontFamily = SpaceGrotesk, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 22.sp),
+    titleSmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, lineHeight = 18.sp),
+    bodyLarge = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 22.sp),
+    bodyMedium = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
+    bodySmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp),
+    labelLarge = TextStyle(fontFamily = Inter, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, lineHeight = 18.sp),
+    labelMedium = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp),
+    labelSmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 0.4.sp),
 )

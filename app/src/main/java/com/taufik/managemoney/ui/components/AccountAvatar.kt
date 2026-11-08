@@ -45,6 +45,8 @@ fun AccountAvatar(
     color: Color,
     modifier: Modifier = Modifier,
     size: Int = 38,
+    /** v4: logo dalam lingkaran putih (kartu akun). */
+    circle: Boolean = false,
 ) {
     val context = LocalContext.current
     val logoRes = remember(kode) {
@@ -56,17 +58,17 @@ fun AccountAvatar(
     }
     when {
         logoRes != 0 -> {
-            val corner = (size * 0.29f).dp
+            val shape = if (circle) androidx.compose.foundation.shape.CircleShape else RoundedCornerShape((size * 0.29f).dp)
             Image(
                 painter = painterResource(id = logoRes),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = modifier
                     .size(size.dp)
-                    .clip(RoundedCornerShape(corner))
+                    .clip(shape)
                     .background(Color.White)
-                    .border(1.dp, Color(0x14000000), RoundedCornerShape(corner))
-                    .padding((size * 0.12f).dp),
+                    .border(1.dp, Color(0x14000000), shape)
+                    .padding((size * if (circle) 0.14f else 0.12f).dp),
             )
         }
         // Tunai tanpa logo file → ilustrasi uang tunai (uang kertas + "Rp").

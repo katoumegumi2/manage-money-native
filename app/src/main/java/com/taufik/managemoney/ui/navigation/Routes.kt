@@ -19,6 +19,16 @@ const val VOICE_INPUT_ROUTE = "voice"
 /** Input cepat: ketik kalimat → parse AI → Konfirmasi (fallback "ketik saja"). */
 const val PARSE_INPUT_ROUTE = "parse"
 
+/** Argumen opsional layar Catat: teks awal (diproses otomatis) & buka pemilih foto langsung. */
+const val ARG_PARSE_TEXT = "text"
+const val ARG_PARSE_PICK = "pick"
+const val PARSE_INPUT_PATTERN = "parse?$ARG_PARSE_TEXT={$ARG_PARSE_TEXT}&$ARG_PARSE_PICK={$ARG_PARSE_PICK}"
+
+fun parseRoute(text: String? = null, pickImage: Boolean = false): String {
+    val t = text?.let { android.net.Uri.encode(it) } ?: ""
+    return "parse?$ARG_PARSE_TEXT=$t&$ARG_PARSE_PICK=$pickImage"
+}
+
 /** Form input manual transaksi. */
 const val MANUAL_ENTRY_ROUTE = "manual"
 

@@ -1,18 +1,25 @@
 package com.taufik.managemoney.ui
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.taufik.managemoney.ui.components.LocalBottomBarSpace
+import com.taufik.managemoney.ui.components.NavBarHeight
+import com.taufik.managemoney.ui.components.PillNavBar
+import com.taufik.managemoney.ui.components.RecordMode
+import com.taufik.managemoney.ui.components.RecordSheet
+import com.taufik.managemoney.ui.navigation.ARG_PARSE_PICK
+import com.taufik.managemoney.ui.navigation.ARG_PARSE_TEXT
+import com.taufik.managemoney.ui.navigation.PARSE_INPUT_PATTERN
+import com.taufik.managemoney.ui.navigation.parseRoute
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,7 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.taufik.managemoney.ui.components.AddFab
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -84,7 +90,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
 
     // Layar input/penuh menyembunyikan bottom nav + FAB.
     val fullScreenRoutes = setOf(
-        VOICE_INPUT_ROUTE, PARSE_INPUT_ROUTE, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE,
+        VOICE_INPUT_ROUTE, PARSE_INPUT_PATTERN, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE,
         SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE,
     )
     // Saat keyboard muncul, sembunyikan bottom nav + FAB agar input (mis. chat AI) menempel
@@ -100,40 +106,18 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            if (showChrome) {
-                // Bottom nav + FAB mic yang menumpuk di tepi atas bar (separuh masuk), bukan melayang.
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    NavigationBar {
-                        TopDestination.entries.forEachIndexed { index, dest ->
-                            // Sisipkan celah di tengah (slot FAB mic) antara Riwayat & Laporan.
-                            if (index == 2) Spacer(Modifier.weight(1f))
-                            val selected = currentDestination?.hierarchy?.any { it.route == dest.route } == true
-                            NavigationBarItem(
-                                selected = selected,
-                                onClick = { openTab(dest.route) },
-                                icon = { Icon(dest.icon, contentDescription = null) },
-                                label = { Text(stringResource(dest.labelRes)) },
-                            )
-                        }
-                    }
-                    AddFab(
-                        onClick = { navController.navigate(PARSE_INPUT_ROUTE) },
-                        onLongClick = { navController.navigate(VOICE_INPUT_ROUTE) },
-                        contentDescription = stringResource(R.string.action_add),
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = (-24).dp),
-                    )
-                }
-            }
-        },
-    ) { innerPadding ->
+    var showRecordSheet by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    val selectedTab = TopDestination.entries.firstOrNull { dest ->
+        currentDestination?.hierarchy?.any { it.route == dest.route } == true
+    }
+    val bottomSpace = if (showChrome) NavBarHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp
+
+    Box(Modifier.fillMaxSize()) {
+      CompositionLocalProvider(LocalBottomBarSpace provides bottomSpace) {
         NavHost(
             navController = navController,
             startDestination = TopDestination.HOME.route,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.fillMaxSize(),
         ) {
             composable(TopDestination.HOME.route) {
                 HomeScreen(
@@ -142,6 +126,9 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                     onEdit = { id -> navController.navigate(editTxRoute(id)) },
                     onSeeAllRecent = { openTab(TopDestination.HISTORY.route) },
                     userName = authState.name ?: authState.email?.substringBefore("@"),
+                    onRecord = { showRecordSheet = true },
+                    onTransfer = { navController.navigate(MANUAL_ENTRY_ROUTE) },
+                    onScan = { navController.navigate(parseRoute(pickImage = true)) },
                 )
             }
             composable(TopDestination.HISTORY.route) {
@@ -194,8 +181,16 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                     onBack = { navController.popBackStack() },
                 )
             }
-            composable(PARSE_INPUT_ROUTE) {
+            composable(
+                route = PARSE_INPUT_PATTERN,
+                arguments = listOf(
+                    navArgument(ARG_PARSE_TEXT) { type = NavType.StringType; nullable = true; defaultValue = null },
+                    navArgument(ARG_PARSE_PICK) { type = NavType.BoolType; defaultValue = false },
+                ),
+            ) { entry ->
                 ParseInputScreen(
+                    initialText = entry.arguments?.getString(ARG_PARSE_TEXT)?.takeIf { it.isNotBlank() },
+                    autoPickImage = entry.arguments?.getBoolean(ARG_PARSE_PICK) ?: false,
                     onBack = { navController.popBackStack() },
                     onParsed = { payload -> navController.navigate(confirmRoute(payload)) },
                     onManual = { navController.navigate(MANUAL_ENTRY_ROUTE) },
@@ -230,5 +225,34 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 )
             }
         }
+      }
+        if (showChrome) {
+            PillNavBar(
+                selected = selectedTab,
+                onSelect = { openTab(it.route) },
+                onAdd = { showRecordSheet = true },
+                onAddLong = { navController.navigate(VOICE_INPUT_ROUTE) },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
+
+    if (showRecordSheet) {
+        RecordSheet(
+            onDismiss = { showRecordSheet = false },
+            onPick = { mode ->
+                showRecordSheet = false
+                when (mode) {
+                    RecordMode.VOICE -> navController.navigate(VOICE_INPUT_ROUTE)
+                    RecordMode.PHOTO -> navController.navigate(parseRoute(pickImage = true))
+                    RecordMode.TYPE -> navController.navigate(PARSE_INPUT_ROUTE)
+                    RecordMode.MANUAL -> navController.navigate(MANUAL_ENTRY_ROUTE)
+                }
+            },
+            onQuickText = { text ->
+                showRecordSheet = false
+                navController.navigate(parseRoute(text = text))
+            },
+        )
     }
 }

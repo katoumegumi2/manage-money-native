@@ -28,4 +28,16 @@ class MoneyTest {
     fun `format jutaan`() {
         assertEquals("Rp 8.000.000", formatRupiah(8_000_000))
     }
+
+    @Test
+    fun `format ringkas jutaan ribuan dan satuan`() {
+        assertEquals("9,3 jt", formatShort(9_278_000))
+        assertEquals("4 jt", formatShort(4_034_000))
+        assertEquals("28 jt", formatShort(27_981_000))
+        assertEquals("513 rb", formatShort(513_000))
+        assertEquals("999", formatShort(999))
+        assertEquals("2 rb", formatShort(1_500))
+        assertEquals("800", formatShort(800))
+        assertEquals("−746 rb", formatShort(-746_000))
+    }
 }

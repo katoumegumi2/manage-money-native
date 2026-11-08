@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solar Icons (480 Design, CC BY 4.0) — dibuat oleh gen_assets.py, jangan diedit manual. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M2 12C2 10.7632 2 9.68872 2.02644 8.75H21.9736C22 9.68872 22 10.7632 22 12C22 16.714 22 19.071 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.071 2 16.714 2 12Z" android:fillColor="#FF000000" android:fillAlpha="0.5" android:fillType="evenOdd" />
+    <path android:pathData="M10.5 11.6045C11.0004 11.2866 11.6716 11.719 13.0137 12.585C14.3377 13.4392 15 13.8666 15 14.5C15 15.1334 14.3377 15.5608 13.0137 16.415C11.6716 17.281 11.0004 17.7134 10.5 17.3955C9.99968 17.0776 10 16.2185 10 14.5C10 12.7815 9.99968 11.9224 10.5 11.6045Z" android:fillColor="#FF000000" />
+    <path android:pathData="M6.59766 7.25H2.10352C2.25076 5.48602 2.60632 4.32249 3.46387 3.46484C4.7162 2.21251 6.62118 2.03116 10.0947 2.00488L6.59766 7.25Z" android:fillColor="#FF000000" />
+    <path android:pathData="M11.999 2C13.8441 2 15.3284 2.00009 16.5391 2.08789L13.0977 7.25H8.40039L11.9004 2H11.999Z" android:fillColor="#FF000000" />
+    <path android:pathData="M18.1982 2.30371C19.1919 2.51314 19.9379 2.86754 20.5352 3.46484C21.3926 4.32248 21.7483 5.48613 21.8955 7.25H14.9004L18.1982 2.30371Z" android:fillColor="#FF000000" />
+</vector>

@@ -1,25 +1,20 @@
 package com.taufik.managemoney.ui.navigation
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.taufik.managemoney.R
 
 /**
- * Tab di bottom navigation (v3): Beranda · Riwayat · [FAB +] · Laporan · Asisten AI.
- * Pengaturan dibuka lewat ikon gear di Beranda; Kelola akun kini ada DI DALAM Pengaturan.
+ * Tab di navbar pil (v4): Beranda · Riwayat · Laporan · Asisten + tombol + terpisah.
+ * Ikon = Solar Bold Duotone. Pengaturan dibuka lewat ikon gear di Beranda.
  */
 enum class TopDestination(
     val route: String,
     @StringRes val labelRes: Int,
-    val icon: ImageVector,
+    @DrawableRes val icon: Int,
 ) {
-    HOME("home", R.string.nav_home, Icons.Outlined.Home),
-    HISTORY("history", R.string.nav_history, Icons.AutoMirrored.Outlined.ReceiptLong),
-    REPORTS("reports", R.string.nav_reports, Icons.Outlined.BarChart),
-    ASK_AI("ask", R.string.nav_ask, Icons.Outlined.AutoAwesome),
+    HOME("home", R.string.nav_home, R.drawable.sol_home),
+    HISTORY("history", R.string.nav_history, R.drawable.sol_history),
+    REPORTS("reports", R.string.nav_reports, R.drawable.sol_chart),
+    ASK_AI("ask", R.string.nav_ask, R.drawable.sol_ai),
 }

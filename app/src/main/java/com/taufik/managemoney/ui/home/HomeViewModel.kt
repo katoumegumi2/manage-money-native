@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.taufik.managemoney.data.settings.HomeAccountOrderStore
 import com.taufik.managemoney.domain.model.AccountBalance
 import com.taufik.managemoney.domain.usecase.ObserveBalances
+import com.taufik.managemoney.domain.usecase.MonthlyPoint
 import com.taufik.managemoney.domain.usecase.ObserveMonthlyFlow
+import com.taufik.managemoney.domain.usecase.ObserveMonthlyTrend
 import com.taufik.managemoney.domain.usecase.ObserveRecentTransactions
 import com.taufik.managemoney.domain.usecase.ObserveTotal
 import com.taufik.managemoney.ui.model.TxRowUi
@@ -28,6 +30,8 @@ data class HomeUiState(
     val keluar: Long = 0,
     val accounts: List<AccountBalance> = emptyList(),
     val recent: List<TxRowUi> = emptyList(),
+    /** Tren 6 bulan (bulan terakhir = berjalan) untuk grafik Beranda. */
+    val trend: List<MonthlyPoint> = emptyList(),
 )
 
 @HiltViewModel
@@ -36,12 +40,13 @@ class HomeViewModel @Inject constructor(
     observeTotal: ObserveTotal,
     observeRecent: ObserveRecentTransactions,
     observeMonthlyFlow: ObserveMonthlyFlow,
+    observeMonthlyTrend: ObserveMonthlyTrend,
     private val orderStore: HomeAccountOrderStore,
 ) : ViewModel() {
 
     private val today: LocalDate = LocalDate.now(ZoneId.of("Asia/Jakarta"))
 
-    val state: StateFlow<HomeUiState> = combine(
+    private val base = combine(
         observeBalances(),
         observeTotal(),
         observeRecent(),
@@ -59,6 +64,10 @@ class HomeViewModel @Inject constructor(
             accounts = ordered,
             recent = recent.map { it.toRowUi(namesById, today) },
         )
+    }
+
+    val state: StateFlow<HomeUiState> = combine(base, observeMonthlyTrend(today)) { s, trend ->
+        s.copy(trend = trend)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
