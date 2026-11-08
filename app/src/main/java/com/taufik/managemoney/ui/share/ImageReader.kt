@@ -23,7 +23,10 @@ internal object ImageReader {
     fun read(context: Context, uri: Uri): ImagePayload? = runCatching {
         val resolver = context.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return null
+        // Catatan: dengan inJustDecodeBounds, decodeStream SELALU mengembalikan null (hanya isi outWidth/
+        // outHeight) — jadi jangan `?: return null` pada hasilnya; cukup pastikan stream terbuka.
+        val stream = resolver.openInputStream(uri) ?: return null
+        stream.use { BitmapFactory.decodeStream(it, null, bounds) }
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
         var sample = 1
         while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= MAX_DIM) sample *= 2
