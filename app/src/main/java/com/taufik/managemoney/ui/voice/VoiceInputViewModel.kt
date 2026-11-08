@@ -9,12 +9,15 @@ import com.taufik.managemoney.data.stt.SttEvent
 import com.taufik.managemoney.ui.navigation.ConfirmPayload
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val RESTART_DELAY_MS = 250L
 
 enum class VoicePhase { IDLE, LISTENING, PROCESSING }
 
@@ -41,33 +44,59 @@ class VoiceInputViewModel @Inject constructor(
 
     private var listenJob: Job? = null
 
-    /** Partial terakhir (transkrip live). Kadang lebih lengkap dari hasil final → dipakai sebagai fallback. */
+    /** Teks dari segmen-segmen yang sudah final dalam sesi ini. */
+    private var committed = ""
+
+    /** Partial terakhir segmen berjalan (transkrip live). Kadang lebih lengkap dari hasil final. */
     private var lastPartial = ""
+
+    private var startedAt = 0L
+    private var lastSpeechAt = 0L
+    private var finished = false
 
     fun startListening() {
         listenJob?.cancel()
+        committed = ""
         lastPartial = ""
+        finished = false
+        startedAt = System.currentTimeMillis()
+        lastSpeechAt = startedAt
         _state.value = VoiceUiState(phase = VoicePhase.LISTENING)
+        listenSegment(restart = false)
+    }
+
+    /** Satu putaran SpeechRecognizer; saat selesai, lanjut putaran berikut bila user masih bicara. */
+    private fun listenSegment(restart: Boolean = true) {
         listenJob = viewModelScope.launch {
+            // Beri waktu recognizer lama dilepas (destroy) agar tak kena ERROR_RECOGNIZER_BUSY.
+            if (restart) delay(RESTART_DELAY_MS)
             stt.listen().collect { event ->
+                if (finished) return@collect
                 when (event) {
-                    SttEvent.Ready, SttEvent.BeginSpeech, SttEvent.EndSpeech -> Unit
+                    SttEvent.Ready, SttEvent.EndSpeech -> Unit
+                    SttEvent.BeginSpeech -> lastSpeechAt = System.currentTimeMillis()
                     is SttEvent.Partial -> {
-                        if (event.text.isNotBlank()) lastPartial = event.text
-                        _state.update { it.copy(partial = event.text) }
+                        if (event.text.isNotBlank()) {
+                            lastPartial = event.text
+                            lastSpeechAt = System.currentTimeMillis()
+                        }
+                        _state.update { it.copy(partial = VoiceSession.join(committed, event.text)) }
                     }
                     is SttEvent.Result -> {
-                        // Final kadang lebih buruk/pendek dari partial terakhir → pilih yang lebih lengkap.
-                        val best = if (event.text.length >= lastPartial.length) event.text else lastPartial
-                        _state.update { it.copy(finalText = best, partial = best) }
-                        parse(best)
+                        commit(VoiceSession.best(event.text, lastPartial))
+                        onSegmentEnd()
                     }
-                    is SttEvent.Failure -> {
-                        // Final kosong tapi sempat ada transkrip live → pakai itu, jangan buang.
-                        if ((event.error == SttError.NO_MATCH || event.error == SttError.NO_SPEECH) && lastPartial.isNotBlank()) {
-                            _state.update { it.copy(finalText = lastPartial, partial = lastPartial) }
-                            parse(lastPartial)
+                    is SttEvent.Failure -> when (event.error) {
+                        // Segmen berakhir tanpa hasil final (biasanya karena hening) → simpan partial, lanjut/selesai.
+                        SttError.NO_MATCH, SttError.NO_SPEECH -> {
+                            commit(lastPartial)
+                            onSegmentEnd(noSpeechError = event.error)
+                        }
+                        else -> if (committed.isNotBlank() || lastPartial.isNotBlank()) {
+                            commit(lastPartial)
+                            finish()
                         } else {
+                            finished = true
                             _state.update { it.copy(phase = VoicePhase.IDLE, sttError = event.error) }
                         }
                     }
@@ -76,8 +105,44 @@ class VoiceInputViewModel @Inject constructor(
         }
     }
 
+    private fun commit(segment: String) {
+        committed = VoiceSession.join(committed, segment)
+        lastPartial = ""
+        _state.update { it.copy(partial = committed) }
+    }
+
+    private fun onSegmentEnd(noSpeechError: SttError = SttError.NO_SPEECH) {
+        val now = System.currentTimeMillis()
+        if (VoiceSession.shouldContinue(silentMs = now - lastSpeechAt, totalMs = now - startedAt)) {
+            listenSegment() // mulai ulang: jeda sebentar tidak memotong ucapan
+        } else {
+            finish(noSpeechError)
+        }
+    }
+
+    /** Tombol "Selesai": hentikan mic sekarang dan proses yang sudah terucap. */
+    fun finishListening() {
+        if (finished) return
+        listenJob?.cancel()
+        commit(lastPartial)
+        finish()
+    }
+
+    private fun finish(emptyError: SttError = SttError.NO_SPEECH) {
+        if (finished) return
+        finished = true
+        val text = committed.trim()
+        if (text.isBlank()) {
+            _state.update { it.copy(phase = VoicePhase.IDLE, sttError = emptyError) }
+            return
+        }
+        _state.update { it.copy(finalText = text, partial = text) }
+        viewModelScope.launch { parse(text) }
+    }
+
     /** Berhenti mendengarkan (mis. tombol Batal) tanpa memproses. */
     fun cancelListening() {
+        finished = true
         listenJob?.cancel()
         listenJob = null
         _state.update { it.copy(phase = VoicePhase.IDLE) }
@@ -85,6 +150,7 @@ class VoiceInputViewModel @Inject constructor(
 
     /** Dipanggil bila izin mikrofon ditolak. */
     fun onPermissionDenied() {
+        finished = true
         listenJob?.cancel()
         _state.value = VoiceUiState(phase = VoicePhase.IDLE, sttError = SttError.PERMISSION)
     }

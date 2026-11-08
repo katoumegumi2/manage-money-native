@@ -6,6 +6,8 @@ import com.taufik.managemoney.data.ai.AiConfig
 import com.taufik.managemoney.data.ai.AiConfigStore
 import com.taufik.managemoney.data.ai.AiConnectionTester
 import com.taufik.managemoney.data.ai.AiProvider
+import com.taufik.managemoney.data.ai.ModelLister
+import com.taufik.managemoney.data.ai.RemoteModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,16 +28,22 @@ data class AiSettingsUiState(
     val saved: Boolean = false,
     val testing: Boolean = false,
     val testOutcome: TestOutcome? = null,
+    /** Model dari server provider (`GET /models`); null = belum dimuat. */
+    val remoteModels: List<RemoteModel>? = null,
+    val loadingModels: Boolean = false,
+    val modelsError: String? = null,
 ) {
     val providers: List<AiProvider> = AiProvider.entries
     val showBaseUrl: Boolean get() = provider.openAiCompatible
     val canSave: Boolean get() = apiKey.isNotBlank() && (!provider.openAiCompatible || baseUrl.isNotBlank())
+    val canLoadModels: Boolean get() = provider.openAiCompatible && canSave && !loadingModels
 }
 
 @HiltViewModel
 class AiSettingsViewModel @Inject constructor(
     private val configStore: AiConfigStore,
     private val tester: AiConnectionTester,
+    private val modelLister: ModelLister,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AiSettingsUiState())
@@ -53,6 +61,7 @@ class AiSettingsViewModel @Inject constructor(
                     apiKey = cfg.apiKey,
                 )
             }
+            if (_state.value.canLoadModels) loadModels()
         }
     }
 
@@ -68,8 +77,22 @@ class AiSettingsViewModel @Inject constructor(
                     apiKey = key,
                     saved = false,
                     testOutcome = null,
+                    remoteModels = null,
+                    modelsError = null,
                 )
             }
+            if (_state.value.canLoadModels) loadModels()
+        }
+    }
+
+    /** Muat daftar model terbaru dari server provider (pakai key/baseUrl yang sedang diisi). */
+    fun loadModels() {
+        if (!_state.value.canLoadModels) return
+        viewModelScope.launch {
+            _state.update { it.copy(loadingModels = true, modelsError = null) }
+            modelLister.list(formConfig())
+                .onSuccess { list -> _state.update { it.copy(loadingModels = false, remoteModels = list) } }
+                .onFailure { e -> _state.update { it.copy(loadingModels = false, modelsError = e.message) } }
         }
     }
 

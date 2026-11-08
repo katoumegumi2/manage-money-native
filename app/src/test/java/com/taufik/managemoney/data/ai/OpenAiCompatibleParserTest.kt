@@ -115,6 +115,6 @@ class OpenAiCompatibleParserTest {
         assertFalse(AiProvider.GEMINI.openAiCompatible)
         assertTrue(AiProvider.DEEPSEEK.openAiCompatible)
         assertTrue(AiProvider.DEEPSEEK.defaultBaseUrl.isNotBlank())
-        assertEquals("deepseek-chat", AiProvider.DEEPSEEK.defaultModel)
+        assertEquals("deepseek-flash", AiProvider.DEEPSEEK.defaultModel)
     }
 }

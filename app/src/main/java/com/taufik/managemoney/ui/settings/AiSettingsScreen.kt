@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -129,25 +130,60 @@ fun AiSettingsScreen(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        if (state.provider.suggestedModels.isNotEmpty()) {
-            Text(
-                text = stringResource(R.string.settings_model_suggested),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        // Pilihan model: daftar langsung dari server (selalu terbaru) bila berhasil dimuat,
+        // selain itu saran bawaan app.
+        val remote = state.remoteModels
+        val chips: List<Pair<String, String>> = if (!remote.isNullOrEmpty()) {
+            remote.map { m ->
+                val extra = listOfNotNull(m.name?.takeIf { it != m.id }, if (m.supportsImage) "gambar" else null)
+                m.id to (if (extra.isEmpty()) m.id else "${m.id} · ${extra.joinToString(" · ")}")
+            }
+        } else {
+            state.provider.suggestedModels.map { it to it }
+        }
+        if (chips.isNotEmpty() || state.provider.openAiCompatible) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        if (!remote.isNullOrEmpty()) R.string.settings_model_from_server else R.string.settings_model_suggested,
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                if (state.provider.openAiCompatible) {
+                    TextButton(onClick = viewModel::loadModels, enabled = state.canLoadModels) {
+                        Text(
+                            stringResource(
+                                if (state.loadingModels) R.string.settings_models_loading else R.string.settings_models_load,
+                            ),
+                        )
+                    }
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                state.provider.suggestedModels.forEach { m ->
+                chips.forEach { (id, label) ->
                     FilterChip(
-                        selected = m == state.model,
-                        onClick = { viewModel.setModel(m) },
-                        label = { Text(m) },
+                        selected = id == state.model,
+                        onClick = { viewModel.setModel(id) },
+                        label = { Text(label) },
                     )
                 }
+            }
+            state.modelsError?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
 

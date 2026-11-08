@@ -114,6 +114,20 @@ fun VoiceInputScreen(
                             },
                             textAlign = TextAlign.Center,
                         )
+                        Text(
+                            text = stringResource(R.string.voice_pause_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                        Button(
+                            onClick = viewModel::finishListening,
+                            enabled = state.partial.isNotBlank(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Gold),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(stringResource(R.string.voice_done))
+                        }
                         OutlinedButton(onClick = { viewModel.cancelListening(); onBack() }) {
                             Text(stringResource(R.string.voice_cancel))
                         }

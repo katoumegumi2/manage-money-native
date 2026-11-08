@@ -2,8 +2,11 @@ package com.taufik.managemoney.data.ai
 
 import com.taufik.managemoney.domain.model.Categories
 import com.taufik.managemoney.domain.model.ParsedTransaction
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
@@ -12,7 +15,7 @@ class ParseException(message: String, cause: Throwable? = null) : Exception(mess
 
 /**
  * Validator §3.5 (sama untuk semua provider):
- * bersihkan fence ```json → parse JSON array → validasi tiap elemen
+ * bersihkan fence ```json → parse JSON array (objek pembungkus dibuka) → validasi tiap elemen
  * (kategori sesuai tipe, nominal ≥ 0, tanggal YYYY-MM-DD). Akun dikanonikalisasi ke kode
  * (case-insensitive); akun di luar daftar → null + perlu dicek (bukan error, mis. bank eksternal).
  * Balasan `[]` → list kosong (sukses). Gagal apa pun → [Result.failure].
@@ -26,7 +29,7 @@ object ParserValidator {
         if (cleaned.isEmpty()) return Result.failure(ParseException("Balasan kosong"))
 
         val list = try {
-            json.decodeFromString<List<ParsedTransaction>>(cleaned)
+            json.decodeFromJsonElement<List<ParsedTransaction>>(unwrapToArray(json.parseToJsonElement(cleaned)))
         } catch (e: Exception) {
             return Result.failure(ParseException("Balasan bukan JSON yang valid", e))
         }
@@ -44,6 +47,21 @@ object ParserValidator {
             normalized += tx.copy(akunDari = dari, akunKe = ke, perluDicek = tx.perluDicek || akunTakDikenal)
         }
         return Result.success(normalized)
+    }
+
+    /**
+     * Kontraknya array, tapi mode `response_format: json_object` (OpenAI-compatible, mis. DeepSeek)
+     * memaksa balasan berupa OBJEK — model lalu membungkus array, mis. `{"data":[...]}` atau
+     * `{"transaksi":[...]}`, atau mengirim satu transaksi tanpa array. Normalisasi ke array.
+     */
+    private fun unwrapToArray(element: JsonElement): JsonArray = when (element) {
+        is JsonArray -> element
+        is JsonObject -> when {
+            "tipe" in element -> JsonArray(listOf(element))
+            else -> element.values.firstOrNull { it is JsonArray } as? JsonArray
+                ?: throw ParseException("Objek JSON tanpa daftar transaksi")
+        }
+        else -> throw ParseException("Balasan bukan array JSON")
     }
 
     private fun failAt(index: Int, reason: String): Result<List<ParsedTransaction>> =

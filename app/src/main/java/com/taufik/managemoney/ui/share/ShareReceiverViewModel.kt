@@ -1,14 +1,10 @@
 package com.taufik.managemoney.ui.share
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taufik.managemoney.data.repo.ParseRepository
-import com.taufik.managemoney.domain.ai.ImagePayload
 import com.taufik.managemoney.domain.ai.ImageTransactionParser
 import com.taufik.managemoney.domain.model.ParsedTransaction
 import com.taufik.managemoney.ui.navigation.ConfirmPayload
@@ -20,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 /** Konten yang dibagikan ke app lewat share sheet. */
@@ -55,7 +50,7 @@ class ShareReceiverViewModel @Inject constructor(
             val result: Result<List<ParsedTransaction>> = when (content) {
                 is SharedContent.Text -> parseRepository.parse(content.text)
                 is SharedContent.Images -> {
-                    val images = withContext(Dispatchers.IO) { content.uris.mapNotNull(::readImage) }
+                    val images = withContext(Dispatchers.IO) { content.uris.mapNotNull { ImageReader.read(context, it) } }
                     if (images.isEmpty()) Result.failure(IllegalStateException("Gambar tidak bisa dibaca"))
                     else imageParser.parse(images)
                 }
@@ -68,24 +63,5 @@ class ShareReceiverViewModel @Inject constructor(
                 onFailure = { ShareState.Error(it.message ?: "Gagal memproses") },
             )
         }
-    }
-
-    /** Baca Uri gambar → kompres (maks 1024px, JPEG 80) → base64. */
-    private fun readImage(uri: Uri): ImagePayload? = runCatching {
-        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return null
-        val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
-        val scaled = scaleDown(bmp, 1024)
-        val out = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, 80, out)
-        ImagePayload(Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP), "image/jpeg")
-    }.getOrNull()
-
-    private fun scaleDown(bmp: Bitmap, maxDim: Int): Bitmap {
-        val w = bmp.width
-        val h = bmp.height
-        val largest = maxOf(w, h)
-        if (largest <= maxDim) return bmp
-        val ratio = maxDim.toFloat() / largest
-        return Bitmap.createScaledBitmap(bmp, (w * ratio).toInt(), (h * ratio).toInt(), true)
     }
 }

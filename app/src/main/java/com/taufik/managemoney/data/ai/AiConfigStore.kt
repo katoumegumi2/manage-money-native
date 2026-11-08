@@ -53,7 +53,7 @@ class AiConfigStore @Inject constructor(
             ?: AiProvider.GEMINI
         AiConfig(
             provider = provider,
-            model = prefs[Keys.MODEL]?.ifBlank { provider.defaultModel } ?: provider.defaultModel,
+            model = provider.migrateModel(prefs[Keys.MODEL]?.ifBlank { provider.defaultModel } ?: provider.defaultModel),
             baseUrl = prefs[Keys.BASE_URL] ?: provider.defaultBaseUrl,
             apiKey = readKey(provider),
         )

@@ -25,6 +25,8 @@
     <string name="voice_processing">Memproses…</string>
     <string name="voice_you_said">Kamu bilang: \"%1$s\"</string>
     <string name="voice_cancel">Batal</string>
+    <string name="voice_done">Selesai</string>
+    <string name="voice_pause_hint">Jeda sebentar tidak apa-apa. Ketuk Selesai kalau sudah.</string>
     <string name="voice_retry">Ucapkan lagi</string>
     <string name="voice_type">Ketik saja</string>
     <string name="voice_empty">Tidak ada transaksi terdeteksi. Coba ulang atau tambah manual.</string>
@@ -65,6 +67,7 @@
     <string name="parse_empty">Tidak ada transaksi terdeteksi. Coba kalimat lain atau tambah manual.</string>
     <string name="parse_error_suffix">%1$s\nKamu masih bisa menambah transaksi secara manual.</string>
     <string name="parse_process">Proses</string>
+    <string name="parse_image">Pilih foto struk</string>
 
     <!-- Beranda -->
     <string name="home_total_label">Total saldo · %1$d akun</string>
@@ -116,6 +119,9 @@
     <string name="settings_provider">Penyedia</string>
     <string name="settings_model">Model</string>
     <string name="settings_model_suggested">Pilihan umum (ketuk untuk pakai):</string>
+    <string name="settings_model_from_server">Model tersedia di server (terbaru):</string>
+    <string name="settings_models_load">Muat dari server</string>
+    <string name="settings_models_loading">Memuat…</string>
     <string name="settings_base_url">Base URL</string>
     <string name="settings_api_key">API key</string>
     <string name="settings_key_hint">Key hanya dipakai untuk memanggil penyedia; tidak dibagikan atau dicatat di log.</string>

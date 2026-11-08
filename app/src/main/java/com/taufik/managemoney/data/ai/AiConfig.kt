@@ -23,8 +23,9 @@ enum class AiProvider(
         suggestedModels = listOf("gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-2.5-pro"),
     ),
     DEEPSEEK(
-        "DeepSeek", "https://api.deepseek.com/chat/completions", "deepseek-chat", true,
-        suggestedModels = listOf("deepseek-chat", "deepseek-reasoner"),
+        "DeepSeek", "https://api.deepseek.com/chat/completions", "deepseek-flash", true,
+        // deepseek-chat / deepseek-reasoner dipensiunkan DeepSeek per 24 Jul 2026 → lihat [migrateModel].
+        suggestedModels = listOf("deepseek-flash", "deepseek-v4-pro"),
     ),
     OPENAI(
         "OpenAI", "https://api.openai.com/v1/chat/completions", "gpt-4o-mini", true,
@@ -39,6 +40,18 @@ enum class AiProvider(
         suggestedModels = listOf("llama-3.3-70b-versatile", "llama-3.1-8b-instant"),
     ),
     CUSTOM("Custom (OpenAI-compatible)", "", "", true),
+}
+
+/** Nama model DeepSeek lama yang sudah dipensiunkan → pengganti resminya. */
+private val LEGACY_DEEPSEEK_MODELS = setOf("deepseek-chat", "deepseek-reasoner", "deepseek-v4-flash")
+
+/**
+ * Ganti nama model tersimpan yang sudah dipensiunkan provider dengan penggantinya,
+ * agar user lama tak perlu mengubah Pengaturan AI secara manual. Model lain dibiarkan.
+ */
+internal fun AiProvider.migrateModel(model: String): String = when {
+    this == AiProvider.DEEPSEEK && model.trim().lowercase() in LEGACY_DEEPSEEK_MODELS -> defaultModel
+    else -> model
 }
 
 /** Konfigurasi parser aktif. `apiKey` disimpan terenkripsi (lihat [AiConfigStore]). */

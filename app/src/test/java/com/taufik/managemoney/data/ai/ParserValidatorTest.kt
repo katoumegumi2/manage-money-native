@@ -146,4 +146,28 @@ class ParserValidatorTest {
         val raw = "[${el(tipe = "transfer", kategori = "makanan", akunDari = "bni", akunKe = "tunai")}]"
         assertTrue(parse(raw).isFailure)
     }
+
+    private val tx = """{"tipe":"pengeluaran","nominal":50000,"kategori":"makanan","akun_dari":"gopay",""" +
+        """"akun_ke":null,"tanggal":"2026-11-08","catatan":"kopi","perlu_dicek":false}"""
+
+    @Test
+    fun `array dibungkus objek (mode json_object DeepSeek) tetap ter-parse`() {
+        // Balasan nyata DeepSeek vision yang sebelumnya ditolak.
+        val r = parse("""{"type": "json_object", "data": [$tx]}""")
+        assertTrue(r.isSuccess)
+        assertEquals(50_000L, r.getOrThrow().single().nominal)
+        assertEquals("gopay", r.getOrThrow().single().akunDari)
+
+        assertEquals(1, parse("""{"transaksi": [$tx]}""").getOrThrow().size)
+    }
+
+    @Test
+    fun `satu objek transaksi tanpa array dianggap list satu`() {
+        assertEquals(1, parse(tx).getOrThrow().size)
+    }
+
+    @Test
+    fun `objek tanpa daftar transaksi gagal anggun`() {
+        assertTrue(parse("""{"pesan": "tidak ada"}""").isFailure)
+    }
 }

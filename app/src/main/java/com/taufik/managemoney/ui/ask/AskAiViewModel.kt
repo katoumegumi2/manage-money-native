@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taufik.managemoney.data.ai.AiConfigStore
 import com.taufik.managemoney.data.ai.InsightCache
+import com.taufik.managemoney.domain.ai.ChatTurn
 import com.taufik.managemoney.domain.ai.FinancialAnalyst
 import com.taufik.managemoney.domain.model.AggregatedFinance
 import com.taufik.managemoney.domain.model.CategoryAgg
@@ -26,8 +27,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
-/** Satu pesan chat (true = dari user, false = dari AI). */
-data class ChatMsg(val fromUser: Boolean, val text: String)
+/** Satu pesan chat (true = dari user, false = dari AI). [isError] = pesan gagal (tak ikut jadi konteks AI). */
+data class ChatMsg(val fromUser: Boolean, val text: String, val isError: Boolean = false)
 
 /** Status kartu "Insight bulan ini" di layar Asisten AI. */
 data class AskInsight(
@@ -124,13 +125,15 @@ class AskAiViewModel @Inject constructor(
     fun send(question: String) {
         val q = question.trim()
         if (q.isBlank() || _sending.value) return
+        // Riwayat sebelum pertanyaan ini; balasan error tak dikirim sebagai konteks.
+        val history = _messages.value.filterNot { it.isError }.map { ChatTurn(it.fromUser, it.text) }
         _messages.value = _messages.value + ChatMsg(fromUser = true, text = q)
         viewModelScope.launch {
             _sending.value = true
-            analyst.ask(q)
+            analyst.ask(q, history)
                 .onSuccess { _messages.value = _messages.value + ChatMsg(false, it) }
                 .onFailure { e ->
-                    _messages.value = _messages.value + ChatMsg(false, "Maaf, gagal menjawab. ${e.message ?: ""}".trim())
+                    _messages.value = _messages.value + ChatMsg(false, "Maaf, gagal menjawab. ${e.message ?: ""}".trim(), isError = true)
                 }
             _sending.value = false
         }

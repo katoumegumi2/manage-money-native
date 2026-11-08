@@ -30,6 +30,7 @@ internal class OpenAiCompatibleParser(
                 ChatMessage(role = "user", content = req.text),
             ),
             responseFormat = ResponseFormat("json_object"),
+            thinking = thinkingFor(baseUrl),
         )
 
         val response = try {

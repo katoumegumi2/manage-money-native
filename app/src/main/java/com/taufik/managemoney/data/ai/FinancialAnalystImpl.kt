@@ -1,6 +1,7 @@
 package com.taufik.managemoney.data.ai
 
 import android.util.Log
+import com.taufik.managemoney.domain.ai.ChatTurn
 import com.taufik.managemoney.domain.ai.FinancialAnalyst
 import com.taufik.managemoney.domain.model.AggregatedFinance
 import kotlinx.coroutines.Dispatchers
@@ -36,14 +37,14 @@ internal class FinancialAnalystImpl @Inject constructor(
     override suspend fun summarize(data: AggregatedFinance): Result<String> =
         run(ANALYSIS_SYSTEM_INSTRUCTION, buildAnalysisUserContent(data))
 
-    override suspend fun ask(question: String): Result<String> {
+    override suspend fun ask(question: String, history: List<ChatTurn>): Result<String> {
         val cfg = configStore.parseCandidates().firstOrNull { it.apiKey.isNotBlank() }
             ?: return Result.failure(ParseException("Belum ada provider AI dengan API key."))
         val system = buildAskSystem()
-        Log.d(TAG, "ask provider=${cfg.provider} model=${cfg.model} q=$question")
+        Log.d(TAG, "ask provider=${cfg.provider} model=${cfg.model} history=${history.size} q=$question")
         return runCatching {
-            if (cfg.provider.openAiCompatible) askOpenAi(cfg, system, question)
-            else askGemini(cfg, system, question)
+            if (cfg.provider.openAiCompatible) askOpenAi(cfg, system, question, history)
+            else askGemini(cfg, system, question, history)
         }.onFailure { Log.w(TAG, "ask gagal: ${it.message}", it) }
     }
 
@@ -54,8 +55,9 @@ internal class FinancialAnalystImpl @Inject constructor(
 
     // --- Tanya AI: loop tool calling per provider ---
 
-    private suspend fun askGemini(cfg: AiConfig, system: String, question: String): String {
+    private suspend fun askGemini(cfg: AiConfig, system: String, question: String, history: List<ChatTurn>): String {
         val contents = ArrayList<GeminiContent>()
+        contents += history.toGeminiContents()
         contents += GeminiContent(role = "user", parts = listOf(GeminiPart(text = question)))
         val tools = listOf(GeminiTool(geminiFunctionDeclarations()))
 
@@ -91,9 +93,10 @@ internal class FinancialAnalystImpl @Inject constructor(
         throw ParseException("Terlalu banyak langkah; coba pertanyaan lebih spesifik.")
     }
 
-    private suspend fun askOpenAi(cfg: AiConfig, system: String, question: String): String {
+    private suspend fun askOpenAi(cfg: AiConfig, system: String, question: String, history: List<ChatTurn>): String {
         val messages = ArrayList<ChatMessage>()
         messages += ChatMessage(role = "system", content = system)
+        messages += history.toOpenAiMessages()
         messages += ChatMessage(role = "user", content = question)
         val tools = openAiTools()
 
@@ -104,6 +107,7 @@ internal class FinancialAnalystImpl @Inject constructor(
                 temperature = 0.3,
                 tools = tools,
                 toolChoice = "auto",
+                thinking = thinkingFor(cfg.baseUrl),
             )
             val resp = withContext(Dispatchers.IO) { openAiApi.chat(cfg.baseUrl, "Bearer ${cfg.apiKey}", body) }
             val msg = resp.choices.firstOrNull()?.message ?: throw ParseException("Balasan AI kosong")
@@ -165,6 +169,7 @@ internal class FinancialAnalystImpl @Inject constructor(
                 ChatMessage(role = "user", content = user),
             ),
             temperature = 0.4,
+            thinking = thinkingFor(cfg.baseUrl),
         )
         val resp = openAiApi.chat(cfg.baseUrl, "Bearer ${cfg.apiKey}", body)
         resp.choices.firstOrNull()?.message?.content.orEmpty()

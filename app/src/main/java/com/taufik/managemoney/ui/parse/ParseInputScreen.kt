@@ -1,5 +1,8 @@
 package com.taufik.managemoney.ui.parse
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +46,10 @@ fun ParseInputScreen(
     viewModel: ParseInputViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Photo picker sistem: tanpa izin storage, maks 5 gambar sekali proses.
+    val pickImages = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5),
+    ) { uris -> viewModel.processImages(uris) }
 
     LaunchedEffect(state.payload) {
         state.payload?.let {
@@ -117,6 +125,17 @@ fun ParseInputScreen(
                 } else {
                     Text(stringResource(R.string.parse_process))
                 }
+            }
+
+            OutlinedButton(
+                onClick = {
+                    pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                enabled = !state.loading,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Outlined.Image, contentDescription = null)
+                Text("  " + stringResource(R.string.parse_image))
             }
 
             OutlinedButton(onClick = onManual, modifier = Modifier.fillMaxWidth()) {

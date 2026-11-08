@@ -19,3 +19,6 @@ secrets.properties
 
 # Kotlin build cache
 /.kotlin/
+
+# Mockup brainstorming (visual companion)
+.superpowers/
