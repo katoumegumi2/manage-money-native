@@ -338,7 +338,7 @@
     <string name="settings_ai_row_sub">Catat, struk, dan chat</string>
     <string name="settings_data_row">Cadangan &amp; data</string>
     <string name="settings_data_row_sub">Google Drive, ekspor CSV, pulihkan</string>
-    <string name="settings_version_footer">Catatan Keuangan · versi 4.0</string>
+    <string name="settings_version_footer">Catatan Keuangan · versi 4.0\nIkon: Solar oleh 480 Design (CC BY 4.0)</string>
     <string name="settings_logout_title">Keluar dari akun Google?</string>
     <string name="settings_logout_body">Data di HP ini tetap ada. Cadangan otomatis ke Drive berhenti sampai kamu masuk lagi.</string>
     <string name="settings_restore_sub">Ganti data di HP ini dengan cadangan</string>
