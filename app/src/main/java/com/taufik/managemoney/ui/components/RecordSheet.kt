@@ -47,7 +47,7 @@ import com.taufik.managemoney.R
 import com.taufik.managemoney.ui.theme.AppTheme
 
 /** Pilihan di modal Catat. */
-enum class RecordMode { VOICE, PHOTO, TYPE, MANUAL }
+enum class RecordMode { VOICE, PHOTO, GALLERY, TYPE, MANUAL }
 
 /**
  * Modal "Catat transaksi" (dibuka tombol +): 4 cara catat + kotak ketik cepat.
@@ -90,12 +90,13 @@ fun RecordSheet(
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 RecordOption(R.drawable.sol_mic, R.string.record_voice, R.string.record_voice_sub, hot = true, Modifier.weight(1f)) { onPick(RecordMode.VOICE) }
-                RecordOption(R.drawable.sol_gallery, R.string.record_photo, R.string.record_photo_sub, hot = false, Modifier.weight(1f)) { onPick(RecordMode.PHOTO) }
+                RecordOption(R.drawable.sol_camera, R.string.record_photo, R.string.record_photo_sub, hot = false, Modifier.weight(1f)) { onPick(RecordMode.PHOTO) }
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                RecordOption(R.drawable.sol_keyboard, R.string.record_type, R.string.record_type_sub, hot = false, Modifier.weight(1f)) { onPick(RecordMode.TYPE) }
-                RecordOption(R.drawable.sol_pen, R.string.record_manual, R.string.record_manual_sub, hot = false, Modifier.weight(1f)) { onPick(RecordMode.MANUAL) }
+                RecordOption(R.drawable.sol_gallery, R.string.record_gallery, null, hot = false, Modifier.weight(1f)) { onPick(RecordMode.GALLERY) }
+                RecordOption(R.drawable.sol_keyboard, R.string.record_type, null, hot = false, Modifier.weight(1f)) { onPick(RecordMode.TYPE) }
+                RecordOption(R.drawable.sol_pen, R.string.record_manual, null, hot = false, Modifier.weight(1f)) { onPick(RecordMode.MANUAL) }
             }
             Spacer(Modifier.height(14.dp))
             QuickInput(onSend = onQuickText)
@@ -107,7 +108,7 @@ fun RecordSheet(
 private fun RecordOption(
     @DrawableRes icon: Int,
     title: Int,
-    sub: Int,
+    sub: Int?,
     hot: Boolean,
     modifier: Modifier,
     onClick: () -> Unit,
@@ -149,13 +150,15 @@ private fun RecordOption(
                 .then(if (c.isDark && hot) Modifier.border(1.5.dp, c.accent, CircleShape) else Modifier),
             contentAlignment = Alignment.Center,
         ) { Sol(icon, tint = iconTint, size = 21.dp) }
-        Spacer(Modifier.height(14.dp))
-        Text(stringResource(title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = if (hotLight) c.onAccent else c.ink)
-        Text(
-            stringResource(sub),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (hotLight) c.onAccent.copy(alpha = 0.8f) else c.muted,
-        )
+        Spacer(Modifier.height(if (sub != null) 14.dp else 10.dp))
+        Text(stringResource(title), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = if (hotLight) c.onAccent else c.ink, maxLines = 1)
+        if (sub != null) {
+            Text(
+                stringResource(sub),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (hotLight) c.onAccent.copy(alpha = 0.8f) else c.muted,
+            )
+        }
     }
 }
 

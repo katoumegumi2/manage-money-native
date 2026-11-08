@@ -262,6 +262,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 when (mode) {
                     RecordMode.VOICE -> navController.navigate(VOICE_INPUT_ROUTE)
                     RecordMode.PHOTO -> navController.navigate(parseRoute(camera = true))
+                    RecordMode.GALLERY -> navController.navigate(parseRoute(pickImage = true))
                     RecordMode.TYPE -> navController.navigate(PARSE_INPUT_ROUTE)
                     RecordMode.MANUAL -> navController.navigate(MANUAL_ENTRY_ROUTE)
                 }
