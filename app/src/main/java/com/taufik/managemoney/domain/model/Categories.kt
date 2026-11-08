@@ -4,11 +4,14 @@ package com.taufik.managemoney.domain.model
 object Categories {
     val PENGELUARAN = listOf(
         "makanan", "belanja", "transport", "bbm", "tagihan", "langganan",
-        "hiburan", "kesehatan", "perawatan", "laundry", "admin", "investasi", "lainnya",
+        "hiburan", "game", "kesehatan", "perawatan", "laundry", "pendidikan",
+        "sosial", "keluarga", "perjalanan", "pinjamkan", "bayar_utang",
+        "admin", "investasi", "lainnya",
     )
     val PEMASUKAN = listOf(
-        "gaji", "usaha", "bonus", "sampingan", "investasi",
-        "penjualan", "refund", "transfer", "lainnya",
+        "gaji", "usaha", "bonus", "sampingan", "reimburse", "pengembalian",
+        "pinjaman", "hadiah", "cashback", "refund", "penjualan", "investasi",
+        "transfer", "penyesuaian", "lainnya",
     )
     val TRANSFER = listOf("lainnya")
 

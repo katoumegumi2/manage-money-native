@@ -29,8 +29,8 @@ JENIS TRANSAKSI (tipe)
 
 KATEGORI
 Pilih TEPAT SATU. Jangan mengarang kategori baru.
-- Jika tipe = pengeluaran -> pilih dari: makanan, belanja, transport, bbm, tagihan, langganan, hiburan, kesehatan, perawatan, laundry, admin, investasi, lainnya
-- Jika tipe = pemasukan  -> pilih dari: gaji, usaha, bonus, sampingan, investasi, penjualan, refund, transfer, lainnya
+- Jika tipe = pengeluaran -> pilih dari: makanan, belanja, transport, bbm, tagihan, langganan, hiburan, game, kesehatan, perawatan, laundry, pendidikan, sosial, keluarga, perjalanan, pinjamkan, bayar_utang, admin, investasi, lainnya
+- Jika tipe = pemasukan  -> pilih dari: gaji, usaha, bonus, sampingan, reimburse, pengembalian, pinjaman, hadiah, cashback, refund, penjualan, investasi, transfer, penyesuaian, lainnya
 - Jika tipe = transfer   -> kategori = lainnya
 Definisi yang gampang keliru:
 - makanan  = makanan/minuman SIAP SANTAP: makan/jajan di luar, kopi, warung, resto, delivery. Contoh: "gacoan", "nasi warung".
@@ -48,7 +48,20 @@ Definisi yang gampang keliru:
 - gaji=gaji rutin; usaha=pendapatan bisnis sendiri (mis. klien SIMRS); bonus=THR/insentif; sampingan=freelance.
 - investasi (pemasukan) = hasil investasi: bunga, dividen, profit jual aset.
 - penjualan = hasil menjual barang pribadi/bekas.
-- refund = pengembalian dana, cashback, reimburse.
+- game = beli akun/item/top up/cheat game (mis. "akun PB", "top up ML").
+- pendidikan = kuliah/SPP/kursus, buku & perlengkapan sekolah, materai untuk urusan kampus.
+- sosial = amal, sedekah, ibadah, sumbangan, kondangan/undangan, uang duka/ngelayat, jenguk, amplop.
+- keluarga = kirim/kasih uang ke keluarga atau orang lain (mis. "kasih bapak", "tf ke Zahra"), BUKAN pinjaman.
+- perjalanan = hotel, penginapan, check-in, deposit hotel, tiket wisata/perjalanan dinas pribadi.
+- pinjamkan = KAMU meminjamkan uang ke orang (mis. "Retno pinjam 200rb", "mba ayu pinjam tunai").
+- bayar_utang = KAMU melunasi utang/cicilan/paylater (mis. "bayar utang ke emak", "bayar SPayLater").
+- reimburse = penggantian biaya dari kantor/instansi: perjadin, ganti bensin/BBM, makan lembur, parkir, kuota.
+- pengembalian = orang MENGEMBALIKAN uangmu / bayar utang ke kamu / ganti patungan (mis. "pengembalian dari Hamid", "emak bayar utang").
+- pinjaman (pemasukan) = KAMU menerima pinjaman/ngutang (mis. "pinjam bapak 50rb").
+- hadiah = uang pemberian/hadiah/angpau (mis. "dikasih abi 50rb").
+- cashback = cashback/promo dari aplikasi atau toko.
+- refund = pengembalian dana pembelian/pembatalan dari toko, aplikasi, atau deposit.
+- penyesuaian = koreksi/tambah saldo awal dompet (mis. "tambah saldo Mandiri jadi 1,4 jt").
 - transfer (pemasukan) = kiriman masuk tak jelas sumbernya; lainnya = selain itu.
 
 AKUN / SUMBER DANA

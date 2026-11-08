@@ -31,8 +31,13 @@ fun relativeDateLabel(date: LocalDate, today: LocalDate): String {
 }
 
 /** Kapitalkan label kategori, mis. "makanan" → "Makanan". */
-fun kategoriLabel(kategori: String): String =
-    kategori.replaceFirstChar { if (it.isLowerCase()) it.titlecase(localeId) else it.toString() }
+fun kategoriLabel(kategori: String): String = when (kategori) {
+    "bayar_utang" -> "Bayar utang"
+    "pinjamkan" -> "Beri pinjaman"
+    "penyesuaian" -> "Koreksi saldo"
+    "bbm" -> "BBM"
+    else -> kategori.replace('_', ' ').replaceFirstChar { if (it.isLowerCase()) it.titlecase(localeId) else it.toString() }
+}
 
 /** Label jenis akun untuk tile/detail. */
 fun jenisLabel(jenis: AccountType): String = when (jenis) {
@@ -164,6 +169,19 @@ fun categoryVisual(tipe: TxType, kategori: String): CategoryVisual {
         "sampingan" -> R.drawable.sol_cat_sampingan
         "penjualan" -> R.drawable.sol_cat_penjualan
         "refund" -> R.drawable.sol_cat_refund
+        "pendidikan" -> R.drawable.sol_cat_pendidikan
+        "sosial" -> R.drawable.sol_cat_sosial
+        "keluarga" -> R.drawable.sol_cat_keluarga
+        "perjalanan" -> R.drawable.sol_cat_perjalanan
+        "game" -> R.drawable.sol_cat_game
+        "pinjamkan" -> R.drawable.sol_cat_pinjamkan
+        "bayar_utang" -> R.drawable.sol_cat_bayar_utang
+        "reimburse" -> R.drawable.sol_cat_reimburse
+        "pengembalian" -> R.drawable.sol_cat_pengembalian
+        "pinjaman" -> R.drawable.sol_cat_pinjaman
+        "hadiah" -> R.drawable.sol_cat_hadiah
+        "cashback" -> R.drawable.sol_cat_cashback
+        "penyesuaian" -> R.drawable.sol_cat_penyesuaian
         "transfer" -> R.drawable.sol_transfer
         else -> if (tipe == TxType.PEMASUKAN) R.drawable.sol_cat_pemasukan else R.drawable.sol_cat_lainnya
     }
