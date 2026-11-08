@@ -62,11 +62,17 @@ saldoAwal
 - Seed akun: `bni, mandiri, seabank` (bank), `gopay, shopeepay` (ewallet), `tunai` (tunai).
 - Kategori — pengeluaran: `makanan, belanja, transport, bbm, tagihan, langganan, hiburan, kesehatan, perawatan, laundry, admin, investasi, lainnya`; pemasukan: `gaji, usaha, bonus, sampingan, investasi, penjualan, refund, transfer, lainnya`; transfer: `lainnya`. Sumber kebenaran: `domain/model/Categories.kt` (prompt parser & UI harus ikut).
 
-## Design tokens (Material 3, light + dark)
-- Warna: ink `#1E2A3A`, paper `#EDF0F2`, card `#FFFFFF`, gold (aksi/voice) `#D99A2B`,
-  income `#2F7D5B`, expense `#C2513B`, transfer `#5C7390`, muted `#6B7785`, line `#E2E6EA`.
-- Font: display **Space Grotesk**, body **Inter**, angka **JetBrains Mono** (tabular).
-- Uang: `Rp 1.234.567` (pemisah titik, locale id-ID). Semua nominal pakai mono tabular.
+## Design tokens (Redesign v4 — Material 3, light + dark)
+- Sumber kebenaran warna: `ui/theme/AppColors.kt` (`AppTheme.colors`). Semua diturunkan dari **satu warna aksen** pilihan user
+  (default biru `#2F7BF6`, preset/hue/hex di layar Tampilan) + mode gelap/terang + mode warna masuk/keluar
+  (`FlowColorMode`: ikut aksen = masuk aksen & keluar netral; atau hijau-toska/oranye tervalidasi buta warna).
+- Terang: latar `#F3F5F8` + gradasi aksen tipis di atas, kartu putih berbayang lembut. Gelap: latar `#090B10` + pendar aksen, kartu kaca bergaris tepi.
+- Komponen bersama di `ui/components/Kit.kt` (appCard, screenBackground, CircleIconButton, SegmentedPills, PrimaryPillButton, …),
+  navbar pil + tombol + terpisah (`PillNavBar`), grafik di `Charts.kt`.
+- Ikon: **Solar Bold Duotone** (CC BY 4.0) sebagai vector drawable `res/drawable/sol_*.xml` — jangan pakai Material Icons / emoji.
+- Font (statis, subset Latin): judul **Space Grotesk**, teks **Inter**, angka **JetBrains Mono** (`MoneyStyle`, tabular).
+- Uang: `Rp 1.234.567` (pemisah titik, locale id-ID). Label ringkas grafik: `formatShort` ("9,3 jt").
+- Istilah UI: "Dompet" (bukan "Akun") untuk bank/e-wallet/tunai. Logo app: "Gelembung Rp" (adaptive + monochrome).
 - Tulisan UI: sentence case, kata kerja aktif, nama tombol konsisten ("Simpan semua" → toast "Tersimpan"). Empty/error state mengarahkan tindakan.
 
 ## Konvensi koding

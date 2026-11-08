@@ -46,7 +46,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taufik.managemoney.R
 import com.taufik.managemoney.data.stt.SttError
-import com.taufik.managemoney.ui.theme.Gold
+import com.taufik.managemoney.ui.theme.AppTheme
+import com.taufik.managemoney.ui.components.CircleIconButton
+import com.taufik.managemoney.ui.components.GhostPillButton
+import com.taufik.managemoney.ui.components.PrimaryPillButton
+import com.taufik.managemoney.ui.components.Sol
+import com.taufik.managemoney.ui.components.appCard
+import com.taufik.managemoney.ui.components.screenBackground
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun VoiceInputScreen(
@@ -86,97 +96,57 @@ fun VoiceInputScreen(
         else -> null
     }
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(modifier = Modifier.fillMaxSize().padding(28.dp)) {
-            TextButton(onClick = onBack, modifier = Modifier.align(Alignment.TopStart)) {
-                Text(stringResource(R.string.action_close))
-            }
-
-            Column(
-                modifier = Modifier.align(Alignment.Center).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-            ) {
-                when (state.phase) {
-                    VoicePhase.LISTENING -> {
-                        PulsingMic()
-                        Text(
-                            text = stringResource(R.string.voice_listening),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
+    val c = AppTheme.colors
+    Box(Modifier.fillMaxSize().screenBackground().statusBarsPadding().navigationBarsPadding()) {
+        CircleIconButton(
+            R.drawable.sol_close, onClick = { viewModel.cancelListening(); onBack() },
+            contentDescription = stringResource(R.string.action_close),
+            modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
+        )
+        Column(
+            modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            when (state.phase) {
+                VoicePhase.LISTENING -> {
+                    PulsingMic()
+                    Text(stringResource(R.string.voice_listening), style = MaterialTheme.typography.headlineSmall, color = c.ink)
+                    Box(Modifier.fillMaxWidth().appCard().padding(18.dp), contentAlignment = Alignment.Center) {
                         Text(
                             text = state.partial.ifBlank { stringResource(R.string.voice_hint) },
                             style = MaterialTheme.typography.bodyLarge,
-                            color = if (state.partial.isBlank()) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
+                            color = if (state.partial.isBlank()) c.muted else c.ink,
                             textAlign = TextAlign.Center,
                         )
-                        Text(
-                            text = stringResource(R.string.voice_pause_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
-                        Button(
-                            onClick = viewModel::finishListening,
-                            enabled = state.partial.isNotBlank(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Gold),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(stringResource(R.string.voice_done))
-                        }
-                        OutlinedButton(onClick = { viewModel.cancelListening(); onBack() }) {
-                            Text(stringResource(R.string.voice_cancel))
+                    }
+                    Text(stringResource(R.string.voice_pause_hint), style = MaterialTheme.typography.bodySmall, color = c.muted, textAlign = TextAlign.Center)
+                    PrimaryPillButton(
+                        stringResource(R.string.voice_done), viewModel::finishListening,
+                        enabled = state.partial.isNotBlank(), icon = R.drawable.sol_check, modifier = Modifier.fillMaxWidth(),
+                    )
+                    GhostPillButton(stringResource(R.string.voice_cancel), { viewModel.cancelListening(); onBack() })
+                }
+                VoicePhase.PROCESSING -> {
+                    CircularProgressIndicator(color = c.accent)
+                    Text(stringResource(R.string.voice_processing), style = MaterialTheme.typography.titleMedium, color = c.ink)
+                    if (state.finalText.isNotBlank()) {
+                        Box(Modifier.fillMaxWidth().appCard().padding(16.dp)) {
+                            Text(stringResource(R.string.voice_you_said, state.finalText), style = MaterialTheme.typography.bodyMedium, color = c.body, textAlign = TextAlign.Center)
                         }
                     }
-
-                    VoicePhase.PROCESSING -> {
-                        CircularProgressIndicator(color = Gold)
-                        Text(
-                            text = stringResource(R.string.voice_processing),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        if (state.finalText.isNotBlank()) {
-                            Text(
-                                text = stringResource(R.string.voice_you_said, state.finalText),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                }
+                VoicePhase.IDLE -> {
+                    Box(Modifier.size(84.dp).clip(CircleShape).background(c.accentSoft), contentAlignment = Alignment.Center) {
+                        Sol(R.drawable.sol_mic, tint = c.accent, size = 38.dp)
                     }
-
-                    VoicePhase.IDLE -> {
-                        Icon(
-                            imageVector = Icons.Filled.Mic,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(48.dp),
-                        )
-                        if (errorMessage != null) {
-                            Text(
-                                text = errorMessage,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                        Button(
-                            onClick = { viewModel.startListening() },
-                            colors = ButtonDefaults.buttonColors(containerColor = Gold),
-                        ) {
-                            Icon(Icons.Filled.Mic, contentDescription = null)
-                            Text("  " + stringResource(R.string.voice_retry))
-                        }
-                        OutlinedButton(onClick = onType, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(R.string.voice_type))
-                        }
-                        TextButton(onClick = onManual) {
-                            Text(stringResource(R.string.action_add_manual))
-                        }
+                    if (errorMessage != null) {
+                        Text(errorMessage, style = MaterialTheme.typography.bodyLarge, color = c.ink, textAlign = TextAlign.Center)
+                    }
+                    PrimaryPillButton(stringResource(R.string.voice_retry), { viewModel.startListening() }, icon = R.drawable.sol_mic, modifier = Modifier.fillMaxWidth())
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        GhostPillButton(stringResource(R.string.voice_type), onType, icon = R.drawable.sol_keyboard, modifier = Modifier.weight(1f))
+                        GhostPillButton(stringResource(R.string.record_manual), onManual, icon = R.drawable.sol_pen, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -205,18 +175,13 @@ private fun PulsingMic() {
                 .size(120.dp)
                 .scale(scale)
                 .alpha(alpha)
-                .background(Gold, CircleShape),
+                .background(AppTheme.colors.accent, CircleShape),
         )
         Box(
-            modifier = Modifier.size(120.dp).background(Gold, CircleShape),
+            modifier = Modifier.size(120.dp).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(AppTheme.colors.accent, AppTheme.colors.accentDeep)), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = Icons.Filled.Mic,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(46.dp),
-            )
+            Sol(R.drawable.sol_mic, tint = AppTheme.colors.onAccent, size = 46.dp)
         }
     }
 }

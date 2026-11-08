@@ -1,5 +1,14 @@
 package com.taufik.managemoney.ui.account
 
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
+import com.taufik.managemoney.ui.components.LocalBottomBarSpace
+import com.taufik.managemoney.ui.components.AccountAvatar
+import com.taufik.managemoney.ui.components.SubScreenHeader
+import com.taufik.managemoney.ui.components.appCard
+import com.taufik.managemoney.ui.components.screenBackground
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,92 +59,60 @@ fun AccountDetailScreen(
         return
     }
 
-    val headerColor = if (state.jenis != null) {
-        accountVisual(state.kode, state.jenis!!).color
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-
-    LazyColumn(modifier = modifier.fillMaxSize()) {
+    val c = com.taufik.managemoney.ui.theme.AppTheme.colors
+    Column(modifier.fillMaxSize().screenBackground().statusBarsPadding()) {
+    SubScreenHeader(state.nama, onBack)
+    LazyColumn(
+        Modifier.weight(1f),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = LocalBottomBarSpace.current + 8.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(headerColor)
-                    .padding(start = 22.dp, end = 22.dp, top = 20.dp, bottom = 22.dp),
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clickable(onClick = onBack)
-                        .padding(vertical = 4.dp),
+            val shape = androidx.compose.foundation.shape.RoundedCornerShape(30.dp)
+            val inner = androidx.compose.foundation.shape.RoundedCornerShape(25.dp)
+            Column(Modifier.fillMaxWidth().appCard(shape).padding(6.dp)) {
+                Column(
+                    Modifier.fillMaxWidth().clip(inner)
+                        .background(
+                            if (c.isDark) androidx.compose.ui.graphics.Brush.linearGradient(listOf(com.taufik.managemoney.ui.theme.mix(c.accent, Color(0xFF11141B), 0.30f), Color(0xFF11141B)))
+                            else androidx.compose.ui.graphics.Brush.linearGradient(listOf(com.taufik.managemoney.ui.theme.mix(c.accent, Color.White, 0.16f), com.taufik.managemoney.ui.theme.mix(c.accent, Color.White, 0.40f))),
+                        )
+                        .padding(16.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back),
-                        tint = Color.White,
-                    )
-                    Spacer(Modifier.width(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (state.jenis != null) {
+                            val v = accountVisual(state.kode, state.jenis!!)
+                            AccountAvatar(kode = state.kode, abbr = v.abbr, color = v.color, size = 34, circle = true)
+                            Spacer(Modifier.width(10.dp))
+                        }
+                        Text(state.jenis?.let { jenisLabel(it) } ?: "", style = MaterialTheme.typography.labelLarge, color = c.ink)
+                    }
                     Text(
-                        text = stringResource(R.string.nav_home),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelLarge,
+                        formatRupiah(state.saldo),
+                        style = com.taufik.managemoney.ui.theme.MoneyStyle.copy(fontSize = 32.sp),
+                        color = if (state.saldo < 0) c.expense else c.ink,
+                        modifier = Modifier.padding(top = 10.dp),
                     )
                 }
                 Text(
-                    text = "${state.nama} · ${state.jenis?.let { jenisLabel(it) } ?: ""}",
-                    color = Color.White,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-                Text(
-                    text = formatRupiah(state.saldo),
-                    color = Color.White,
-                    fontFamily = MonoFamily,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.displayMedium,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-                Text(
-                    text = stringResource(R.string.account_initial_balance, formatRupiah(state.saldoAwal)),
-                    color = Color.White.copy(alpha = 0.85f),
+                    stringResource(R.string.account_initial_balance, formatRupiah(state.saldoAwal)),
                     style = MaterialTheme.typography.labelMedium,
-                    fontFamily = SpaceGrotesk,
-                    modifier = Modifier.padding(top = 6.dp),
+                    color = c.body,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                 )
             }
         }
-
+        item { com.taufik.managemoney.ui.components.SectionHeader(stringResource(R.string.account_mutations)) }
         item {
-            Text(
-                text = stringResource(R.string.account_mutations),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 22.dp, vertical = 14.dp),
-            )
-        }
-
-        if (state.mutasi.isEmpty() && !state.loading) {
-            item {
-                Text(
-                    text = stringResource(R.string.account_no_mutations),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),
-                )
-            }
-        } else {
-            items(state.mutasi, key = { it.id }) { row ->
-                TxRow(row, modifier = Modifier.padding(horizontal = 22.dp))
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                )
+            Column(Modifier.fillMaxWidth().appCard().padding(horizontal = 14.dp, vertical = 2.dp)) {
+                if (state.mutasi.isEmpty() && !state.loading) {
+                    Text(stringResource(R.string.account_no_mutations), style = MaterialTheme.typography.bodyMedium, color = c.muted, modifier = Modifier.padding(vertical = 24.dp))
+                } else {
+                    state.mutasi.forEach { row -> TxRow(row, modifier = Modifier.fillMaxWidth()) }
+                }
             }
         }
-
-        item { Spacer(Modifier.height(96.dp)) }
+    }
     }
 }
 

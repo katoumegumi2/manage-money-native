@@ -1,5 +1,15 @@
 package com.taufik.managemoney.ui.accounts
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.unit.sp
+import com.taufik.managemoney.ui.components.CardDivider
+import com.taufik.managemoney.ui.components.GhostPillButton
+import com.taufik.managemoney.ui.components.GroupLabel
+import com.taufik.managemoney.ui.components.SubScreenHeader
+import com.taufik.managemoney.ui.components.appCard
+import com.taufik.managemoney.ui.components.screenBackground
+
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -75,63 +85,48 @@ fun AccountsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                title = { Text(stringResource(R.string.settings_accounts_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+    val c = com.taufik.managemoney.ui.theme.AppTheme.colors
+    Column(modifier.fillMaxSize().screenBackground().statusBarsPadding().navigationBarsPadding()) {
+        SubScreenHeader(stringResource(R.string.settings_accounts_title), onBack)
+        LazyColumn(
+            Modifier.weight(1f),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            item {
+                Text(stringResource(R.string.accounts_active_hint), style = MaterialTheme.typography.bodySmall, color = c.muted, modifier = Modifier.padding(horizontal = 4.dp))
+            }
+            // Kelompok per jenis: Bank → E-Wallet → Tunai (urutan dalam grup ikut `urutan`).
+            AccountType.entries.forEach { type ->
+                val rows = state.items.filter { it.account.jenis == type }
+                if (rows.isNotEmpty()) {
+                    item(key = "sec-$type") {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            GroupLabel(sectionLabel(type))
+                            Column(Modifier.fillMaxWidth().appCard()) {
+                                rows.forEachIndexed { idx, row ->
+                                    if (idx > 0) CardDivider(start = 64.dp)
+                                    AccountListItem(
+                                        account = row.account,
+                                        saldo = row.saldo,
+                                        onClick = { editing = row.account },
+                                        onToggle = { aktif -> viewModel.setActive(row.account, aktif) },
+                                    )
+                                }
+                            }
+                        }
                     }
-                },
-            )
-        },
-    ) { innerPadding ->
-    LazyColumn(modifier = modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 18.dp)) {
-        item {
-            Text(
-                text = stringResource(R.string.accounts_active_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-        }
-
-        // Kelompokkan per jenis: Bank → E-Wallet → Tunai (urutan dalam grup ikut `urutan`).
-        AccountType.entries.forEach { type ->
-            val rows = state.items.filter { it.account.jenis == type }
-            if (rows.isNotEmpty()) {
-                item(key = "sec-$type") {
-                    Text(
-                        text = sectionLabel(type),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-                    )
-                }
-                items(rows, key = { it.account.id }) { row ->
-                    AccountListItem(
-                        account = row.account,
-                        saldo = row.saldo,
-                        onClick = { editing = row.account },
-                        onToggle = { aktif -> viewModel.setActive(row.account, aktif) },
-                    )
                 }
             }
-        }
-
-        item {
-            OutlinedButton(
-                onClick = { adding = true },
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-            ) {
-                Text(stringResource(R.string.accounts_add))
+            item {
+                GhostPillButton(
+                    stringResource(R.string.accounts_add),
+                    onClick = { adding = true },
+                    icon = R.drawable.sol_add_circle,
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                )
             }
         }
-        item { Spacer(Modifier.height(96.dp)) }
-    }
     }
 
     editing?.let { acc ->
@@ -167,19 +162,18 @@ private fun sectionLabel(type: AccountType): String = when (type) {
 private fun AccountListItem(account: Account, saldo: Long, onClick: () -> Unit, onToggle: (Boolean) -> Unit) {
     val v = accountVisual(account.kode, account.jenis)
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 9.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Akun nonaktif diredupkan agar jelas tidak tampil di Beranda.
+        // Dompet nonaktif diredupkan agar jelas tidak tampil di Beranda.
         val dim = if (account.aktif) 1f else 0.45f
-        AccountAvatar(kode = account.kode, abbr = v.abbr, color = v.color, size = 38, modifier = Modifier.alpha(dim))
+        AccountAvatar(kode = account.kode, abbr = v.abbr, color = v.color, size = 38, circle = true, modifier = Modifier.alpha(dim))
         Column(modifier = Modifier.weight(1f).padding(horizontal = 13.dp).alpha(dim)) {
-            Text(account.nama, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Text(account.nama, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = com.taufik.managemoney.ui.theme.AppTheme.colors.ink)
             Text(
                 text = formatRupiah(saldo),
-                fontFamily = MonoFamily,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = com.taufik.managemoney.ui.theme.MoneyStyle.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium),
+                color = com.taufik.managemoney.ui.theme.AppTheme.colors.muted,
             )
         }
         Switch(checked = account.aktif, onCheckedChange = onToggle)

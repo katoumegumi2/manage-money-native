@@ -1,6 +1,12 @@
 package com.taufik.managemoney.ui.ask
 
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,42 +31,55 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taufik.managemoney.R
-import com.taufik.managemoney.ui.theme.BalanceCardBg
-import com.taufik.managemoney.ui.theme.EmeraldBright
-import com.taufik.managemoney.ui.theme.MutedOnDark
+import com.taufik.managemoney.ui.components.LocalBottomBarSpace
+import com.taufik.managemoney.ui.components.PrimaryPillButton
+import com.taufik.managemoney.ui.components.Sol
+import com.taufik.managemoney.ui.components.appCard
+import com.taufik.managemoney.ui.components.screenBackground
+import com.taufik.managemoney.ui.theme.AppTheme
 
+/** Ubah markdown ringan jawaban AI (`**tebal**`) jadi teks bergaya; tanda bintang tidak ditampilkan. */
+internal fun richText(text: String): AnnotatedString = buildAnnotatedString {
+    var i = 0
+    while (i < text.length) {
+        val start = text.indexOf("**", i)
+        if (start < 0) { append(text.substring(i)); break }
+        val end = text.indexOf("**", start + 2)
+        if (end < 0) { append(text.substring(i)); break }
+        append(text.substring(i, start))
+        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(text.substring(start + 2, end)) }
+        i = end + 2
+    }
+}
+
+/** Asisten AI v4: sapaan + insight + contoh, gelembung chat, input pil dengan mic (STT bawaan) & kirim. */
 @Composable
 fun AskAiScreen(
     userName: String? = null,
@@ -69,8 +89,9 @@ fun AskAiScreen(
     val sending by viewModel.sending.collectAsStateWithLifecycle()
     val provider by viewModel.provider.collectAsStateWithLifecycle()
     val insight by viewModel.insight.collectAsStateWithLifecycle()
-    var input by remember { mutableStateOf("") }
+    var input by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val c = AppTheme.colors
 
     LaunchedEffect(messages.size, sending) {
         val count = messages.size + if (sending) 1 else 0
@@ -78,13 +99,14 @@ fun AskAiScreen(
     }
 
     Column(
-        modifier = Modifier
+        Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .imePadding(),
+            .screenBackground()
+            .statusBarsPadding()
+            .imePadding()
+            .padding(bottom = LocalBottomBarSpace.current),
     ) {
-        AskHeader()
-
+        Header(provider)
         if (messages.isEmpty()) {
             EmptyAsk(
                 provider = provider,
@@ -98,15 +120,14 @@ fun AskAiScreen(
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 itemsIndexed(messages) { _, msg -> Bubble(msg) }
                 if (sending) item { ThinkingBubble() }
             }
         }
-
-        ChatInputBar(
+        InputBar(
             value = input,
             onValue = { input = it },
             onSend = { viewModel.send(input); input = "" },
@@ -115,42 +136,27 @@ fun AskAiScreen(
     }
 }
 
-/** Header: chip sparkle + judul & subjudul (tanpa tombol kembali — ini tab). */
 @Composable
-private fun AskHeader() {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        SparkleChip(size = 42)
-        Column {
+private fun Header(provider: String) {
+    val c = AppTheme.colors
+    Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            Modifier
+                .size(44.dp)
+                .then(if (c.isDark) Modifier.shadow(14.dp, CircleShape, ambientColor = c.accent, spotColor = c.accent) else Modifier)
+                .clip(CircleShape)
+                .background(if (c.isDark) c.card else Color.White)
+                .border(2.dp, c.accent, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { Sol(R.drawable.sol_ai, tint = c.accent, size = 21.dp) }
+        Column(Modifier.padding(start = 12.dp)) {
+            Text(stringResource(R.string.ask_assistant_title), style = MaterialTheme.typography.titleLarge, color = c.ink)
             Text(
-                stringResource(R.string.ask_assistant_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                stringResource(R.string.ask_assistant_subtitle),
+                stringResource(R.string.ask_header_sub, provider.ifBlank { stringResource(R.string.ask_provider_fallback) }),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = c.muted,
             )
         }
-    }
-}
-
-@Composable
-private fun SparkleChip(size: Int) {
-    Box(
-        modifier = Modifier.size(size.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            Icons.Filled.AutoAwesome,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size((size * 0.55f).dp),
-        )
     }
 }
 
@@ -161,311 +167,180 @@ private fun EmptyAsk(
     insight: AskInsight,
     onGenerate: () -> Unit,
     onExample: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
 ) {
+    val c = AppTheme.colors
+    val name = userName?.trim()?.takeIf { it.isNotEmpty() }
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 8.dp),
+        modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        ProviderGreetingCard(provider, userName)
+        Box(Modifier.widthIn(max = 320.dp).appCard(bubbleShape(false)).padding(14.dp)) {
+            Text(
+                if (name != null) stringResource(R.string.ask_greeting, name) else stringResource(R.string.ask_greeting_plain),
+                style = MaterialTheme.typography.bodyMedium,
+                color = c.ink,
+            )
+        }
         InsightCard(insight, onGenerate)
-
         Text(
             stringResource(R.string.ask_try).uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(top = 4.dp),
+            fontWeight = FontWeight.Bold,
+            color = c.muted,
+            modifier = Modifier.padding(start = 4.dp, top = 4.dp),
         )
-        val examples = listOf(
-            Triple(stringResource(R.string.ask_example_1), Icons.Filled.ShoppingBag, Color(0xFFD9569E) to Color(0xFFFCEAF3)),
-            Triple(stringResource(R.string.ask_example_2), Icons.Filled.TrendingUp, Color(0xFF12B76A) to Color(0xFFEAFBF1)),
-            Triple(stringResource(R.string.ask_example_3), Icons.Filled.Payments, Color(0xFF2E7DD8) to Color(0xFFE8F1FD)),
-        )
-        examples.forEach { (ex, icon, colors) ->
-            SuggestionCard(ex, icon, stroke = colors.first, bg = colors.second, onClick = { onExample(ex) })
+        listOf(
+            R.string.ask_example_1 to R.drawable.sol_cat_belanja,
+            R.string.ask_example_2 to R.drawable.sol_chart,
+            R.string.ask_example_3 to R.drawable.sol_cat_gaji,
+        ).forEach { (res, icon) ->
+            val text = stringResource(res)
+            Row(
+                Modifier.fillMaxWidth().appCard(RoundedCornerShape(20.dp)).clickable { onExample(text) }.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(Modifier.size(36.dp).clip(CircleShape).background(c.accentSoft), contentAlignment = Alignment.Center) {
+                    Sol(icon, tint = if (c.isDark) c.accent else c.accentText, size = 18.dp)
+                }
+                Text(text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = c.ink, modifier = Modifier.weight(1f).padding(horizontal = 12.dp))
+                Sol(R.drawable.sol_arrow_right, tint = c.muted, size = 16.dp)
+            }
         }
-
-        Text(
-            stringResource(R.string.ask_disclaimer),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 6.dp),
-        )
+        Text(stringResource(R.string.ask_disclaimer), style = MaterialTheme.typography.labelSmall, color = c.muted, modifier = Modifier.padding(4.dp, 2.dp, 4.dp, 12.dp))
     }
 }
 
-/** Kartu status provider (gelap) + sapaan bernama. */
-@Composable
-private fun ProviderGreetingCard(provider: String, userName: String?) {
-    val name = userName?.trim()?.takeIf { it.isNotEmpty() }
-    val providerName = provider.ifBlank { stringResource(R.string.ask_provider_fallback) }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(BalanceCardBg, RoundedCornerShape(18.dp))
-            .padding(16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.size(8.dp).background(EmeraldBright, CircleShape))
-            Text(
-                stringResource(R.string.ask_provider_connected, providerName),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-            )
-        }
-        Text(
-            if (name != null) stringResource(R.string.ask_greeting, name) else stringResource(R.string.ask_greeting_plain),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MutedOnDark,
-            modifier = Modifier.padding(top = 8.dp),
-        )
-    }
-}
-
-/** Kartu "Insight bulan ini" (rekap naratif; narasi dari cache/generate). */
 @Composable
 private fun InsightCard(insight: AskInsight, onGenerate: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(18.dp))
-            .padding(16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SparkleChip(size = 26)
-            Text(
-                stringResource(R.string.ask_insight_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.weight(1f))
+    val c = AppTheme.colors
+    Column(Modifier.fillMaxWidth().appCard().padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Sol(R.drawable.sol_ai, tint = c.accent, size = 18.dp)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.ask_insight_title), style = MaterialTheme.typography.titleMedium, color = c.ink, modifier = Modifier.weight(1f))
             if (insight.text != null && !insight.loading) {
                 Text(
                     stringResource(R.string.ask_insight_refresh),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable(onClick = onGenerate),
+                    color = c.accentText,
+                    modifier = Modifier.clip(CircleShape).clickable(onClick = onGenerate).padding(6.dp),
                 )
             }
         }
         when {
-            insight.loading -> Row(
-                modifier = Modifier.padding(top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
-                Text(stringResource(R.string.ask_insight_generating), style = MaterialTheme.typography.bodyMedium)
+            insight.loading -> Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = c.accent)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.ask_insight_generating), style = MaterialTheme.typography.bodySmall, color = c.muted)
             }
-
-            insight.text != null -> InsightText(insight.text)
-
+            insight.text != null -> Text(richText(insight.text), style = MaterialTheme.typography.bodyMedium, color = c.body, modifier = Modifier.padding(top = 8.dp))
             else -> {
-                Text(
-                    stringResource(R.string.ask_insight_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp, bottom = 10.dp),
-                )
-                insight.error?.let {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(bottom = 8.dp),
+                insight.error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = c.danger, modifier = Modifier.padding(top = 6.dp)) }
+                Text(stringResource(R.string.ask_insight_hint), style = MaterialTheme.typography.bodySmall, color = c.muted, modifier = Modifier.padding(top = 6.dp))
+                if (insight.canGenerate) {
+                    PrimaryPillButton(
+                        stringResource(if (insight.error != null) R.string.ask_insight_retry else R.string.ask_insight_generate),
+                        onGenerate,
+                        height = 40.dp,
+                        modifier = Modifier.padding(top = 10.dp),
                     )
                 }
-                if (insight.canGenerate) {
-                    Button(onClick = onGenerate, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(if (insight.error != null) R.string.ask_insight_retry else R.string.ask_insight_generate))
-                    }
-                }
             }
-        }
-    }
-}
-
-@Composable
-private fun InsightText(text: String) {
-    val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
-    Column(modifier = Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        lines.forEachIndexed { i, line ->
-            val bullet = line.startsWith("- ") || line.startsWith("• ")
-            if (bullet) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("•", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
-                    Text(line.removePrefix("- ").removePrefix("• "), style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                Text(
-                    line,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = if (i == 0) FontWeight.SemiBold else FontWeight.Normal,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SuggestionCard(text: String, icon: ImageVector, stroke: Color, bg: Color, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Box(
-            modifier = Modifier.size(34.dp).background(bg, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(icon, contentDescription = null, tint = stroke, modifier = Modifier.size(18.dp))
-        }
-        Text(
-            text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun Bubble(msg: ChatMsg) {
-    val isUser = msg.fromUser
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
-        verticalAlignment = Alignment.Bottom,
-    ) {
-        if (!isUser) {
-            SparkleChip(size = 30)
-            Spacer(Modifier.width(8.dp))
-        }
-        Box(
-            modifier = Modifier
-                .widthIn(max = 300.dp)
-                .background(
-                    color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = bubbleShape(isUser),
-                )
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-        ) {
-            Text(
-                msg.text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface,
-            )
         }
     }
 }
 
 private fun bubbleShape(isUser: Boolean) =
-    if (isUser) {
-        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 4.dp)
-    } else {
-        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 4.dp, bottomEnd = 16.dp)
-    }
+    if (isUser) RoundedCornerShape(20.dp, 20.dp, 6.dp, 20.dp) else RoundedCornerShape(20.dp, 20.dp, 20.dp, 6.dp)
 
 @Composable
-private fun ThinkingBubble() {
-    Row(verticalAlignment = Alignment.Bottom) {
-        SparkleChip(size = 30)
-        Spacer(Modifier.width(8.dp))
-        Box(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh, bubbleShape(false))
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
-                Text(
-                    stringResource(R.string.ask_thinking),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+private fun Bubble(msg: ChatMsg) {
+    val c = AppTheme.colors
+    Box(Modifier.fillMaxWidth(), contentAlignment = if (msg.fromUser) Alignment.CenterEnd else Alignment.CenterStart) {
+        if (msg.fromUser) {
+            Text(
+                msg.text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = c.onAccent,
+                modifier = Modifier
+                    .widthIn(max = 300.dp)
+                    .clip(bubbleShape(true))
+                    .background(Brush.linearGradient(listOf(c.accent, c.accentDeep)))
+                    .padding(horizontal = 14.dp, vertical = 11.dp),
+            )
+        } else {
+            Text(
+                richText(msg.text),
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (msg.isError) c.danger else c.ink,
+                modifier = Modifier.widthIn(max = 310.dp).appCard(bubbleShape(false)).padding(horizontal = 14.dp, vertical = 11.dp),
+            )
         }
     }
 }
 
-/** Bar input: SATU kotak berisi teks + mic + tombol kirim (squircle) yang menyatu. */
 @Composable
-private fun ChatInputBar(value: String, onValue: (String) -> Unit, onSend: () -> Unit, sending: Boolean) {
-    Surface(tonalElevation = 2.dp, color = MaterialTheme.colorScheme.background) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .padding(start = 16.dp, top = 6.dp, bottom = 6.dp, end = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(modifier = Modifier.weight(1f).heightIn(min = 36.dp), contentAlignment = Alignment.CenterStart) {
-                BasicTextField(
-                    value = value,
-                    onValueChange = onValue,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    maxLines = 4,
-                    modifier = Modifier.fillMaxWidth(),
-                    decorationBox = { inner ->
-                        Box {
-                            if (value.isEmpty()) {
-                                Text(
-                                    stringResource(R.string.ask_placeholder),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            inner()
-                        }
-                    },
-                )
-            }
-            Icon(
-                Icons.Filled.Mic,
-                contentDescription = stringResource(R.string.ask_mic),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(horizontal = 6.dp)
-                    .size(22.dp)
-                    .clickable(onClick = { }),
-            )
-            val sendEnabled = value.isNotBlank() && !sending
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (sendEnabled) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                    )
-                    .clickable(enabled = sendEnabled, onClick = onSend),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.Send,
-                    contentDescription = stringResource(R.string.ask_send),
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp),
-                )
+private fun ThinkingBubble() {
+    val c = AppTheme.colors
+    Row(
+        Modifier.appCard(bubbleShape(false)).padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp, color = c.accent)
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(R.string.ask_thinking), style = MaterialTheme.typography.bodySmall, color = c.muted)
+    }
+}
+
+/** Kotak input pil: teks + mic (pengenal suara bawaan, hasil mengisi kotak) + kirim. */
+@Composable
+private fun InputBar(value: String, onValue: (String) -> Unit, onSend: () -> Unit, sending: Boolean) {
+    val c = AppTheme.colors
+    val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        if (r.resultCode == Activity.RESULT_OK) {
+            r.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { heard ->
+                onValue(listOf(value.trim(), heard).filter { it.isNotEmpty() }.joinToString(" "))
             }
         }
+    }
+    val sendEnabled = value.isNotBlank() && !sending
+    Row(
+        Modifier
+            .padding(start = 14.dp, end = 14.dp, top = 6.dp, bottom = 10.dp)
+            .fillMaxWidth()
+            .heightIn(min = 54.dp)
+            .appCard(RoundedCornerShape(27.dp))
+            .padding(start = 18.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.weight(1f)) {
+            if (value.isEmpty()) Text(stringResource(R.string.ask_placeholder), style = MaterialTheme.typography.bodyMedium, color = c.muted)
+            BasicTextField(
+                value = value,
+                onValueChange = onValue,
+                maxLines = 4,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = c.ink),
+                cursorBrush = SolidColor(c.accent),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Box(
+            Modifier.clip(CircleShape).clickable {
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "id-ID")
+                runCatching { speech.launch(intent) }
+            }.padding(8.dp),
+        ) { Sol(R.drawable.sol_mic, tint = c.muted, size = 20.dp, contentDescription = stringResource(R.string.ask_mic)) }
+        Box(
+            Modifier
+                .size(42.dp)
+                .clip(CircleShape)
+                .background(Brush.linearGradient(listOf(c.accent.copy(alpha = if (sendEnabled) 1f else 0.4f), c.accentDeep.copy(alpha = if (sendEnabled) 1f else 0.4f))))
+                .clickable(enabled = sendEnabled, onClick = onSend),
+            contentAlignment = Alignment.Center,
+        ) { Sol(R.drawable.sol_send, tint = c.onAccent, size = 18.dp, contentDescription = stringResource(R.string.ask_send)) }
     }
 }

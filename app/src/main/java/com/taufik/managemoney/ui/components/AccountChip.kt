@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.taufik.managemoney.core.formatRupiah
 import com.taufik.managemoney.domain.model.AccountBalance
 import com.taufik.managemoney.ui.util.accountVisual
@@ -37,12 +38,12 @@ fun AccountChip(
     targeted: Boolean = false,
 ) {
     val visual = accountVisual(account.kode, account.jenis)
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(20.dp)
+    val c = com.taufik.managemoney.ui.theme.AppTheme.colors
     Row(
         modifier = modifier
-            .then(if (dragging) Modifier.shadow(10.dp, shape) else Modifier)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .then(if (dragging) Modifier.shadow(12.dp, shape) else Modifier)
+            .appCard(shape, elevated = !dragging)
             .then(
                 when {
                     dragging -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, shape)
@@ -54,7 +55,7 @@ fun AccountChip(
             .padding(start = 11.dp, top = 9.dp, end = 9.dp, bottom = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AccountAvatar(kode = account.kode, abbr = visual.abbr, color = visual.color, size = 26)
+        AccountAvatar(kode = account.kode, abbr = visual.abbr, color = visual.color, size = 28, circle = true)
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -70,18 +71,12 @@ fun AccountChip(
             )
             Text(
                 text = formatRupiah(account.saldo),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
+                style = com.taufik.managemoney.ui.theme.MoneyStyle.copy(fontSize = 12.sp),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Icon(
-            imageVector = Icons.Filled.DragIndicator,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 2.dp),
-        )
+        Sol(com.taufik.managemoney.R.drawable.sol_drag, tint = c.muted, size = 18.dp, modifier = Modifier.padding(start = 2.dp))
     }
 }

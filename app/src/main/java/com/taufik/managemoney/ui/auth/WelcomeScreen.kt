@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taufik.managemoney.R
-import com.taufik.managemoney.ui.theme.Gold
+import com.taufik.managemoney.ui.components.PrimaryPillButton
+import com.taufik.managemoney.ui.components.screenBackground
+import androidx.compose.ui.draw.clip
 
 /** Layar sambutan onboarding: login Google (dianjurkan) atau pakai tanpa backup. */
 @Composable
@@ -46,7 +48,8 @@ fun WelcomeScreen(viewModel: AuthViewModel = hiltViewModel()) {
         viewModel.messageShown()
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
+    val c = com.taufik.managemoney.ui.theme.AppTheme.colors
+    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize().screenBackground()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -54,11 +57,10 @@ fun WelcomeScreen(viewModel: AuthViewModel = hiltViewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Icon(
-                imageVector = Icons.Filled.CloudSync,
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(R.drawable.logo_app),
                 contentDescription = null,
-                tint = Gold,
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier.size(96.dp).clip(RoundedCornerShape(26.dp)),
             )
             Spacer(Modifier.height(28.dp))
             Text(
@@ -77,18 +79,13 @@ fun WelcomeScreen(viewModel: AuthViewModel = hiltViewModel()) {
             Spacer(Modifier.height(40.dp))
 
             if (viewModel.isLoginConfigured) {
-                Button(
-                    onClick = { viewModel.signIn(context) },
-                    enabled = !busy,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Gold),
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                ) {
-                    if (busy) {
-                        CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
-                    } else {
-                        Text(stringResource(R.string.welcome_sign_in), fontWeight = FontWeight.SemiBold)
-                    }
+                if (busy) {
+                    CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp, color = c.accent)
+                } else {
+                    PrimaryPillButton(
+                        stringResource(R.string.welcome_sign_in), { viewModel.signIn(context) },
+                        icon = R.drawable.sol_cloud_check, height = 52.dp, modifier = Modifier.fillMaxWidth(),
+                    )
                 }
                 Spacer(Modifier.height(10.dp))
             }
