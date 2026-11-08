@@ -1,5 +1,16 @@
 package com.taufik.managemoney.ui.edit
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import com.taufik.managemoney.ui.components.CircleIconButton
+import com.taufik.managemoney.ui.components.PrimaryPillButton
+import com.taufik.managemoney.ui.components.SubScreenHeader
+import com.taufik.managemoney.ui.components.appCard
+import com.taufik.managemoney.ui.components.screenBackground
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,89 +64,57 @@ fun EditTransactionScreen(
 
     LaunchedEffectDone(state.saved || state.deleted, onDone)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                title = { Text(stringResource(R.string.edit_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                    }
-                },
-                actions = {
-                    if (state.found) {
-                        IconButton(onClick = { showDelete = true }) {
-                            Icon(Icons.Filled.DeleteOutline, contentDescription = stringResource(R.string.action_delete), tint = Expense)
-                        }
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    val c = com.taufik.managemoney.ui.theme.AppTheme.colors
+    Column(
+        Modifier.fillMaxSize().screenBackground().statusBarsPadding().navigationBarsPadding().imePadding(),
+    ) {
+        SubScreenHeader(
+            stringResource(R.string.edit_title),
+            onBack = onDone,
+            trailing = {
+                if (state.found) {
+                    CircleIconButton(R.drawable.sol_trash, { showDelete = true }, stringResource(R.string.action_delete), tint = c.danger)
+                } else {
+                    Spacer(Modifier.size(42.dp))
+                }
+            },
+        )
         val editable = state.editable
         if (!state.found && !state.loading) {
-            Column(modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp)) {
-                Text(stringResource(R.string.edit_not_found), style = MaterialTheme.typography.bodyLarge)
-            }
-            return@Scaffold
+            Text(stringResource(R.string.edit_not_found), style = MaterialTheme.typography.bodyLarge, color = c.muted, modifier = Modifier.padding(24.dp))
+            return@Column
         }
-        if (editable == null) return@Scaffold
-
+        if (editable == null) return@Column
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            TipeSegmented(selected = editable.tipe, onSelect = viewModel::setTipe)
-            NominalField(value = editable.nominal, onValue = viewModel::setNominal)
-
-            if (editable.tipe != TxType.TRANSFER) {
-                KategoriPicker(tipe = editable.tipe, selected = editable.kategori, onSelect = viewModel::setKategori)
-            }
-
-            when (editable.tipe) {
-                TxType.PENGELUARAN -> AccountPicker(
-                    label = stringResource(R.string.field_account_from),
-                    accounts = state.accounts,
-                    selectedId = editable.akunDariId,
-                    onSelect = viewModel::setAkunDari,
-                )
-                TxType.PEMASUKAN -> AccountPicker(
-                    label = stringResource(R.string.field_account_to),
-                    accounts = state.accounts,
-                    selectedId = editable.akunKeId,
-                    onSelect = viewModel::setAkunKe,
-                )
-                TxType.TRANSFER -> TransferAccounts(
-                    accounts = state.accounts,
-                    fromId = editable.akunDariId,
-                    toId = editable.akunKeId,
-                    onFrom = viewModel::setAkunDari,
-                    onTo = viewModel::setAkunKe,
-                    fromError = false,
-                    toError = false,
-                )
-            }
-
-            TanggalField(value = editable.tanggal, onValue = viewModel::setTanggal)
-            CatatanField(value = editable.catatan, onValue = viewModel::setCatatan)
-
-            state.error?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
-            }
-
-            Button(
-                onClick = viewModel::save,
-                enabled = state.canSave,
-                modifier = Modifier.fillMaxWidth(),
+            Column(
+                Modifier.fillMaxWidth().appCard(androidx.compose.foundation.shape.RoundedCornerShape(26.dp)).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Text(stringResource(R.string.action_save))
+                TipeSegmented(selected = editable.tipe, onSelect = viewModel::setTipe)
+                NominalField(value = editable.nominal, onValue = viewModel::setNominal)
+                if (editable.tipe != TxType.TRANSFER) {
+                    KategoriPicker(tipe = editable.tipe, selected = editable.kategori, onSelect = viewModel::setKategori)
+                }
+                when (editable.tipe) {
+                    TxType.PENGELUARAN -> AccountPicker(stringResource(R.string.field_account_from), state.accounts, editable.akunDariId, viewModel::setAkunDari)
+                    TxType.PEMASUKAN -> AccountPicker(stringResource(R.string.field_account_to), state.accounts, editable.akunKeId, viewModel::setAkunKe)
+                    TxType.TRANSFER -> TransferAccounts(state.accounts, editable.akunDariId, editable.akunKeId, viewModel::setAkunDari, viewModel::setAkunKe, fromError = false, toError = false)
+                }
+                TanggalField(value = editable.tanggal, onValue = viewModel::setTanggal)
+                CatatanField(value = editable.catatan, onValue = viewModel::setCatatan)
             }
+            state.error?.let { Text(it, color = c.danger, style = MaterialTheme.typography.bodySmall) }
         }
+        PrimaryPillButton(
+            stringResource(R.string.action_save),
+            onClick = viewModel::save,
+            enabled = state.canSave,
+            icon = R.drawable.sol_check,
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+        )
     }
 
     if (showDelete) {
@@ -145,13 +124,13 @@ fun EditTransactionScreen(
             text = { Text(stringResource(R.string.edit_delete_msg)) },
             confirmButton = {
                 TextButton(onClick = { showDelete = false; viewModel.delete() }) {
-                    Text(stringResource(R.string.action_delete), color = Expense)
+                    Text(stringResource(R.string.action_delete), color = com.taufik.managemoney.ui.theme.AppTheme.colors.danger)
                 }
             },
             dismissButton = {
                 if (state.batchId != null) {
                     TextButton(onClick = { showDelete = false; viewModel.deleteBatch() }) {
-                        Text(stringResource(R.string.edit_delete_batch), color = Expense)
+                        Text(stringResource(R.string.edit_delete_batch), color = com.taufik.managemoney.ui.theme.AppTheme.colors.danger)
                     }
                 } else {
                     TextButton(onClick = { showDelete = false }) {

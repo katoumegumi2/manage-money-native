@@ -330,9 +330,15 @@ fun GroupLabel(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun CategoryIcon(tipe: TxType, kategori: String, modifier: Modifier = Modifier, size: Dp = 42.dp) {
     val c = AppTheme.colors
+    // Latar dari warna tanda grafik, ikon dari warna teks (lebih kontras, terutama mode "ikut aksen" di gelap).
     val tint = when (tipe) {
         TxType.PENGELUARAN -> c.expenseMark
         TxType.PEMASUKAN -> c.incomeMark
+        TxType.TRANSFER -> c.transfer
+    }
+    val iconTint = when (tipe) {
+        TxType.PENGELUARAN -> c.expense
+        TxType.PEMASUKAN -> c.income
         TxType.TRANSFER -> c.transfer
     }
     Box(
@@ -343,7 +349,7 @@ fun CategoryIcon(tipe: TxType, kategori: String, modifier: Modifier = Modifier, 
             .then(if (c.isDark) Modifier.border(1.dp, Color(0x14FFFFFF), CircleShape) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
-        Sol(categoryVisual(tipe, kategori).icon, tint = tint, size = size * 0.48f)
+        Sol(categoryVisual(tipe, kategori).icon, tint = iconTint, size = size * 0.48f)
     }
 }
 
@@ -398,4 +404,22 @@ fun SettingRow(
 @Composable
 fun CardDivider(modifier: Modifier = Modifier, start: Dp = 14.dp) {
     Box(modifier.fillMaxWidth().padding(start = start, end = 14.dp).height(1.dp).background(AppTheme.colors.line))
+}
+
+/** Header sub-layar: tombol kembali bulat + judul di tengah. */
+@Composable
+fun SubScreenHeader(title: String, onBack: () -> Unit, modifier: Modifier = Modifier, trailing: (@Composable () -> Unit)? = null) {
+    val c = AppTheme.colors
+    Row(modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        CircleIconButton(com.taufik.managemoney.R.drawable.sol_arrow_left, onBack, androidx.compose.ui.res.stringResource(com.taufik.managemoney.R.string.action_back))
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            color = c.ink,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            maxLines = 1,
+        )
+        if (trailing != null) trailing() else Spacer(Modifier.size(42.dp))
+    }
 }

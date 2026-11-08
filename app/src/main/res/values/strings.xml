@@ -5,10 +5,10 @@
     <string name="nav_home">Beranda</string>
     <string name="nav_history">Riwayat</string>
     <string name="nav_reports">Laporan</string>
-    <string name="nav_accounts">Akun</string>
+    <string name="nav_accounts">Dompet</string>
     <string name="nav_settings">Pengaturan</string>
     <string name="nav_ask">Asisten</string>
-    <string name="settings_accounts_title">Pengaturan Rekening</string>
+    <string name="settings_accounts_title">Dompet</string>
     <string name="settings_accounts_desc">Bank, e-wallet &amp; tunai</string>
     <string name="settings_system_title">Pengaturan Sistem</string>
     <string name="settings_system_desc">Tema, AI, cadangan &amp; data</string>
@@ -52,8 +52,8 @@
     <string name="confirm_need_check">perlu dicek</string>
     <string name="confirm_save_all">Simpan semua (%1$d)</string>
     <string name="issue_nominal">Isi nominal lebih dari 0</string>
-    <string name="issue_transfer_same">Akun asal dan tujuan harus berbeda</string>
-    <string name="issue_account_required">Pilih akun dulu</string>
+    <string name="issue_transfer_same">Dompet asal dan tujuan harus berbeda</string>
+    <string name="issue_account_required">Pilih dompet dulu</string>
     <string name="field_from_short">Dari</string>
     <string name="field_to_short">Ke</string>
 
@@ -70,13 +70,13 @@
     <string name="parse_image">Pilih foto struk</string>
 
     <!-- Beranda -->
-    <string name="home_total_label">Total saldo · %1$d akun</string>
+    <string name="home_total_label">Total saldo · %1$d dompet</string>
     <string name="home_in">Masuk</string>
     <string name="home_out">Keluar</string>
     <string name="home_recent">Transaksi terbaru</string>
     <string name="home_empty_title">Belum ada transaksi</string>
     <string name="home_empty_hint">Catat lewat tombol suara atau tambah manual</string>
-    <string name="home_accounts">Akun</string>
+    <string name="home_accounts">Dompet</string>
     <string name="home_see_all">Lihat semua</string>
     <string name="home_show_all_count">Lihat semua (%1$d)</string>
     <string name="home_collapse">Sembunyikan</string>
@@ -90,8 +90,8 @@
     <!-- Detail akun -->
     <string name="account_initial_balance">Saldo awal %1$s</string>
     <string name="account_mutations">Mutasi</string>
-    <string name="account_no_mutations">Belum ada mutasi pada akun ini</string>
-    <string name="account_not_found">Akun tidak ditemukan</string>
+    <string name="account_no_mutations">Belum ada mutasi pada dompet ini</string>
+    <string name="account_not_found">Dompet tidak ditemukan</string>
 
     <!-- Tema -->
     <string name="settings_theme">Tema</string>
@@ -136,13 +136,13 @@
     <string name="action_save">Simpan</string>
     <string name="action_delete">Hapus</string>
     <string name="action_cancel">Batal</string>
-    <string name="field_account_from">Dari akun</string>
-    <string name="field_account_to">Ke akun</string>
+    <string name="field_account_from">Dari dompet</string>
+    <string name="field_account_to">Ke dompet</string>
 
     <!-- Riwayat -->
     <string name="history_search">Cari catatan atau kategori</string>
     <string name="history_all">Semua</string>
-    <string name="history_account_all">Semua akun</string>
+    <string name="history_account_all">Semua dompet</string>
     <string name="history_recap_title">Pengeluaran bulan ini</string>
     <string name="history_empty">Tidak ada transaksi cocok</string>
 
@@ -154,12 +154,12 @@
     <string name="edit_delete_batch">Hapus seluruh batch</string>
 
     <!-- Kelola akun -->
-    <string name="accounts_add">Tambah akun</string>
-    <string name="account_edit_title">Edit akun</string>
+    <string name="accounts_add">Tambah dompet</string>
+    <string name="account_edit_title">Edit dompet</string>
     <string name="account_name">Nama</string>
     <string name="account_code">Kode</string>
-    <string name="accounts_active_hint">Akun yang aktif muncul di Beranda dan pilihan input. Matikan yang tidak kamu pakai.</string>
-    <string name="accounts_active_toggle">Aktifkan akun</string>
+    <string name="accounts_active_hint">Dompet yang aktif muncul di Beranda dan pilihan input. Matikan yang tidak kamu pakai.</string>
+    <string name="accounts_active_toggle">Aktifkan dompet</string>
     <string name="accounts_section_bank">Bank</string>
     <string name="accounts_section_ewallet">E-Wallet</string>
     <string name="accounts_section_tunai">Tunai</string>
@@ -264,7 +264,7 @@
     <string name="record_quick_hint">beli kopi 25rb sama bensin ceban…</string>
     <!-- Redesign v4: Beranda -->
     <string name="home_total_short">Total saldo</string>
-    <string name="home_account_count">%1$d akun</string>
+    <string name="home_account_count">%1$d dompet</string>
     <string name="home_show_balance">Tampilkan saldo</string>
     <string name="home_hide_balance">Sembunyikan saldo</string>
     <string name="home_action_record">Catat</string>
@@ -272,7 +272,7 @@
     <string name="home_action_scan">Struk</string>
     <string name="home_net_month">Net bulan ini</string>
     <string name="home_reorder">Atur urutan</string>
-    <string name="home_reorder_title">Atur urutan akun</string>
+    <string name="home_reorder_title">Atur urutan dompet</string>
     <string name="home_reorder_hint">Tekan lama lalu geser kartu untuk memindahkan.</string>
     <string name="home_spend_month">Pengeluaran · %1$s</string>
     <string name="home_month_running"> (berjalan)</string>
@@ -284,11 +284,11 @@
     <string name="reports_six_months">6 bulan terakhir</string>
     <string name="reports_meter_title">Pengeluaran dibanding pemasukan</string>
     <string name="reports_meter_caption">dari pemasukan terpakai</string>
-    <string name="reports_left">Sisa Rp %1$s dalam 6 bulan</string>
-    <string name="reports_over">Lebih keluar Rp %1$s dalam 6 bulan</string>
+    <string name="reports_left">Sisa Rp %1$s %2$s</string>
+    <string name="reports_over">Lebih keluar Rp %1$s %2$s</string>
     <string name="reports_flow">Arus kas</string>
     <string name="reports_net">Net</string>
-    <string name="reports_flow_foot">*bulan berjalan · ketuk atau geser grafik untuk ganti bulan</string>
+    <string name="reports_flow_foot">*sedang berjalan · ketuk atau geser grafik untuk melihat nilainya</string>
     <string name="reports_where">Ke mana uangmu</string>
     <string name="reports_where_empty">Belum ada pengeluaran bulan ini.</string>
     <string name="reports_insight">Insight AI</string>
@@ -302,10 +302,62 @@
     <string name="confirm_need_check_short">Perlu dicek</string>
     <string name="confirm_check_then_save">Cek lalu simpan</string>
     <string name="confirm_tile_category">Kategori</string>
-    <string name="confirm_tile_from">Dari akun</string>
-    <string name="confirm_tile_to">Ke akun</string>
+    <string name="confirm_tile_from">Dari dompet</string>
+    <string name="confirm_tile_to">Ke dompet</string>
     <string name="confirm_tile_date">Tanggal</string>
     <string name="confirm_edit_detail">Ubah detail</string>
     <string name="confirm_hide_editor">Tutup editor</string>
-    <string name="confirm_pick_account">Pilih akun</string>
+    <string name="confirm_pick_account">Pilih dompet</string>
+    <!-- Redesign v4: periode Laporan -->
+    <string name="period_week">Minggu</string>
+    <string name="period_month">Bulan</string>
+    <string name="period_six_months">6 bulan</string>
+    <string name="period_year">Tahun</string>
+    <string name="period_phrase_week">7 hari terakhir</string>
+    <string name="period_phrase_month">bulan ini</string>
+    <string name="period_phrase_six">dalam 6 bulan</string>
+    <string name="period_phrase_year">dalam setahun</string>
+    <string name="reports_where_empty_period">Belum ada pengeluaran di periode ini.</string>
+    <!-- Redesign v4: Tampilan -->
+    <string name="appearance_title">Tampilan</string>
+    <string name="appearance_preview">Pratinjau</string>
+    <string name="appearance_accent">Warna aksen</string>
+    <string name="appearance_custom">Pilih sendiri</string>
+    <string name="appearance_hex_invalid">Kode warna harus 6 digit hex, mis. #2F7BF6</string>
+    <string name="appearance_flow">Warna masuk/keluar</string>
+    <string name="appearance_flow_hint">Ikut aksen: masuk memakai warna aksen, keluar netral. Tanda +/− tetap ada.</string>
+    <string name="appearance_flow_follow">Ikut aksen</string>
+    <string name="appearance_flow_fixed">Hijau–oranye</string>
+    <!-- Redesign v4: Pengaturan -->
+    <string name="settings_linked_drive">Tertaut ke Google Drive</string>
+    <string name="settings_secure">Aman</string>
+    <string name="settings_group_general">Umum</string>
+    <string name="settings_group_data">Data &amp; cadangan</string>
+    <string name="settings_appearance_sub">Mode, warna aksen</string>
+    <string name="settings_ai_row">Penyedia &amp; model</string>
+    <string name="settings_ai_row_sub">Catat, struk, dan chat</string>
+    <string name="settings_data_row">Cadangan &amp; data</string>
+    <string name="settings_data_row_sub">Google Drive, ekspor CSV, pulihkan</string>
+    <string name="settings_version_footer">Catatan Keuangan · versi 4.0</string>
+    <string name="settings_logout_title">Keluar dari akun Google?</string>
+    <string name="settings_logout_body">Data di HP ini tetap ada. Cadangan otomatis ke Drive berhenti sampai kamu masuk lagi.</string>
+    <string name="settings_restore_sub">Ganti data di HP ini dengan cadangan</string>
+    <string name="settings_passphrase_sub">Kunci enkripsi file cadangan</string>
+    <!-- Redesign v4: Asisten AI -->
+    <string name="ai_status_ready">Siap</string>
+    <string name="ai_status_nokey">Belum ada key</string>
+    <string name="ai_reload_models">Muat ulang</string>
+    <string name="ai_models_from_server">Langsung dari server, selalu terbaru</string>
+    <string name="ai_tag_image">bisa gambar</string>
+    <string name="ai_model_custom">Atau ketik nama model</string>
+    <!-- Redesign v4: Riwayat -->
+    <string name="history_count">%1$d transaksi</string>
+    <string name="history_empty_filter">Tidak ada transaksi yang cocok. Coba ubah filter atau kata kunci.</string>
+    <!-- Redesign v4: editor -->
+    <string name="field_nominal">Nominal</string>
+    <string name="field_note">Catatan</string>
+    <string name="field_note_hint">Opsional, mis. "gacoan sama teman"</string>
+    <string name="date_today">Hari ini</string>
+    <string name="date_yesterday">Kemarin</string>
+    <string name="date_pick">Pilih</string>
 </resources>

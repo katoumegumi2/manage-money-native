@@ -1,5 +1,13 @@
 package com.taufik.managemoney.ui.manualentry
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import com.taufik.managemoney.ui.components.PrimaryPillButton
+import com.taufik.managemoney.ui.components.SubScreenHeader
+import com.taufik.managemoney.ui.components.appCard
+import com.taufik.managemoney.ui.components.screenBackground
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,78 +53,38 @@ fun ManualEntryScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val draft = state.draft
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0, 0, 0, 0),
-                title = { Text(stringResource(R.string.action_add_manual)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            Surface(tonalElevation = 3.dp) {
-                Button(
-                    onClick = { onContinue(viewModel.buildPayload()) },
-                    enabled = state.canContinue,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                ) {
-                    Text(stringResource(R.string.manual_continue))
-                }
-            }
-        },
-    ) { padding ->
+    Column(
+        Modifier.fillMaxSize().screenBackground().statusBarsPadding().navigationBarsPadding().imePadding(),
+    ) {
+        SubScreenHeader(stringResource(R.string.action_add_manual), onBack)
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            TipeSegmented(selected = draft.tipe, onSelect = viewModel::setTipe)
-
-            NominalField(value = draft.nominal, onValue = viewModel::setNominal)
-
-            if (draft.tipe != TxType.TRANSFER) {
-                KategoriPicker(
-                    tipe = draft.tipe,
-                    selected = draft.kategori,
-                    onSelect = viewModel::setKategori,
-                )
+            Column(
+                Modifier.fillMaxWidth().appCard(androidx.compose.foundation.shape.RoundedCornerShape(26.dp)).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                TipeSegmented(selected = draft.tipe, onSelect = viewModel::setTipe)
+                NominalField(value = draft.nominal, onValue = viewModel::setNominal)
+                if (draft.tipe != TxType.TRANSFER) {
+                    KategoriPicker(tipe = draft.tipe, selected = draft.kategori, onSelect = viewModel::setKategori)
+                }
+                when (draft.tipe) {
+                    TxType.PENGELUARAN -> AccountPicker(stringResource(R.string.field_account_from), state.accounts, draft.akunDariId, viewModel::setAkunDari)
+                    TxType.PEMASUKAN -> AccountPicker(stringResource(R.string.field_account_to), state.accounts, draft.akunKeId, viewModel::setAkunKe)
+                    TxType.TRANSFER -> TransferAccounts(state.accounts, draft.akunDariId, draft.akunKeId, viewModel::setAkunDari, viewModel::setAkunKe, fromError = false, toError = false)
+                }
+                TanggalField(value = draft.tanggal, onValue = viewModel::setTanggal)
+                CatatanField(value = draft.catatan, onValue = viewModel::setCatatan)
             }
-
-            when (draft.tipe) {
-                TxType.PENGELUARAN -> AccountPicker(
-                    label = stringResource(R.string.field_from_short),
-                    accounts = state.accounts,
-                    selectedId = draft.akunDariId,
-                    onSelect = viewModel::setAkunDari,
-                )
-                TxType.PEMASUKAN -> AccountPicker(
-                    label = stringResource(R.string.field_to_short),
-                    accounts = state.accounts,
-                    selectedId = draft.akunKeId,
-                    onSelect = viewModel::setAkunKe,
-                )
-                TxType.TRANSFER -> TransferAccounts(
-                    accounts = state.accounts,
-                    fromId = draft.akunDariId,
-                    toId = draft.akunKeId,
-                    onFrom = viewModel::setAkunDari,
-                    onTo = viewModel::setAkunKe,
-                    fromError = false,
-                    toError = false,
-                )
-            }
-
-            TanggalField(value = draft.tanggal, onValue = viewModel::setTanggal)
-            CatatanField(value = draft.catatan, onValue = viewModel::setCatatan)
         }
+        PrimaryPillButton(
+            stringResource(R.string.manual_continue),
+            onClick = { onContinue(viewModel.buildPayload()) },
+            enabled = state.canContinue,
+            icon = R.drawable.sol_arrow_right,
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+        )
     }
 }

@@ -57,6 +57,8 @@ import com.taufik.managemoney.ui.navigation.ASK_AI_ROUTE
 import com.taufik.managemoney.ui.navigation.SETTINGS_ROUTE
 import com.taufik.managemoney.ui.navigation.ACCOUNTS_ROUTE
 import com.taufik.managemoney.ui.navigation.SYSTEM_SETTINGS_ROUTE
+import com.taufik.managemoney.ui.navigation.APPEARANCE_ROUTE
+import com.taufik.managemoney.ui.navigation.DATA_SETTINGS_ROUTE
 import com.taufik.managemoney.ui.navigation.TopDestination
 import com.taufik.managemoney.ui.navigation.VOICE_INPUT_ROUTE
 import com.taufik.managemoney.ui.navigation.accountDetailRoute
@@ -91,7 +93,7 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
     // Layar input/penuh menyembunyikan bottom nav + FAB.
     val fullScreenRoutes = setOf(
         VOICE_INPUT_ROUTE, PARSE_INPUT_PATTERN, MANUAL_ENTRY_ROUTE, CONFIRM_ROUTE, EDIT_TX_ROUTE,
-        SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE,
+        SETTINGS_ROUTE, ACCOUNTS_ROUTE, SYSTEM_SETTINGS_ROUTE, APPEARANCE_ROUTE, DATA_SETTINGS_ROUTE,
     )
     // Saat keyboard muncul, sembunyikan bottom nav + FAB agar input (mis. chat AI) menempel
     // ke atas keyboard (tak ada celah setinggi navbar).
@@ -141,8 +143,16 @@ fun MoneyApp(authViewModel: com.taufik.managemoney.ui.auth.AuthViewModel = andro
                 SettingsMenuScreen(
                     onBack = { navController.popBackStack() },
                     onAccounts = { navController.navigate(ACCOUNTS_ROUTE) },
-                    onSystem = { navController.navigate(SYSTEM_SETTINGS_ROUTE) },
+                    onAppearance = { navController.navigate(APPEARANCE_ROUTE) },
+                    onAi = { navController.navigate(SYSTEM_SETTINGS_ROUTE) },
+                    onData = { navController.navigate(DATA_SETTINGS_ROUTE) },
                 )
+            }
+            composable(APPEARANCE_ROUTE) {
+                com.taufik.managemoney.ui.settings.AppearanceScreen(onBack = { navController.popBackStack() })
+            }
+            composable(DATA_SETTINGS_ROUTE) {
+                com.taufik.managemoney.ui.settings.DataSettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(ACCOUNTS_ROUTE) {
                 AccountsScreen(onBack = { navController.popBackStack() })

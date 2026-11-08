@@ -41,6 +41,12 @@ const val ACCOUNTS_ROUTE = "settings/accounts"
 /** Pengaturan Sistem — tema, AI, cadangan Drive, data. Sub-layar Pengaturan. */
 const val SYSTEM_SETTINGS_ROUTE = "settings/system"
 
+/** Tampilan (mode, aksen, warna masuk/keluar). */
+const val APPEARANCE_ROUTE = "settings/appearance"
+
+/** Cadangan & data (Drive, ekspor/impor). */
+const val DATA_SETTINGS_ROUTE = "settings/data"
+
 /** Chat "Tanya AI" — tanya bebas tentang keuangan (dibuka dari Laporan). */
 const val ASK_AI_ROUTE = "ask"
 

@@ -30,14 +30,17 @@ data class HistoryFilter(
     val query: String = "",
 )
 
-/** Kelompok transaksi per tanggal. */
-data class DateGroup(val label: String, val rows: List<TxRowUi>)
+/** Kelompok transaksi per tanggal + total masuk/keluar hari itu (transfer tak dihitung). */
+data class DateGroup(val label: String, val rows: List<TxRowUi>, val masuk: Long = 0, val keluar: Long = 0)
 
 data class HistoryUiState(
     val loading: Boolean = true,
     val filter: HistoryFilter = HistoryFilter(),
     val accounts: List<Account> = emptyList(),
     val groups: List<DateGroup> = emptyList(),
+    val totalMasuk: Long = 0,
+    val totalKeluar: Long = 0,
+    val count: Int = 0,
 ) {
     val isEmpty: Boolean get() = groups.isEmpty()
 }
@@ -69,8 +72,14 @@ class HistoryViewModel @Inject constructor(
             .toSortedMap(compareByDescending { it })
             .map { (date, list) ->
                 DateGroup(
-                    label = date.format(dateHeaderFormat),
+                    label = when (date) {
+                        today -> "Hari ini"
+                        today.minusDays(1) -> "Kemarin"
+                        else -> date.format(dateHeaderFormat).replaceFirstChar { it.titlecase(localeId) }
+                    },
                     rows = list.map { it.toRowUi(namesById, today) },
+                    masuk = list.filter { it.tipe == TxType.PEMASUKAN }.sumOf { it.nominal },
+                    keluar = list.filter { it.tipe == TxType.PENGELUARAN }.sumOf { it.nominal },
                 )
             }
 
@@ -79,6 +88,9 @@ class HistoryViewModel @Inject constructor(
             filter = f,
             accounts = accounts,
             groups = groups,
+            totalMasuk = filtered.filter { it.tipe == TxType.PEMASUKAN }.sumOf { it.nominal },
+            totalKeluar = filtered.filter { it.tipe == TxType.PENGELUARAN }.sumOf { it.nominal },
+            count = filtered.size,
         )
     }.stateIn(
         scope = viewModelScope,

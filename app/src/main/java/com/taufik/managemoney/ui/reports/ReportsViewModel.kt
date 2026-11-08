@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -56,6 +57,8 @@ data class ReportsUiState(
     val bars: List<CategoryBar> = emptyList(),
     val trend: List<TrendBar> = emptyList(),
     val insight: InsightUi = InsightUi(),
+    val selectedPeriod: com.taufik.managemoney.domain.usecase.ReportPeriod = com.taufik.managemoney.domain.usecase.ReportPeriod.MONTH,
+    val report: com.taufik.managemoney.domain.usecase.PeriodReport? = null,
 ) {
     val isEmpty: Boolean get() = masuk == 0L && keluar == 0L && bars.isEmpty()
     val hasTrend: Boolean get() = trend.any { it.masuk > 0 || it.keluar > 0 }
@@ -66,6 +69,7 @@ class ReportsViewModel @Inject constructor(
     observeExpenseByCategory: ObserveExpenseByCategory,
     observeMonthlyFlow: ObserveMonthlyFlow,
     observeMonthlyTrend: ObserveMonthlyTrend,
+    observePeriodReport: com.taufik.managemoney.domain.usecase.ObservePeriodReport,
     private val analyst: FinancialAnalyst,
     private val insightCache: InsightCache,
 ) : ViewModel() {
@@ -95,7 +99,14 @@ class ReportsViewModel @Inject constructor(
 
     private val insightState = kotlinx.coroutines.flow.MutableStateFlow(InsightUi())
 
-    val state: StateFlow<ReportsUiState> = combine(
+    private val periodState = kotlinx.coroutines.flow.MutableStateFlow(com.taufik.managemoney.domain.usecase.ReportPeriod.MONTH)
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val periodReport = periodState.flatMapLatest { observePeriodReport(it, today) }
+
+    fun setPeriod(p: com.taufik.managemoney.domain.usecase.ReportPeriod) { periodState.value = p }
+
+    private val baseState = combine(
         aggregate,
         observeExpenseByCategory(today),
         observeMonthlyTrend(today),
@@ -116,6 +127,10 @@ class ReportsViewModel @Inject constructor(
                 insight = insight,
             )
         }
+    }
+
+    val state: StateFlow<ReportsUiState> = combine(baseState, periodState, periodReport) { base, p, r ->
+        base.copy(selectedPeriod = p, report = r)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReportsUiState())
 
     init {

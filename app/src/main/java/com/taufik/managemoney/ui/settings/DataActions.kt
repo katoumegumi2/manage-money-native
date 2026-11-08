@@ -1,5 +1,7 @@
 package com.taufik.managemoney.ui.settings
 
+import com.taufik.managemoney.ui.components.appCard
+
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -50,26 +52,17 @@ fun DataActions(
     }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 6.dp))
-        Text(
-            text = stringResource(R.string.data_section),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        OutlinedButton(onClick = { exportLauncher.launch("transaksi.csv") }, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.data_export_csv))
+        com.taufik.managemoney.ui.components.GroupLabel(stringResource(R.string.data_section))
+        Column(Modifier.fillMaxWidth().appCard()) {
+            com.taufik.managemoney.ui.components.SettingRow(R.drawable.sol_document, stringResource(R.string.data_export_csv), { exportLauncher.launch("transaksi.csv") })
+            com.taufik.managemoney.ui.components.CardDivider(start = 62.dp)
+            com.taufik.managemoney.ui.components.SettingRow(R.drawable.sol_cloud_check, stringResource(R.string.data_backup), { backupLauncher.launch("money-backup.db") })
+            com.taufik.managemoney.ui.components.CardDivider(start = 62.dp)
+            com.taufik.managemoney.ui.components.SettingRow(
+                R.drawable.sol_restart, stringResource(R.string.data_restore), { restoreLauncher.launch(arrayOf("*/*")) },
+                subtitle = stringResource(R.string.data_restore_warning),
+            )
         }
-        OutlinedButton(onClick = { backupLauncher.launch("money-backup.db") }, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.data_backup))
-        }
-        OutlinedButton(onClick = { restoreLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.data_restore))
-        }
-        Text(
-            text = stringResource(R.string.data_restore_warning),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
 

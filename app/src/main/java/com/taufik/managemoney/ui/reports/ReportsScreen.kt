@@ -50,7 +50,12 @@ import com.taufik.managemoney.ui.components.FlowLinesChart
 import com.taufik.managemoney.ui.components.LocalBottomBarSpace
 import com.taufik.managemoney.ui.components.MeterGauge
 import com.taufik.managemoney.ui.components.PrimaryPillButton
+import com.taufik.managemoney.ui.components.SegmentedPills
 import com.taufik.managemoney.ui.components.SmallPill
+import com.taufik.managemoney.domain.model.CategorySum
+import com.taufik.managemoney.domain.usecase.PeriodReport
+import com.taufik.managemoney.domain.usecase.ReportPeriod
+import com.taufik.managemoney.ui.util.kategoriLabel
 import com.taufik.managemoney.ui.components.Sol
 import com.taufik.managemoney.ui.components.appCard
 import com.taufik.managemoney.ui.components.screenBackground
@@ -64,11 +69,11 @@ private val localeId = Locale.forLanguageTag("id-ID")
 /** Satu potongan "Ke mana uangmu": maks 4 kategori terbesar + "Lainnya" (abu) agar palet tetap aman CVD. */
 private data class CatSlice(val label: String, val kategori: String, val total: Long, val colorIndex: Int)
 
-private fun slices(bars: List<CategoryBar>): List<CatSlice> {
-    val named = bars.filter { !it.label.equals("lainnya", ignoreCase = true) }.sortedByDescending { it.total }
+private fun slices(cats: List<CategorySum>): List<CatSlice> {
+    val named = cats.filter { !it.kategori.equals("lainnya", ignoreCase = true) }.sortedByDescending { it.total }
     val top = named.take(4)
-    val rest = bars.sumOf { it.total } - top.sumOf { it.total }
-    return top.mapIndexed { i, b -> CatSlice(b.label, b.label.lowercase(localeId), b.total, i) } +
+    val rest = cats.sumOf { it.total } - top.sumOf { it.total }
+    return top.mapIndexed { i, b -> CatSlice(kategoriLabel(b.kategori), b.kategori.lowercase(localeId), b.total, i) } +
         if (rest > 0) listOf(CatSlice("Lainnya", "lainnya", rest, 4)) else emptyList()
 }
 
@@ -89,29 +94,41 @@ fun ReportsScreen(viewModel: ReportsViewModel = hiltViewModel()) {
     ) {
         item { Spacer(Modifier.statusBarsPadding()) }
         item {
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.nav_reports), style = MaterialTheme.typography.headlineMedium, color = c.ink, modifier = Modifier.weight(1f))
-                SmallPill(stringResource(R.string.reports_six_months), on = true)
-            }
+            Text(stringResource(R.string.nav_reports), style = MaterialTheme.typography.headlineMedium, color = c.ink, modifier = Modifier.padding(top = 8.dp))
+        }
+        item {
+            SegmentedPills(
+                options = listOf(
+                    ReportPeriod.WEEK to stringResource(R.string.period_week),
+                    ReportPeriod.MONTH to stringResource(R.string.period_month),
+                    ReportPeriod.SIX_MONTHS to stringResource(R.string.period_six_months),
+                    ReportPeriod.YEAR to stringResource(R.string.period_year),
+                ),
+                selected = state.selectedPeriod,
+                onSelect = viewModel::setPeriod,
+                fill = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
         if (state.loading) {
             item { Box(Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = c.accent) } }
             return@LazyColumn
         }
-        if (state.hasTrend) {
-            item { MeterCard(state) }
-            item { FlowCard(state) }
+        val report = state.report
+        if (report != null) {
+            item { MeterCard(report) }
+            item { FlowCard(report) }
+            item { WhereCard(report) }
         }
-        item { WhereCard(state) }
         item { InsightCard(state.insight, onGenerate = viewModel::generateInsight) }
     }
 }
 
 @Composable
-private fun MeterCard(state: ReportsUiState) {
+private fun MeterCard(report: PeriodReport) {
     val c = AppTheme.colors
-    val masuk = state.trend.sumOf { it.masuk }
-    val keluar = state.trend.sumOf { it.keluar }
+    val masuk = report.masuk
+    val keluar = report.keluar
     val ratio = if (masuk > 0) keluar.toFloat() / masuk else if (keluar > 0) 1.2f else 0f
     val sisa = masuk - keluar
     Column(
@@ -136,13 +153,32 @@ private fun MeterCard(state: ReportsUiState) {
         Spacer(Modifier.height(12.dp))
         val good = sisa >= 0
         SmallPill(
-            stringResource(if (good) R.string.reports_left else R.string.reports_over, formatShort(kotlin.math.abs(sisa))),
+            stringResource(if (good) R.string.reports_left else R.string.reports_over, formatShort(kotlin.math.abs(sisa)), periodPhrase(report.period)),
             icon = if (good) R.drawable.sol_arrow_up else R.drawable.sol_arrow_down,
             container = (if (good) c.incomeMark else c.expenseMark).copy(alpha = if (c.isDark) 0.16f else 0.12f),
             content = if (good) c.income else c.expense,
         )
     }
 }
+
+private val rangeFmt = java.time.format.DateTimeFormatter.ofPattern("d MMM", localeId)
+private val monthFmt = java.time.format.DateTimeFormatter.ofPattern("MMM yyyy", localeId)
+
+private fun periodRange(r: PeriodReport): String = when (r.period) {
+    ReportPeriod.WEEK -> "${r.start.format(rangeFmt)} – ${r.end.format(rangeFmt)}"
+    ReportPeriod.MONTH -> r.start.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", localeId)).replaceFirstChar { it.titlecase(localeId) }
+    else -> "${r.start.format(monthFmt)} – ${r.end.format(monthFmt)}"
+}
+
+@Composable
+private fun periodPhrase(p: ReportPeriod): String = stringResource(
+    when (p) {
+        ReportPeriod.WEEK -> R.string.period_phrase_week
+        ReportPeriod.MONTH -> R.string.period_phrase_month
+        ReportPeriod.SIX_MONTHS -> R.string.period_phrase_six
+        ReportPeriod.YEAR -> R.string.period_phrase_year
+    },
+)
 
 @Composable
 private fun StatCol(label: String, value: String, color: Color) {
@@ -153,10 +189,10 @@ private fun StatCol(label: String, value: String, color: Color) {
 }
 
 @Composable
-private fun FlowCard(state: ReportsUiState) {
+private fun FlowCard(report: PeriodReport) {
     val c = AppTheme.colors
-    val trend = state.trend
-    var sel by rememberSaveable(trend.size) { mutableIntStateOf((trend.size - 2).coerceAtLeast(0)) }
+    val trend = report.buckets
+    var sel by rememberSaveable(report.period) { mutableIntStateOf(trend.indexOfLast { it.current }.coerceAtLeast(0)) }
     val i = sel.coerceIn(trend.indices)
     val p = trend[i]
     val net = p.masuk - p.keluar
@@ -171,7 +207,7 @@ private fun FlowCard(state: ReportsUiState) {
             Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            val month = p.label.replaceFirstChar { it.titlecase(localeId) } + if (i == trend.lastIndex) "*" else ""
+            val month = p.label + if (p.current) "*" else ""
             ReadoutPill { Text(month, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.ExtraBold, color = c.ink) }
             ReadoutPill { Dot(c.incomeMark); Text(formatShort(p.masuk), style = MoneyStyle.copy(fontSize = 11.5.sp), color = c.ink) }
             ReadoutPill { Dot(c.expenseMark); Text(formatShort(p.keluar), style = MoneyStyle.copy(fontSize = 11.5.sp), color = c.ink) }
@@ -183,7 +219,7 @@ private fun FlowCard(state: ReportsUiState) {
         FlowLinesChart(
             masuk = trend.map { it.masuk },
             keluar = trend.map { it.keluar },
-            labels = trend.map { it.label.replaceFirstChar { ch -> ch.titlecase(localeId) } },
+            labels = trend.map { it.label },
             selected = i,
             onSelect = { sel = it },
             modifier = Modifier.padding(top = 8.dp),
@@ -206,18 +242,18 @@ private fun ReadoutPill(content: @Composable () -> Unit) {
 private fun Dot(color: Color) = Box(Modifier.size(8.dp).clip(CircleShape).background(color))
 
 @Composable
-private fun WhereCard(state: ReportsUiState) {
+private fun WhereCard(report: PeriodReport) {
     val c = AppTheme.colors
-    val parts = slices(state.bars)
+    val parts = slices(report.categories)
     val total = parts.sumOf { it.total }
     var hi by rememberSaveable { mutableStateOf<Int?>(null) }
     Column(Modifier.fillMaxWidth().appCard().padding(16.dp)) {
         Row(verticalAlignment = Alignment.Bottom) {
             Text(stringResource(R.string.reports_where), style = MaterialTheme.typography.titleMedium, color = c.ink, modifier = Modifier.weight(1f))
-            Text(state.period, style = MaterialTheme.typography.labelMedium, color = c.muted)
+            Text(periodRange(report), style = MaterialTheme.typography.labelMedium, color = c.muted)
         }
         if (parts.isEmpty()) {
-            Text(stringResource(R.string.reports_where_empty), style = MaterialTheme.typography.bodySmall, color = c.muted, modifier = Modifier.padding(top = 12.dp))
+            Text(stringResource(R.string.reports_where_empty_period), style = MaterialTheme.typography.bodySmall, color = c.muted, modifier = Modifier.padding(top = 12.dp))
             return@Column
         }
         Text(formatRupiah(total), style = MoneyStyle.copy(fontSize = 22.sp), color = c.ink, modifier = Modifier.padding(top = 6.dp, bottom = 12.dp))

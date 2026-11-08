@@ -1,5 +1,7 @@
 package com.taufik.managemoney.ui.settings
 
+import com.taufik.managemoney.ui.components.appCard
+
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -62,29 +64,29 @@ fun BackupSection(viewModel: BackupViewModel = hiltViewModel()) {
     // Hanya relevan bila akun Google tertaut.
     if (!authState.signedIn) return
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.backup_section),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+    val statusText = if (meta.hasBackup) {
+        val when_ = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(meta.lastBackupAt))
+        stringResource(R.string.backup_last, when_, meta.lastBackupSize / 1024)
+    } else {
+        stringResource(R.string.backup_never)
+    }
+    com.taufik.managemoney.ui.components.GroupLabel(stringResource(R.string.backup_section))
+    Column(Modifier.fillMaxWidth().then(Modifier.appCard())) {
+        com.taufik.managemoney.ui.components.SettingRow(
+            R.drawable.sol_cloud_upload, stringResource(R.string.backup_now), { if (!busy) viewModel.backupNow() },
+            subtitle = statusText, chevron = false,
         )
-        val statusText = if (meta.hasBackup) {
-            val when_ = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(meta.lastBackupAt))
-            stringResource(R.string.backup_last, when_, meta.lastBackupSize / 1024)
-        } else {
-            stringResource(R.string.backup_never)
-        }
-        Text(statusText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-        OutlinedButton(onClick = { viewModel.backupNow() }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.backup_now))
-        }
-        OutlinedButton(onClick = { showPassphrase = true }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(if (viewModel.hasPassphrase()) R.string.backup_change_passphrase else R.string.backup_set_passphrase))
-        }
-        OutlinedButton(onClick = { showRestore = true }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.restore_from_drive))
-        }
+        com.taufik.managemoney.ui.components.CardDivider(start = 62.dp)
+        com.taufik.managemoney.ui.components.SettingRow(
+            R.drawable.sol_restart, stringResource(R.string.restore_from_drive), { if (!busy) showRestore = true },
+            subtitle = stringResource(R.string.settings_restore_sub),
+        )
+        com.taufik.managemoney.ui.components.CardDivider(start = 62.dp)
+        com.taufik.managemoney.ui.components.SettingRow(
+            R.drawable.sol_key, stringResource(if (viewModel.hasPassphrase()) R.string.backup_change_passphrase else R.string.backup_set_passphrase),
+            { if (!busy) showPassphrase = true },
+            subtitle = stringResource(R.string.settings_passphrase_sub),
+        )
     }
 
     if (showPassphrase) {
