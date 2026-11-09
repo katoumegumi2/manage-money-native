@@ -1,0 +1,104 @@
+# Rilis APK: push tag "v*" (mis. v0.2.0) → test → build APK release bertanda tangan
+# release keystore → tempel di halaman Releases.
+# Jalankan manual (tab Actions → Release → Run workflow) untuk build uji coba:
+# APK hanya diunggah sebagai artifact, TIDAK dipublikasikan ke Releases.
+#
+# Secrets yang wajib diisi (Settings → Secrets and variables → Actions):
+#   RELEASE_KEYSTORE_BASE64   isi file .jks dalam base64
+#   RELEASE_STORE_PASSWORD    password keystore
+#   RELEASE_KEY_ALIAS         alias kunci (mis. "release")
+#   RELEASE_KEY_PASSWORD      password kunci
+#   GOOGLE_WEB_CLIENT_ID      Web OAuth client ID (untuk login Google)
+# GEMINI_API_KEY sengaja TIDAK ada: key di dalam APK bisa dibongkar orang.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write # perlu untuk membuat Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Pastikan secrets lengkap
+        env:
+          KS: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          SP: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KA: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KP: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          WC: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: |
+          missing=0
+          for v in KS SP KA KP WC; do
+            if [ -z "${!v}" ]; then echo "::error::Secret untuk $v belum diisi"; missing=1; fi
+          done
+          exit $missing
+
+      # Keystore tidak pernah ada di repo: dirakit dari secret ke folder sementara runner.
+      - name: Pasang keystore
+        env:
+          KS: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KS" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "RELEASE_STORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Tentukan versi
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            NAME="${GITHUB_REF_NAME#v}"
+          else
+            NAME="0.0.0-dev.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "VERSION_NAME=$NAME" >> "$GITHUB_ENV"
+          # versionCode harus selalu naik; run_number workflow ini selalu bertambah.
+          echo "VERSION_CODE=$((100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+
+      - name: Test + build APK release
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+        run: ./gradlew :app:testDebugUnitTest :app:assembleRelease
+
+      - name: Cek tanda tangan APK
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs "$APK" | tee certs.txt
+          # Jaga-jaga: jangan sampai kunci debug ikut terbit.
+          if grep -q "CN=Android Debug" certs.txt; then
+            echo "::error::APK ditandatangani kunci DEBUG"; exit 1
+          fi
+          mv "$APK" "managemoney-${VERSION_NAME}.apk"
+
+      - name: Terbitkan ke Releases (hanya untuk tag)
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: managemoney-${{ env.VERSION_NAME }}.apk
+          generate_release_notes: true
+
+      - name: Unggah sebagai artifact (run manual)
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: managemoney-${{ env.VERSION_NAME }}
+          path: managemoney-${{ env.VERSION_NAME }}.apk
+
+      - name: Hapus keystore dari runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"

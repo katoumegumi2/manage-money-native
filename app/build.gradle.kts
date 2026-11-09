@@ -14,8 +14,20 @@ val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
+// Nilai dari environment (dipakai GitHub Actions) menang atas local.properties.
+fun secret(name: String): String? =
+    System.getenv(name)?.takeIf { it.isNotBlank() } ?: localProps.getProperty(name)?.takeIf { it.isNotBlank() }
+
+// GEMINI_API_KEY sengaja TIDAK dibaca dari env: key yang tertanam di APK bisa dibongkar siapa saja.
+// Build CI = kosong → user isi key sendiri di Pengaturan.
 val geminiApiKey: String = localProps.getProperty("GEMINI_API_KEY", "")
-val googleWebClientId: String = localProps.getProperty("GOOGLE_WEB_CLIENT_ID", "")
+val googleWebClientId: String = secret("GOOGLE_WEB_CLIENT_ID") ?: ""
+
+// Release keystore (permanen, untuk APK yang dibagikan). Kalau tidak diatur → fallback kunci debug
+// (perilaku lama: build lokal bisa menimpa build debug tanpa hapus data).
+val releaseStoreFile: String? = secret("RELEASE_STORE_FILE")
+val releaseSigningReady: Boolean = releaseStoreFile != null &&
+    listOf("RELEASE_STORE_PASSWORD", "RELEASE_KEY_ALIAS", "RELEASE_KEY_PASSWORD").all { secret(it) != null }
 
 android {
     namespace = "com.taufik.managemoney"
@@ -25,8 +37,9 @@ android {
         applicationId = "com.taufik.managemoney"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // CI mengisi lewat env (versionCode harus selalu naik agar bisa update).
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
+        versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -35,11 +48,26 @@ android {
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
+    signingConfigs {
+        if (releaseSigningReady) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile!!)
+                storePassword = secret("RELEASE_STORE_PASSWORD")
+                keyAlias = secret("RELEASE_KEY_ALIAS")
+                keyPassword = secret("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            // App pribadi (sideload): tanda tangan debug agar bisa dipasang menimpa build debug tanpa hapus data.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (releaseSigningReady) {
+                signingConfigs.getByName("release")
+            } else {
+                // Tanpa release keystore: tanda tangan debug (cuma untuk HP sendiri, jangan dibagikan).
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

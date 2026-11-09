@@ -22,3 +22,9 @@ secrets.properties
 
 # Mockup brainstorming (visual companion)
 .superpowers/
+
+# Release keystore — JANGAN commit (simpan di luar repo + backup)
+*.jks
+
+# Dokumen internal — tidak ikut repo publik (simpan lokal saja)
+docs/private/
