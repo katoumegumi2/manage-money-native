@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kebijakan Privasi — Catatan Keuangan</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<div class="card">
+  <h1>Kebijakan Privasi</h1>
+  <p class="muted">Catatan Keuangan · berlaku sejak 9 November 2026</p>
+
+  <p>Catatan Keuangan dibuat agar data keuanganmu tetap milikmu. Pengembang <strong>tidak punya server</strong> dan <strong>tidak menerima, menyimpan, atau melihat</strong> datamu. Halaman ini menjelaskan ke mana saja data bisa mengalir dan kenapa.</p>
+
+  <h2>1. Data yang disimpan di HP</h2>
+  <p>Transaksi, dompet, kategori, dan pengaturan disimpan di penyimpanan lokal HP-mu. API key AI disimpan terenkripsi di HP. Menghapus aplikasi akan menghapus data ini.</p>
+
+  <h2>2. Login Google</h2>
+  <p>Login dengan Google dipakai untuk mengenali akunmu dan mengaktifkan cadangan ke Google Drive. Aplikasi membaca nama dan alamat email akun Google-mu dan hanya menyimpannya di HP.</p>
+
+  <h2>3. Cadangan Google Drive</h2>
+  <ul>
+    <li>Aplikasi meminta izin <code>drive.file</code>: hanya bisa melihat dan mengubah file yang dibuat aplikasi ini sendiri, <strong>tidak bisa membaca file lain</strong> di Drive-mu.</li>
+    <li>Cadangan disimpan di folder “Cadangan Catatan Keuangan” di Google Drive milikmu, dalam keadaan terenkripsi dengan passphrase yang kamu buat. Tanpa passphrase itu, isinya tidak bisa dibaca — termasuk oleh pengembang.</li>
+    <li>Kamu bisa menghapus cadangan kapan saja dari Google Drive, dan mencabut izin aplikasi di <a href="https://myaccount.google.com/connections">pengaturan akun Google</a>.</li>
+  </ul>
+
+  <h2>4. Fitur AI</h2>
+  <p>Saat kamu memakai fitur AI (mencatat lewat teks/suara, membaca foto struk, insight, atau asisten), aplikasi mengirim data yang diperlukan langsung dari HP ke penyedia AI yang <strong>kamu pilih sendiri</strong> di Pengaturan, memakai API key milikmu. Data itu bisa berupa teks yang kamu tulis atau ucapkan, foto struk, daftar nama dompet, dan ringkasan transaksi. Pengolahannya tunduk pada kebijakan privasi penyedia tersebut (misalnya Google Gemini, DeepSeek, OpenAI, OpenRouter, atau Groq). Semua fitur lain tetap bisa dipakai tanpa AI.</p>
+
+  <h2>5. Input suara</h2>
+  <p>Pengenalan suara memakai layanan pengenalan suara bawaan Android di HP-mu. Aplikasi hanya menerima teks hasilnya, tidak menyimpan rekaman suara.</p>
+
+  <h2>6. Yang tidak dilakukan aplikasi</h2>
+  <ul>
+    <li>Tidak ada iklan, analitik, atau pelacak.</li>
+    <li>Tidak menjual atau membagikan data ke pihak lain selain yang kamu aktifkan sendiri di atas.</li>
+    <li>Data dari Google API (Google Drive, profil Google) hanya dipakai untuk fitur cadangan dan login, sesuai <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a> termasuk ketentuan Limited Use.</li>
+  </ul>
+
+  <h2>7. Perubahan dan kontak</h2>
+  <p>Perubahan kebijakan akan diumumkan di halaman ini. Pertanyaan bisa diajukan lewat <a href="https://github.com/katoumegumi2/manage-money-native/issues">GitHub Issues</a>.</p>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">English summary</h2>
+  <p>Catatan Keuangan has no server; the developer never receives your data. Data stays on your device. Google Sign-In (name, email) is used only to identify your account. Backups use the <code>drive.file</code> scope and are stored, encrypted with your own passphrase, in a “Cadangan Catatan Keuangan” folder in your own Google Drive. AI features send the needed text, receipt photos, wallet names, or transaction summaries directly to the AI provider you choose, using your own API key. No ads, analytics, or trackers. Use of Google user data complies with the Google API Services User Data Policy, including the Limited Use requirements.</p>
+  <p><a href="index.html">← Beranda</a></p>
+</div>
+</main>
+</body>
+</html>
