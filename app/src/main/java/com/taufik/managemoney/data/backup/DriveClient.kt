@@ -97,6 +97,8 @@ class DriveClient @Inject constructor(
             val req = if (existingId == null) {
                 val metadata = buildJsonObject {
                     put("name", name)
+                    // Tanpa ini Drive menebak tipe dari isi biner (sempat terbaca "image/tiff").
+                    put("mimeType", "application/octet-stream")
                     if (parentId != null) put("parents", JsonArray(listOf(JsonPrimitive(parentId))))
                 }.toString()
                 val multipart = MultipartBody.Builder().setType("multipart/related".toMediaType())
