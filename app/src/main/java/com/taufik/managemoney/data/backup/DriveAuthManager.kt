@@ -19,7 +19,9 @@ sealed class DriveAuth {
 }
 
 /**
- * Minta access token ber-scope `drive.appdata` lewat Authorization API (Google Identity).
+ * Minta access token ber-scope `drive.file` lewat Authorization API (Google Identity).
+ * `drive.file` = hanya file yang dibuat app ini; scope non-sensitive → consent screen bisa
+ * di-publish ke Production tanpa verifikasi Google (beda dengan `drive.appdata` yang sensitive).
  * - Sudah pernah diizinkan → token langsung (silent), termasuk dari WorkManager.
  * - Belum → kembalikan [DriveAuth.NeedsConsent]; UI meluncurkan PendingIntent, lalu [resultFromIntent].
  */
@@ -27,10 +29,10 @@ sealed class DriveAuth {
 class DriveAuthManager @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    private val driveAppdataScope = Scope("https://www.googleapis.com/auth/drive.appdata")
+    private val driveFileScope = Scope("https://www.googleapis.com/auth/drive.file")
 
     private fun request() = AuthorizationRequest.builder()
-        .setRequestedScopes(listOf(driveAppdataScope))
+        .setRequestedScopes(listOf(driveFileScope))
         .build()
 
     suspend fun authorize(): DriveAuth = try {

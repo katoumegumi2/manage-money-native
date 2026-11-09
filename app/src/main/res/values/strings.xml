@@ -202,7 +202,7 @@
     <string name="restore_action">Pulihkan</string>
     <string name="restore_skip">Lewati, mulai baru</string>
     <string name="backup_enable_title">Aktifkan cadangan otomatis</string>
-    <string name="backup_enable_subtitle">Buat passphrase untuk mengenkripsi cadangan. Simpan baik-baik — tanpa ini cadangan tak bisa dipulihkan.</string>
+    <string name="backup_enable_subtitle">Cadangan terenkripsi disimpan di folder “Cadangan Catatan Keuangan” di Google Drive-mu. Buat passphrase untuk mengenkripsinya — simpan baik-baik, tanpa ini cadangan tak bisa dipulihkan.</string>
     <string name="backup_enable_action">Aktifkan &amp; backup sekarang</string>
     <string name="action_save_generic">Simpan</string>
     <string name="action_cancel_generic">Batal</string>
